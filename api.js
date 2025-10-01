@@ -140,3 +140,35 @@ async function loadCustomers(limit = 50) {
     return [];
   }
 }
+
+// تحميل قائمة المحادثات
+async function loadConversations(limit = 50) {
+  try {
+    const data = await apiRequest(`/conversations?limit=${limit}`);
+    console.log('Conversations Response:', data);
+    if (data.success && Array.isArray(data.data)) {
+      return data.data;
+    }
+    console.error('فشل في جلب المحادثات:', data);
+    return [];
+  } catch (error) {
+    console.error('خطأ في تحميل المحادثات:', error);
+    return [];
+  }
+}
+
+// تحميل رسائل محادثة محددة
+async function loadConversationMessages(conversationId, limit = 50) {
+  try {
+    const data = await apiRequest(`/conversations/${conversationId}/messages?limit=${limit}`);
+    console.log('Messages Response:', data);
+    if (data.success && Array.isArray(data.data)) {
+      return data.data;
+    }
+    console.error('فشل في جلب رسائل المحادثة:', data);
+    return [];
+  } catch (error) {
+    console.error('خطأ في تحميل رسائل المحادثة:', error);
+    return [];
+  }
+}

@@ -43,14 +43,13 @@
               <i data-lucide="megaphone" class="h-4 w-4"></i>
               <span>الحملات</span>
             </button>
-            <button
-              id="chats-button"
-              type="button"
+            <a
+              href="./chats.html"
               class="inline-flex items-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <i data-lucide="message-circle" class="h-4 w-4"></i>
               <span>الدردشات</span>
-            </button>
+            </a>
           </div>
 
           <div class="flex items-center space-x-4 space-x-reverse">
@@ -555,6 +554,16 @@
         if (currentPage < totalPages) {
           currentPage++;
           renderAbandonedCartsPage();
+        }
+      }
+
+      // إعداد زر العملاء
+      function setupCustomersDrawer() {
+        const customersButton = document.getElementById('customers-button');
+        if (customersButton) {
+          customersButton.addEventListener('click', function() {
+            window.location.href = './customers.html';
+          });
         }
       }
 

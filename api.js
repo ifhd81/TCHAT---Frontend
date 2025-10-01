@@ -124,3 +124,19 @@ async function loadAbandonedCarts(limit = 20) {
     return [];
   }
 }
+
+// تحميل قائمة العملاء
+async function loadCustomers(limit = 50) {
+  try {
+    const data = await apiRequest(`/customers?limit=${limit}`);
+    console.log('Customers Response:', data);
+    if (data.success && Array.isArray(data.data)) {
+      return data.data;
+    }
+    console.error('فشل في جلب العملاء:', data);
+    return [];
+  } catch (error) {
+    console.error('خطأ في تحميل العملاء:', error);
+    return [];
+  }
+}

@@ -204,13 +204,17 @@
       // تحميل البيانات من Backend
       async function loadDashboardData() {
         try {
+          console.log('بدء تحميل بيانات لوحة التحكم...');
+          
           // تحميل بيانات الإيرادات
           const revenueData = await loadRevenueData();
+          console.log('Revenue Data:', revenueData);
           renderRevenueTable(revenueData);
           
-          // تحميل إحصائيات WhatsApp
-          const whatsappStats = await loadWhatsAppStats();
-          renderWhatsAppTable(whatsappStats);
+          // تحميل أرقام WhatsApp من Meta
+          const metaPhoneNumbers = await loadMetaPhoneNumbers();
+          console.log('Meta Phone Numbers:', metaPhoneNumbers);
+          renderWhatsAppTable(metaPhoneNumbers);
           
         } catch (error) {
           console.error('خطأ في تحميل بيانات لوحة التحكم:', error);
@@ -256,39 +260,62 @@
       }
 
       // عرض جدول أرقام WhatsApp
-      function renderWhatsAppTable(stats) {
+      function renderWhatsAppTable(phoneNumbers) {
         const tbody = document.getElementById('whatsapp-numbers-tbody');
-        if (!stats) return;
+        if (!phoneNumbers || phoneNumbers.length === 0) {
+          console.error('لا توجد أرقام WhatsApp');
+          return;
+        }
         
-        tbody.innerHTML = `
-          <tr class="border-t border-gray-200 hover:bg-gray-50">
-            <td class="px-6 py-4 text-center">
-              <span class="font-mono text-gray-900 number">${stats.phone_number}</span>
-            </td>
-            <td class="px-6 py-4 text-center">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                ${stats.status}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-center">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                ${stats.quality_rating}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-center">
-              <div class="flex items-center justify-center space-x-2 space-x-reverse">
-                <span class="font-mono text-gray-900 number">${stats.daily_limit.toLocaleString('en-US')}</span>
-                <i data-lucide="trending-up" class="w-4 h-4 text-blue-500"></i>
-              </div>
-            </td>
-            <td class="px-6 py-4 text-center">
-              <span class="text-gray-900">${stats.display_name}</span>
-            </td>
-            <td class="px-6 py-4 text-center">
-              <span class="text-gray-900">Whatsapp</span>
-            </td>
-          </tr>
-        `;
+        console.log('عرض أرقام WhatsApp:', phoneNumbers);
+        
+        tbody.innerHTML = phoneNumbers.map(phone => {
+          // تنسيق تقييم الجودة
+          let qualityText = phone.quality_rating;
+          if (qualityText === 'GREEN') qualityText = 'مرتفع';
+          else if (qualityText === 'YELLOW') qualityText = 'متوسط';
+          else if (qualityText === 'RED') qualityText = 'منخفض';
+          
+          // تنظيف رقم الهاتف (إزالة المسافات والرموز)
+          const cleanPhoneNumber = phone.display_phone_number.replace(/[\s\+\-]/g, '');
+          
+          // تحديد الحد اليومي بناء على throughput level أو استخدام 1000 كافتراضي
+          const dailyLimit = phone.throughput_level === 'HIGH' ? 10000 : 
+                           phone.throughput_level === 'VERY_HIGH' ? 100000 : 1000;
+          
+          // تحديد الحالة
+          const status = phone.code_verification_status === 'VERIFIED' ? 'متصل' : 'غير متحقق';
+          
+          return `
+            <tr class="border-t border-gray-200 hover:bg-gray-50">
+              <td class="px-6 py-4 text-center">
+                <span class="font-mono text-gray-900 number">${cleanPhoneNumber}</span>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  ${status}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  ${qualityText}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="flex items-center justify-center space-x-2 space-x-reverse">
+                  <span class="font-mono text-gray-900 number">${dailyLimit.toLocaleString('en-US')}</span>
+                  <i data-lucide="trending-up" class="w-4 h-4 text-blue-500"></i>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="text-gray-900">${phone.verified_name}</span>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="text-gray-900">Whatsapp</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
         
         // إعادة تهيئة الأيقونات
         lucide.createIcons();

@@ -20,21 +20,21 @@
           </div>
 
           <div class="flex-1 flex justify-center space-x-3 space-x-reverse">
-            <a
-              href="./customers.html"
+            <button
+              id="customers-button"
+              type="button"
               class="inline-flex items-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <i data-lucide="users" class="h-4 w-4"></i>
               <span>العملاء</span>
-            </a>
-            <button
-              id="templates-button"
-              type="button"
+            </button>
+            <a
+              href="./templates.html"
               class="inline-flex items-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
               <span>القوالب</span>
-            </button>
+            </a>
             <button
               id="campaigns-button"
               type="button"
@@ -305,8 +305,6 @@
       // تحميل البيانات من Backend
       async function loadDashboardData() {
         try {
-          console.log('بدء تحميل بيانات لوحة التحكم...');
-
           setTableState('revenue-table-tbody', 'loading', 4);
           setTableState('abandoned-carts-tbody', 'loading', 5);
           setTableState('meta-phone-numbers-tbody', 'loading', 6);
@@ -564,6 +562,7 @@
       document.addEventListener('DOMContentLoaded', function() {
         lucide.createIcons();
         loadDashboardData();
+        setupCustomersDrawer();
       });
 
       // تسجيل الخروج

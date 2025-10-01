@@ -161,11 +161,9 @@
         const hasBody = components.some(component => component.type === 'BODY');
         const hasFooter = components.some(component => component.type === 'FOOTER');
 
-        const componentTags = [
-          hasHeader ? '<span class="rounded-full border border-input bg-muted px-2 py-0.5 text-xs">Header</span>' : '',
-          hasBody ? '<span class="rounded-full border border-input bg-muted px-2 py-0.5 text-xs">Body</span>' : '',
-          hasFooter ? '<span class="rounded-full border border-input bg-muted px-2 py-0.5 text-xs">Footer</span>' : ''
-        ].filter(Boolean).join(' ');
+        const componentTags = components.length
+          ? `<div class="flex flex-wrap items-center justify-end gap-2">${components.map(component => `<span class="${badgeClass} bg-muted/60 text-muted-foreground border-none">${component.type}</span>`).join('')}</div>`
+          : '';
 
         const updatedDate = template.quality_score?.date
           ? new Date(template.quality_score.date * 1000).toLocaleString('ar-SA')
@@ -178,9 +176,9 @@
                 <div class="flex items-center justify-between gap-2">
                   <div class="text-body-md font-semibold text-foreground">${template.name}</div>
                 </div>
-                <div class="flex flex-wrap items-center gap-2 text-body-xs text-muted-foreground">
+                <div class="flex flex-wrap items-center gap-2 text-body-xs text-muted-foreground justify-between">
                   <span class="number">ID: ${template.id}</span>
-                  ${components.length ? components.map(component => `<span class="${badgeClass} bg-muted/60 text-muted-foreground border-none">${component.type}</span>`).join('') : ''}
+                  ${componentTags}
                 </div>
               </div>
             </td>

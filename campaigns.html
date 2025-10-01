@@ -317,7 +317,7 @@
               <div class="space-y-1">
                 <div class="text-body-md font-semibold">${campaign.name}</div>
                 <div class="text-body-sm text-muted-foreground">${campaign.description || 'بدون وصف'}</div>
-                <div class="text-body-xs text-muted-foreground">تم الإنشاء: ${new Date(campaign.created_at).toLocaleDateString('ar-SA')}</div>
+                <div class="text-body-xs text-muted-foreground">تم الإنشاء: <span class="number">${new Date(campaign.created_at).toLocaleDateString('en-GB')}</span></div>
               </div>
             </td>
             <td class="px-4 py-4 text-center">
@@ -341,13 +341,13 @@
                 <div class="w-full bg-muted rounded-full h-2">
                   <div class="bg-primary h-2 rounded-full transition-all" style="width: ${progressPercent}%"></div>
                 </div>
-                <div class="text-body-xs text-muted-foreground">${progressPercent}%</div>
+                <div class="text-body-xs text-muted-foreground number">${progressPercent}%</div>
               </div>
             </td>
             <td class="px-4 py-4 text-center">
               <div class="text-body-sm text-muted-foreground">
                 <div class="number">${campaign.batch_size}</div>
-                <div>كل ${campaign.batch_interval_hours} ساعة</div>
+                <div>كل <span class="number">${campaign.batch_interval_hours}</span> ساعة</div>
               </div>
             </td>
             <td class="px-4 py-4 text-center">
@@ -599,24 +599,24 @@
       const totalDuration = (batchCount - 1) * batchInterval;
 
       previewContent.innerHTML = `
-        <div class="space-y-2 text-body-sm">
-          <div class="flex justify-between">
-            <span>عدد الدفعات:</span>
-            <span class="number">${batchCount}</span>
+          <div class="space-y-2 text-body-sm">
+            <div class="flex justify-between">
+              <span>عدد الدفعات:</span>
+              <span class="number">${batchCount}</span>
+            </div>
+            <div class="flex justify-between">
+              <span>حجم كل دفعة:</span>
+              <span class="number">${batchSize}</span> عميل
+            </div>
+            <div class="flex justify-between">
+              <span>الفترة بين الدفعات:</span>
+              <span class="number">${batchInterval}</span> ساعة
+            </div>
+            <div class="flex justify-between">
+              <span>المدة الإجمالية:</span>
+              <span class="number">${totalDuration}</span> ساعة
+            </div>
           </div>
-          <div class="flex justify-between">
-            <span>حجم كل دفعة:</span>
-            <span class="number">${batchSize} عميل</span>
-          </div>
-          <div class="flex justify-between">
-            <span>الفترة بين الدفعات:</span>
-            <span class="number">${batchInterval} ساعة</span>
-          </div>
-          <div class="flex justify-between">
-            <span>المدة الإجمالية:</span>
-            <span class="number">${totalDuration} ساعة</span>
-          </div>
-        </div>
       `;
     }
 
@@ -787,16 +787,16 @@
                         </span>
                       </td>
                       <td class="px-4 py-3 text-center text-body-sm text-muted-foreground">
-                        ${recipient.sent_at ? new Date(recipient.sent_at).toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'}) : '-'}
+                        <span class="number">${recipient.sent_at ? new Date(recipient.sent_at).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'}) : '-'}</span>
                       </td>
                       <td class="px-4 py-3 text-center text-body-sm text-muted-foreground">
-                        ${recipient.delivered_at ? new Date(recipient.delivered_at).toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'}) : '-'}
+                        <span class="number">${recipient.delivered_at ? new Date(recipient.delivered_at).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'}) : '-'}</span>
                       </td>
                       <td class="px-4 py-3 text-center text-body-sm text-muted-foreground">
-                        ${recipient.read_at ? new Date(recipient.read_at).toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'}) : '-'}
+                        <span class="number">${recipient.read_at ? new Date(recipient.read_at).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'}) : '-'}</span>
                       </td>
                       <td class="px-4 py-3 text-center text-body-sm text-muted-foreground">
-                        ${recipient.replied_at ? new Date(recipient.replied_at).toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'}) : '-'}
+                        <span class="number">${recipient.replied_at ? new Date(recipient.replied_at).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'}) : '-'}</span>
                       </td>
                     </tr>
                   `).join('') : `

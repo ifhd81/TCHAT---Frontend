@@ -6,6 +6,15 @@ export default defineConfig({
     port: 5173,
     open: true
   },
+  preview: {
+    host: '0.0.0.0',
+    port: process.env.PORT || 4173,
+    strictPort: false,
+    allowedHosts: [
+      'tchat-frontend-production.up.railway.app',
+      '.railway.app'
+    ]
+  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',

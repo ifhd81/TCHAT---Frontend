@@ -6,6 +6,7 @@
     <title>TCHAT - لوحة التحكم</title>
     <link rel="stylesheet" href="./style.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="./api.js"></script>
   </head>
   <body class="rtl min-h-screen" style="background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 50%, #ffffff 100%); font-family: 'LamaSans', sans-serif;">
     
@@ -108,148 +109,8 @@
                     <th class="px-6 py-4 text-right text-body-sm font-medium text-gray-700">الطلبات المنسوبة<br><span class="font-normal text-gray-500">(آخر 30 يوماً)</span></th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
-                  <!-- السلات المتروكة -->
-                  <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-right">
-                      <span class="text-body-md text-gray-900 font-medium">السلات المتروكة</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        فعالة
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-lg font-bold text-gray-900">403,095.84</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-md text-gray-900">13,398.51</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-md text-gray-900">26,613.77</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="text-body-lg font-bold text-gray-900">127</span>
-                    </td>
-                  </tr>
-
-                  <!-- سلسلة الترحيب بالعملاء -->
-                  <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-right">
-                      <span class="text-body-md text-gray-900 font-medium">سلسلة الترحيب بالعملاء</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        فعالة
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-lg font-bold text-gray-900">228,899.92</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-md text-gray-900">10,770.62</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-md text-gray-900">19,721.20</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="text-body-lg font-bold text-gray-900">67</span>
-                    </td>
-                  </tr>
-
-                  <!-- إعادة الاستهداف بعد الشراء -->
-                  <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-right">
-                      <span class="text-body-md text-gray-900 font-medium">إعادة الاستهداف بعد الشراء</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        فعالة
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-lg font-bold text-gray-900">21,074.63</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-md text-gray-900">1,562.99</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-md text-gray-900">2,737.64</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="text-body-lg font-bold text-gray-900">10</span>
-                    </td>
-                  </tr>
-
-                  <!-- ترك تصفح المتجر -->
-                  <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-right">
-                      <span class="text-body-md text-gray-900 font-medium">ترك تصفح المتجر</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                        متوقفة
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-lg font-bold text-gray-900">26,296.19</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-md text-gray-900">0.00</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-md text-gray-900">0.00</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="text-body-lg font-bold text-gray-900">0</span>
-                    </td>
-                  </tr>
-
-                  <!-- استرداد العملاء -->
-                  <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-right">
-                      <span class="text-body-md text-gray-900 font-medium">استرداد العملاء</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        فعالة
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-lg font-bold text-gray-900">12,473.91</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-md text-gray-900">0.00</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-md text-gray-900">484.33</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="text-body-lg font-bold text-gray-900">1</span>
-                    </td>
-                  </tr>
-
-                  <!-- الحملات التسويقية -->
-                  <tr class="hover:bg-gray-50 border-t-2 border-gray-300">
-                    <td class="px-6 py-4 text-right">
-                      <span class="text-body-md text-gray-900 font-bold">الحملات التسويقية</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="text-body-sm text-gray-600">28 ذات إيرادات</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-lg font-bold text-gray-900">573,462.19</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-md text-gray-900">44,173.94</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="font-mono text-body-md text-gray-900">55,161.08</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                      <span class="text-body-lg font-bold text-gray-900">239</span>
-                    </td>
-                  </tr>
+                <tbody id="revenue-table-tbody" class="divide-y divide-gray-200">
+                  <!-- البيانات ستُحمل من Backend -->
                 </tbody>
               </table>
             </div>
@@ -340,15 +201,110 @@
         window.location.href = './login.html';
       }
 
+      // تحميل البيانات من Backend
+      async function loadDashboardData() {
+        try {
+          // تحميل بيانات الإيرادات
+          const revenueData = await loadRevenueData();
+          renderRevenueTable(revenueData);
+          
+          // تحميل إحصائيات WhatsApp
+          const whatsappStats = await loadWhatsAppStats();
+          renderWhatsAppTable(whatsappStats);
+          
+        } catch (error) {
+          console.error('خطأ في تحميل بيانات لوحة التحكم:', error);
+        }
+      }
+
+      // عرض جدول الإيرادات
+      function renderRevenueTable(data) {
+        const tbody = document.getElementById('revenue-table-tbody');
+        if (!data || data.length === 0) return;
+        
+        tbody.innerHTML = data.map(item => {
+          const statusClass = item.status === 'فعالة' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800';
+          const isTotal = item.campaign_name === 'الحملات التسويقية';
+          const borderClass = isTotal ? 'border-t-2 border-gray-300' : '';
+          
+          return `
+            <tr class="hover:bg-gray-50 ${borderClass}">
+              <td class="px-6 py-4 text-right">
+                <span class="text-body-md text-gray-900 ${isTotal ? 'font-bold' : 'font-medium'}">${item.campaign_name}</span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                ${item.status.includes('ذات إيرادات') ? 
+                  `<span class="text-body-sm text-gray-600">${item.status}</span>` :
+                  `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">${item.status}</span>`
+                }
+              </td>
+              <td class="px-6 py-4 text-right">
+                <span class="font-mono text-body-lg font-bold text-gray-900">${item.total_revenue.toLocaleString('ar-SA', {minimumFractionDigits: 2})}</span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <span class="font-mono text-body-md text-gray-900">${item.last_30_days.toLocaleString('ar-SA', {minimumFractionDigits: 2})}</span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <span class="font-mono text-body-md text-gray-900">${item.previous_30_days.toLocaleString('ar-SA', {minimumFractionDigits: 2})}</span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <span class="text-body-lg font-bold text-gray-900">${item.attributed_orders}</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // عرض جدول أرقام WhatsApp
+      function renderWhatsAppTable(stats) {
+        const tbody = document.getElementById('whatsapp-numbers-tbody');
+        if (!stats) return;
+        
+        tbody.innerHTML = `
+          <tr class="border-t border-gray-200 hover:bg-gray-50">
+            <td class="px-6 py-4 text-center">
+              <span class="font-mono text-gray-900">${stats.phone_number}</span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                ${stats.status}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                ${stats.quality_rating}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <div class="flex items-center justify-center space-x-2 space-x-reverse">
+                <span class="font-mono text-gray-900">${stats.daily_limit.toLocaleString('ar-SA')}</span>
+                <i data-lucide="trending-up" class="w-4 h-4 text-blue-500"></i>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="text-gray-900">${stats.display_name}</span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="text-gray-900">Whatsapp</span>
+            </td>
+          </tr>
+        `;
+        
+        // إعادة تهيئة الأيقونات
+        lucide.createIcons();
+      }
+
       // تهيئة أيقونات Lucide
       document.addEventListener('DOMContentLoaded', function() {
         lucide.createIcons();
+        loadDashboardData();
       });
 
       // تسجيل الخروج
       function logout() {
         localStorage.removeItem('tchat_logged_in');
         localStorage.removeItem('tchat_user');
+        localStorage.removeItem('tchat_token');
         window.location.href = './login.html';
       }
     </script>

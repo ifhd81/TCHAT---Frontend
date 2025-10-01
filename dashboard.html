@@ -45,9 +45,12 @@
             </button>
             <a
               href="./chats.html"
-              class="inline-flex items-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              class="inline-flex items-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative"
             >
-              <i data-lucide="message-circle" class="h-4 w-4"></i>
+              <div class="relative">
+                <i data-lucide="message-circle" class="h-4 w-4"></i>
+                <div id="unread-indicator" class="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive hidden"></div>
+              </div>
               <span>الدردشات</span>
             </a>
           </div>
@@ -340,6 +343,9 @@
           totalItems = abandonedCarts.length;
           updatePagination();
           renderAbandonedCartsPage();
+
+          // فحص المحادثات غير المقروءة
+          checkUnreadConversations();
           
         } catch (error) {
           console.error('خطأ في تحميل بيانات لوحة التحكم:', error);
@@ -572,6 +578,9 @@
         lucide.createIcons();
         loadDashboardData();
         setupCustomersDrawer();
+        
+        // فحص المحادثات غير المقروءة كل دقيقة
+        setInterval(checkUnreadConversations, 60000);
       });
 
       // تسجيل الخروج

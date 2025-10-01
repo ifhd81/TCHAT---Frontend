@@ -172,3 +172,26 @@ async function loadConversationMessages(conversationId, limit = 50) {
     return [];
   }
 }
+
+// فحص المحادثات غير المقروءة
+async function checkUnreadConversations() {
+  try {
+    const conversations = await loadConversations(50);
+    const unreadCount = conversations.filter(conv => !conv.is_read).length;
+    
+    const indicator = document.getElementById('unread-indicator');
+    if (indicator) {
+      if (unreadCount > 0) {
+        indicator.classList.remove('hidden');
+        indicator.title = `${unreadCount} محادثة غير مقروءة`;
+      } else {
+        indicator.classList.add('hidden');
+      }
+    }
+    
+    return unreadCount;
+  } catch (error) {
+    console.error('خطأ في فحص المحادثات غير المقروءة:', error);
+    return 0;
+  }
+}

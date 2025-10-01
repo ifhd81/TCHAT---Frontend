@@ -31,7 +31,7 @@ document.querySelector('#app').innerHTML = `
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- جدول إجمالي الإيرادات -->
       <div class="bg-card rounded-lg shadow-sm border border-border mb-8">
-        <div class="bg-primary text-primary-foreground p-4 rounded-t-lg">
+        <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4 rounded-t-lg">
           <h2 class="text-heading-md font-bold">إجمالي الإيرادات (SAR)</h2>
         </div>
         
@@ -56,7 +56,7 @@ document.querySelector('#app').innerHTML = `
 
       <!-- جدول رقم الواتساب -->
       <div class="bg-card rounded-lg shadow-sm border border-border">
-        <div class="bg-primary text-primary-foreground p-4 rounded-t-lg">
+        <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4 rounded-t-lg">
           <h2 class="text-heading-md font-bold">رقم الواتساب</h2>
         </div>
         

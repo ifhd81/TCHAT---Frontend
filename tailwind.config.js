@@ -20,75 +20,67 @@ export default {
         medium: "600",
       },
       colors: {
-        // Neutral Colors
-        neutral: {
-          50: "#f4f5f6",
-          100: "#f3f4f6", 
-          200: "#e5e7eb",
-          300: "#d1d5db",
-          400: "#9ca3af",
-          500: "#6b7280",
-          600: "#595b5d",
-          700: "#374151",
-          800: "#1f2937",
-          900: "#111827",
-        },
-        // Primary Colors (Green)
+        // النظام الجديد - Indigo Based
         primary: {
-          main: "#2e9066",
-          surface: "#f2f6f4",
-          focus: "#e4ede9",
-          border: "#d7e4de",
-          hover: "#1d7650",
-          pressed: "#103525",
-          DEFAULT: "#2e9066",
+          DEFAULT: "#4f46e5", // Indigo-600
           foreground: "#ffffff",
+          hover: "#4338ca", // Indigo-700
+          50: "#eef2ff",
+          500: "#6366f1", // Indigo-500
+          600: "#4f46e5", // Indigo-600
+          700: "#4338ca", // Indigo-700
         },
-        // Secondary Colors (Orange)
+        background: "#ffffff", // أبيض
+        foreground: "#1f2937", // Gray-800
+        card: {
+          DEFAULT: "#ffffff",
+          foreground: "#1f2937",
+        },
+        popover: {
+          DEFAULT: "#ffffff", 
+          foreground: "#1f2937",
+        },
         secondary: {
-          main: "#ff9d18",
-          surface: "#fff5e8",
-          focus: "#ffebd1",
-          border: "#ffd8a3",
-          hover: "#e58400",
-          pressed: "#aa6910",
-          DEFAULT: "#ff9d18",
-          foreground: "#ffffff",
+          DEFAULT: "#f9fafb", // Gray-50
+          foreground: "#1f2937",
         },
-        // Legacy support
-        sec: "#2e9066",
-        hover: "#1d7650",
-        iconsbg: "#f2f6f4",
-        dark: "#111827",
-        white: "white",
-        background: "#f4f5f6",
-        pageBg: "#f4f5f6",
-        foreground: "#111827",
-        error: "#ef4444",
-        success: "#10b981",
-        // Shadcn/ui color system
-        border: "#e5e7eb",
-        input: "#e5e7eb",
-        ring: "#2e9066",
         muted: {
-          DEFAULT: "#f3f4f6",
-          foreground: "#6b7280",
+          DEFAULT: "#f3f4f6", // Gray-100
+          foreground: "#6b7280", // Gray-500
         },
         accent: {
           DEFAULT: "#f3f4f6",
-          foreground: "#111827",
+          foreground: "#1f2937",
         },
+        border: "#e5e7eb", // Gray-200
+        input: "#e5e7eb", // Gray-200  
+        ring: "#6366f1", // Indigo-500
+        // ألوان الحالة
+        success: "#10b981", // Emerald-500
+        warning: "#f59e0b", // Amber-500
         destructive: {
-          DEFAULT: "#ef4444",
+          DEFAULT: "#ef4444", // Red-500
           foreground: "#ffffff",
         },
-        card: {
-          DEFAULT: "#ffffff",
-          foreground: "#111827",
+        error: "#ef4444",
+        // ألوان الرسوم البيانية
+        chart: {
+          1: "#10b981", // أخضر
+          2: "#3b82f6", // أزرق  
+          3: "#8b5cf6", // بنفسجي
+          4: "#f59e0b", // برتقالي
+          5: "#ef4444", // أحمر
         },
-        popover: {
-          DEFAULT: "#ffffff",
-          foreground: "#111827",
+        // Sidebar colors
+        sidebar: {
+          DEFAULT: "rgba(255, 255, 255, 0.95)",
+          foreground: "#1f2937",
+          primary: "#4f46e5",
+          "primary-foreground": "#ffffff",
+          accent: "#eef2ff", // Indigo-50
+          "accent-foreground": "#4f46e5",
+          border: "rgba(79, 70, 229, 0.1)",
+          ring: "#6366f1",
         },
       },
     },

@@ -117,10 +117,10 @@
         if (username.trim() && password.trim()) {
           submitBtn.disabled = false;
           submitBtn.classList.remove('bg-muted', 'text-muted-foreground', 'hover:bg-muted/80');
-          submitBtn.classList.add('bg-primary', 'text-primary-foreground', 'hover:bg-primary-hover');
+          submitBtn.classList.add('bg-indigo-600', 'text-white', 'hover:bg-indigo-700');
         } else {
           submitBtn.disabled = true;
-          submitBtn.classList.remove('bg-primary', 'text-primary-foreground', 'hover:bg-primary-hover');
+          submitBtn.classList.remove('bg-indigo-600', 'text-white', 'hover:bg-indigo-700');
           submitBtn.classList.add('bg-muted', 'text-muted-foreground', 'hover:bg-muted/80');
         }
       }

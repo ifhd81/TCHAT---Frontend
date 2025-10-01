@@ -360,6 +360,11 @@
                     <i data-lucide="play" class="h-3 w-3"></i>
                   </button>
                 ` : ''}
+                ${campaign.status === 'running' || campaign.status === 'completed' ? `
+                  <button onclick="resendCampaign(${campaign.id})" class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-warning text-warning-foreground transition hover:bg-warning/90">
+                    <i data-lucide="repeat" class="h-3 w-3"></i>
+                  </button>
+                ` : ''}
               </div>
             </td>
           </tr>
@@ -808,6 +813,34 @@
       } catch (error) {
         console.error('خطأ في بدء الحملة:', error);
         alert('تعذر بدء الحملة. تحقق من الاتصال.');
+      }
+    }
+
+    // إعادة إرسال الحملة
+    async function resendCampaign(campaignId) {
+      if (!confirm('هل تريد إعادة إرسال هذه الحملة؟ سيتم إرسال الرسائل للمستقبلين مرة أخرى.')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}/resend`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+          }
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('تم بدء إعادة الإرسال بنجاح!');
+          refreshCampaigns();
+        } else {
+          alert('فشل في إعادة الإرسال: ' + (result.message || 'خطأ غير معروف'));
+        }
+      } catch (error) {
+        console.error('خطأ في إعادة الإرسال:', error);
+        alert('تعذر إعادة الإرسال. تحقق من الاتصال.');
       }
     }
 

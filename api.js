@@ -105,3 +105,23 @@ async function loadWhatsAppWebhooks(limit = 10) {
     return { count: 0, data: [] };
   }
 }
+
+// تحميل السلات المتروكة
+async function loadAbandonedCarts(limit = 20) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/abandoned-carts?limit=${limit}`);
+    const data = await response.json();
+    
+    console.log('Abandoned Carts Response:', data);
+    
+    if (data.success && data.data) {
+      return data.data;
+    } else {
+      console.error('فشل في جلب السلات المتروكة:', data);
+      return [];
+    }
+  } catch (error) {
+    console.error('خطأ في تحميل السلات المتروكة:', error);
+    return [];
+  }
+}

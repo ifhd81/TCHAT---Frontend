@@ -1,0 +1,542 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* RTL/LTR Support */
+.rtl {
+  direction: rtl;
+}
+
+.ltr {
+  direction: ltr;
+}
+
+/* Fix for Arabic text rendering */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="ltr"] {
+  text-align: left;
+}
+
+/* Ensure proper text alignment in buttons and links */
+[dir="rtl"] .text-center {
+  text-align: center;
+}
+
+[dir="ltr"] .text-center {
+  text-align: center;
+}
+
+/* Animation للنافذة المنبثقة من الأسفل */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* تخصيص خط إشعارات Sonner */
+[data-sonner-toaster] [data-sonner-toast] {
+  font-family: 'LamaSans', ui-sans-serif, system-ui, sans-serif !important;
+  direction: rtl !important;
+}
+
+[data-sonner-toaster] [data-sonner-toast] [data-title] {
+  font-family: 'LamaSans', ui-sans-serif, system-ui, sans-serif !important;
+}
+
+[data-sonner-toaster] [data-sonner-toast] [data-description] {
+  font-family: 'LamaSans', ui-sans-serif, system-ui, sans-serif !important;
+}
+
+/* نظام أحجام الخطوط المخصص */
+.text-heading-xl {
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 700 !important;
+}
+
+.text-heading-lg {
+  font-size: 22px;
+  line-height: 1.3;
+  font-weight: 700 !important;
+}
+
+.text-heading-md {
+  font-size: 20px;
+  line-height: 1.4;
+  font-weight: 700 !important;
+}
+
+.text-heading-sm {
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 700 !important;
+}
+
+.text-body-lg {
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 400 !important;
+}
+
+.text-body-md {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400 !important;
+}
+
+.text-body-sm {
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 400 !important;
+}
+
+.text-button-lg {
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 600 !important;
+}
+
+.text-button-md {
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 600 !important;
+}
+
+.text-button-sm {
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 500 !important;
+}
+
+/* أوزان إضافية للعناصر التي تحتاج bold */
+.text-heading-xl-bold {
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 800 !important;
+}
+
+.text-heading-lg-bold {
+  font-size: 22px;
+  line-height: 1.3;
+  font-weight: 800 !important;
+}
+
+.text-heading-md-bold {
+  font-size: 20px;
+  line-height: 1.4;
+  font-weight: 800 !important;
+}
+
+.text-heading-sm-bold {
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 800 !important;
+}
+
+.text-body-lg-bold {
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 700 !important;
+}
+
+.text-body-md-bold {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 700 !important;
+}
+
+.text-body-sm-bold {
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 700 !important;
+}
+
+/* Utility classes */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* LamaSans Font Family */
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-Thin.woff2') format('woff2');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-ThinItalic.woff2') format('woff2');
+  font-weight: 100;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-ExtraLight.woff2') format('woff2');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-ExtraLightItalic.woff2') format('woff2');
+  font-weight: 200;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-LightItalic.woff2') format('woff2');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-RegularItalic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-MediumItalic.woff2') format('woff2');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-SemiBoldItalic.woff2') format('woff2');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-BoldItalic.woff2') format('woff2');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-ExtraBold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-ExtraBoldItalic.woff2') format('woff2');
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LamaSans';
+  src: url('/fonts/LamaSans-BlackItalic.woff2') format('woff2');
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  /* CSS Variables from send-frontend */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 222.2 84% 4.9%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 84% 4.9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  --radius: 0.4rem;
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
+  --sidebar-background: 0 0% 98%;
+  --sidebar-foreground: 240 5.3% 26.1%;
+  --sidebar-primary: 240 5.9% 10%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 240 4.8% 95.9%;
+  --sidebar-accent-foreground: 240 5.9% 10%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-ring: 217.2 91.2% 59.8%;
+}
+
+@layer base {
+  :root {
+    --color-background: hsl(var(--background));
+    --color-foreground: hsl(var(--foreground));
+    --color-card: hsl(var(--card));
+    --color-card-foreground: hsl(var(--card-foreground));
+    --color-popover: hsl(var(--popover));
+    --color-popover-foreground: hsl(var(--popover-foreground));
+    --color-primary: hsl(var(--primary));
+    --color-primary-foreground: hsl(var(--primary-foreground));
+    --color-secondary: hsl(var(--secondary));
+    --color-secondary-foreground: hsl(var(--secondary-foreground));
+    --color-muted: hsl(var(--muted));
+    --color-muted-foreground: hsl(var(--muted-foreground));
+    --color-accent: hsl(var(--accent));
+    --color-accent-foreground: hsl(var(--accent-foreground));
+    --color-destructive: hsl(var(--destructive));
+    --color-destructive-foreground: hsl(var(--destructive-foreground));
+    --color-border: hsl(var(--border));
+    --color-input: hsl(var(--input));
+    --color-ring: hsl(var(--ring));
+    
+    /* Lumo base and tint */
+    --lumo-base-color: #fff;
+    --lumo-tint-5pct: hsla(0, 0%, 100%, 0.3);
+    --lumo-tint-10pct: hsla(0, 0%, 100%, 0.37);
+    --lumo-tint-20pct: hsla(0, 0%, 100%, 0.44);
+    --lumo-tint-30pct: hsla(0, 0%, 100%, 0.5);
+    --lumo-tint-40pct: hsla(0, 0%, 100%, 0.57);
+    --lumo-tint-50pct: hsla(0, 0%, 100%, 0.64);
+    --lumo-tint-60pct: hsla(0, 0%, 100%, 0.7);
+    --lumo-tint-70pct: hsla(0, 0%, 100%, 0.77);
+    --lumo-tint-80pct: hsla(0, 0%, 100%, 0.84);
+    --lumo-tint-90pct: hsla(0, 0%, 100%, 0.9);
+    --lumo-tint: #fff;
+
+    /* Lumo shade/contrast */
+    --lumo-shade-5pct: hsla(214, 61%, 25%, 0.05);
+    --lumo-shade-10pct: hsla(214, 57%, 24%, 0.1);
+    --lumo-shade-20pct: hsla(214, 53%, 23%, 0.16);
+    --lumo-shade-30pct: hsla(214, 50%, 22%, 0.26);
+    --lumo-shade-40pct: hsla(214, 47%, 21%, 0.38);
+    --lumo-shade-50pct: hsla(214, 45%, 20%, 0.52);
+    --lumo-shade-60pct: hsla(214, 43%, 19%, 0.6);
+    --lumo-shade-70pct: hsla(214, 42%, 18%, 0.69);
+    --lumo-shade-80pct: hsla(214, 41%, 17%, 0.83);
+    --lumo-shade-90pct: hsla(214, 40%, 16%, 0.94);
+    --lumo-shade: hsl(214, 35%, 15%);
+
+    --lumo-contrast-5pct: var(--lumo-shade-5pct);
+    --lumo-contrast-10pct: var(--lumo-shade-10pct);
+    --lumo-contrast-20pct: var(--lumo-shade-20pct);
+    --lumo-contrast-30pct: var(--lumo-shade-30pct);
+    --lumo-contrast-40pct: var(--lumo-shade-40pct);
+    --lumo-contrast-50pct: var(--lumo-shade-50pct);
+    --lumo-contrast-60pct: var(--lumo-shade-60pct);
+    --lumo-contrast-70pct: var(--lumo-shade-70pct);
+    --lumo-contrast-80pct: var(--lumo-shade-80pct);
+    --lumo-contrast-90pct: var(--lumo-shade-90pct);
+    --lumo-contrast: var(--lumo-shade);
+
+    --lumo-header-text-color: var(--lumo-contrast);
+    --lumo-body-text-color: var(--lumo-contrast-90pct);
+    --lumo-secondary-text-color: var(--lumo-contrast-70pct);
+    --lumo-tertiary-text-color: var(--lumo-contrast-50pct);
+    --lumo-disabled-text-color: var(--lumo-contrast-30pct);
+
+    /* Lumo primary */
+    --lumo-primary-color: hsl(214, 100%, 48%);
+    --lumo-primary-color-50pct: hsla(214, 100%, 49%, 0.76);
+    --lumo-primary-color-10pct: hsla(214, 100%, 60%, 0.13);
+    --lumo-primary-text-color: hsl(214, 100%, 43%);
+    --lumo-primary-contrast-color: #fff;
+
+    /* Lumo error/success */
+    --lumo-error-color: hsl(3, 85%, 48%);
+    --lumo-error-color-50pct: hsla(3, 85%, 49%, 0.5);
+    --lumo-error-color-10pct: hsla(3, 85%, 49%, 0.1);
+    --lumo-error-text-color: hsl(3, 89%, 42%);
+    --lumo-error-contrast-color: #fff;
+    --lumo-success-color: hsl(145, 72%, 30%);
+  }
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 84% 4.9%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
+  --sidebar-background: 240 5.9% 10%;
+  --sidebar-foreground: 240 4.8% 95.9%;
+  --sidebar-primary: 224.3 76.3% 94.1%;
+  --sidebar-primary-foreground: 240 5.9% 10%;
+  --sidebar-accent: 240 3.7% 15.9%;
+  --sidebar-accent-foreground: 240 4.8% 95.9%;
+  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-ring: 217.2 91.2% 59.8%;
+}
+
+/* CSS Theme Variables - matching send-frontend */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'LamaSans', 'Cairo', Arial, Helvetica, sans-serif;
+    direction: rtl;
+    font-variant-numeric: lining-nums;
+  }
+}
+
+/* RTL Support */
+html {
+  direction: rtl;
+}
+
+/* Force English numbers */
+* {
+  font-variant-numeric: lining-nums;
+}
+
+.arabic-text {
+  unicode-bidi: bidi-override;
+  direction: rtl;
+}
+
+/* Ensure all numbers display as English */
+time, .date, .number {
+  font-variant-numeric: lining-nums;
+  unicode-bidi: bidi-override;
+  direction: ltr;
+  display: inline-block;
+}
+
+main {
+  background: hsl(var(--background));
+  font-family: "LamaSans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+html {
+  font-family: "LamaSans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+body {
+  background-color: #f0f0f0 !important;
+}
+
+.custom-pb {
+  padding-bottom: 8rem;
+}
+
+* {
+  line-height: unset !important;
+}
+
+.text-neutral-500 {
+  @apply font-semibold; 
+}
+.text-neutral-600 {
+  @apply font-semibold text-sm;
+}
+
+.text-neutral-500.bold {
+  @apply font-bold;
+}

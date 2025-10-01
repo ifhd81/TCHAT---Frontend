@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TCHAT - لوحة التحكم</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  </head>
+  <body class="rtl min-h-screen" style="background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 50%, #ffffff 100%); font-family: 'LamaSans', sans-serif;">
+    
+    <div class="min-h-screen flex">
+      
+      <!-- Sidebar -->
+      <div class="w-64 min-h-screen border-l border-gray-200" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+        <div class="p-6">
+          <!-- User Profile -->
+          <div class="flex items-center space-x-3 space-x-reverse mb-8">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+              ا
+            </div>
+            <div class="text-right">
+              <p class="text-sm font-medium text-gray-900">المدير العام</p>
+              <p class="text-xs text-gray-500">admin@munasabati.com</p>
+            </div>
+          </div>
+
+          <!-- Navigation Menu -->
+          <nav class="space-y-2">
+            <a href="#" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-white" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+              <i data-lucide="home" class="w-5 h-5 ml-3"></i>
+              الرئيسية
+            </a>
+            
+            <a href="#" class="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+              <i data-lucide="users" class="w-5 h-5 ml-3"></i>
+              المناسبات
+            </a>
+            
+            <a href="#" class="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+              <i data-lucide="calendar" class="w-5 h-5 ml-3"></i>
+              العمليات
+            </a>
+            
+            <a href="#" class="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+              <i data-lucide="activity" class="w-5 h-5 ml-3"></i>
+              الدردشات
+            </a>
+            
+            <a href="#" class="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+              <i data-lucide="phone" class="w-5 h-5 ml-3"></i>
+              أرقام الواتساب
+            </a>
+            
+            <a href="#" class="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+              <i data-lucide="file-text" class="w-5 h-5 ml-3"></i>
+              سجلات المرفوعات
+            </a>
+            
+            <a href="#" class="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+              <i data-lucide="credit-card" class="w-5 h-5 ml-3"></i>
+              إدارة القوالب
+            </a>
+            
+            <a href="#" class="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+              <i data-lucide="settings" class="w-5 h-5 ml-3"></i>
+              الإعدادات
+            </a>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="flex-1">
+        <!-- Header -->
+        <header class="border-b border-gray-200 p-6" style="background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px);">
+          <div class="flex items-center justify-between">
+            <div class="text-right">
+              <h1 class="text-2xl font-bold text-gray-900">لوحة التحكم</h1>
+              <p class="text-sm text-gray-600">إدارة المناسبات والدعوات الإلكترونية بسهولة وأناقة</p>
+            </div>
+            
+            <div class="flex items-center space-x-4 space-x-reverse">
+              <div class="flex items-center space-x-2 space-x-reverse text-sm text-gray-600">
+                <i data-lucide="calendar" class="w-4 h-4"></i>
+                <span>2 مناسبة</span>
+              </div>
+              <div class="flex items-center space-x-2 space-x-reverse text-sm text-gray-600">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>4 دعوة</span>
+              </div>
+              <div class="flex items-center space-x-2 space-x-reverse text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4"></i>
+                <span>2 تأكيد</span>
+              </div>
+              
+              <div class="flex items-center space-x-3 space-x-reverse">
+                <button class="px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors">
+                  <i data-lucide="refresh-cw" class="w-4 h-4 ml-2"></i>
+                  التقارير
+                </button>
+                
+                <button class="px-4 py-2 text-sm rounded-lg text-white transition-colors" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                  <i data-lucide="plus" class="w-4 h-4 ml-2"></i>
+                  مناسبة جديدة
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-6">
+          <!-- Stats Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- في الانتظار -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                  <i data-lucide="clock" class="w-6 h-6 text-white"></i>
+                </div>
+                <div class="text-right">
+                  <p class="text-2xl font-bold text-gray-900">2</p>
+                  <p class="text-sm text-gray-600">منتظر</p>
+                </div>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 text-right">في الانتظار</h3>
+              <p class="text-sm text-gray-600 text-right">بانتظار البدء</p>
+            </div>
+
+            <!-- الأليكات -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #10b981, #059669);">
+                  <i data-lucide="users" class="w-6 h-6 text-white"></i>
+                </div>
+                <div class="text-right">
+                  <p class="text-2xl font-bold text-gray-900">2</p>
+                  <p class="text-sm text-gray-600">تأكيد</p>
+                </div>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 text-right">الأليكات</h3>
+              <p class="text-sm text-gray-600 text-right">الدعوات المؤكدة</p>
+            </div>
+
+            <!-- إجمالي الدعوات -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                  <i data-lucide="send" class="w-6 h-6 text-white"></i>
+                </div>
+                <div class="text-right">
+                  <p class="text-2xl font-bold text-gray-900">4</p>
+                  <p class="text-sm text-gray-600">دعوة</p>
+                </div>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 text-right">إجمالي الدعوات</h3>
+              <p class="text-sm text-gray-600 text-right">الدعوات المرسلة</p>
+            </div>
+
+            <!-- إجمالي المناسبات -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                  <i data-lucide="calendar" class="w-6 h-6 text-white"></i>
+                </div>
+                <div class="text-right">
+                  <p class="text-2xl font-bold text-gray-900">2</p>
+                  <p class="text-sm text-gray-600">مناسبة</p>
+                </div>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 text-right">إجمالي المناسبات</h3>
+              <p class="text-sm text-gray-600 text-right">المناسبات في النظام</p>
+            </div>
+          </div>
+
+          <!-- Stats Lower Row -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- إجمالي الرصيد -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                  <i data-lucide="dollar-sign" class="w-6 h-6 text-white"></i>
+                </div>
+                <div class="text-right">
+                  <p class="text-2xl font-bold text-gray-900">0.00</p>
+                  <p class="text-sm text-gray-600">ر.س.</p>
+                </div>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 text-right">إجمالي الرصيد</h3>
+              <p class="text-sm text-gray-600 text-right">عبر جميع الأرقام</p>
+            </div>
+
+            <!-- تم القراءة -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                  <i data-lucide="eye" class="w-6 h-6 text-white"></i>
+                </div>
+                <div class="text-right">
+                  <p class="text-2xl font-bold text-gray-900">0.0%</p>
+                  <p class="text-sm text-gray-600">معدل القراءة</p>
+                </div>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 text-right">تم القراءة</h3>
+              <p class="text-sm text-gray-600 text-right">0 مقروءة</p>
+            </div>
+
+            <!-- نجاح التسليم -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #10b981, #059669);">
+                  <i data-lucide="check" class="w-6 h-6 text-white"></i>
+                </div>
+                <div class="text-right">
+                  <p class="text-2xl font-bold text-gray-900">0.0%</p>
+                  <p class="text-sm text-gray-600">معدل التسليم</p>
+                </div>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 text-right">نجاح التسليم</h3>
+              <p class="text-sm text-gray-600 text-right">0 مسلمة</p>
+            </div>
+
+            <!-- إجمالي الإرسال -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                  <i data-lucide="send" class="w-6 h-6 text-white"></i>
+                </div>
+                <div class="text-right">
+                  <p class="text-2xl font-bold text-gray-900">0</p>
+                  <p class="text-sm text-gray-600">رسالة</p>
+                </div>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 text-right">إجمالي الإرسال</h3>
+              <p class="text-sm text-gray-600 text-right">عبر جميع الأرقام</p>
+            </div>
+          </div>
+
+          <!-- WhatsApp Numbers Table -->
+          <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-8">
+            <div class="p-4 rounded-t-xl" style="background: linear-gradient(135deg, #a855f7, #3b82f6);">
+              <h2 class="text-xl font-bold text-white text-right">أرقام الواتساب</h2>
+              <p class="text-sm text-white/80 text-right">إدارة أرقام الواتساب والدفع ومراقبة الذكاء</p>
+            </div>
+            
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-right text-sm font-medium text-gray-700">الرقم</th>
+                    <th class="px-6 py-3 text-right text-sm font-medium text-gray-700">الحالة</th>
+                    <th class="px-6 py-3 text-right text-sm font-medium text-gray-700">تقييم الجودة</th>
+                    <th class="px-6 py-3 text-right text-sm font-medium text-gray-700">الحد اليومي للرسائل</th>
+                    <th class="px-6 py-3 text-right text-sm font-medium text-gray-700">الإسم</th>
+                    <th class="px-6 py-3 text-right text-sm font-medium text-gray-700">مزود الخدمة</th>
+                    <th class="px-6 py-3 text-right text-sm font-medium text-gray-700">الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-t border-gray-200 hover:bg-gray-50">
+                    <td class="px-6 py-4 text-right">
+                      <span class="font-mono text-gray-900">966533934546</span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <div class="flex items-center justify-end">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          متصل
+                        </span>
+                        <i data-lucide="refresh-cw" class="w-4 h-4 text-green-500 mr-2"></i>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <div class="flex items-center justify-end">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          مرتفع
+                        </span>
+                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <span class="font-mono text-gray-900">1,000</span>
+                      <i data-lucide="trending-up" class="w-4 h-4 text-blue-500 mr-1"></i>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <span class="text-gray-900">مناسبتي</span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <div class="flex items-center justify-end">
+                        <span class="text-gray-900">Whatsapp</span>
+                        <span class="text-green-500 mr-2">📱</span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <button class="px-3 py-1 text-xs rounded-lg text-white" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                        <i data-lucide="zap" class="w-3 h-3 ml-1"></i>
+                        مزامنة
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Payment Status -->
+          <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div class="p-4 rounded-t-xl" style="background: linear-gradient(135deg, #3b82f6, #a855f7);">
+              <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold text-white">حالة الدفع</h2>
+                <i data-lucide="dollar-sign" class="w-6 h-6 text-white"></i>
+              </div>
+            </div>
+            
+            <div class="p-6">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                  <span class="text-gray-900">لا يوجد مشكلة</span>
+                </div>
+                <div class="text-right">
+                  <p class="text-lg font-bold text-gray-900">حالة الدفع عبر واتساب الأعمال</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      // تحقق من تسجيل الدخول
+      if (!localStorage.getItem('tchat_logged_in')) {
+        window.location.href = './login.html';
+      }
+
+      // تهيئة أيقونات Lucide
+      document.addEventListener('DOMContentLoaded', function() {
+        lucide.createIcons();
+      });
+
+      // تسجيل الخروج
+      function logout() {
+        localStorage.removeItem('tchat_logged_in');
+        localStorage.removeItem('tchat_user');
+        window.location.href = './login.html';
+      }
+    </script>
+  </body>
+</html>

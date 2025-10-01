@@ -8,101 +8,66 @@
     <link rel="stylesheet" href="./style.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   </head>
-  <body class="rtl bg-background min-h-screen">
-    <!-- Language Selector -->
-    <div class="absolute top-4 right-4">
-      <div class="bg-card rounded-lg border border-border px-3 py-2 flex items-center space-x-2 space-x-reverse">
-        <span class="text-body-sm text-muted-foreground">اللغة</span>
-        <div class="flex items-center space-x-1 space-x-reverse">
-          <div class="w-5 h-4 bg-green-600 rounded-sm flex items-center justify-center">
-            <span class="text-xs text-white font-bold">🇸🇦</span>
-          </div>
-          <span class="text-body-sm text-foreground">العربية</span>
-          <i data-lucide="chevron-down" class="w-4 h-4 text-muted-foreground"></i>
-        </div>
-      </div>
-    </div>
-
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-md w-full space-y-8">
-        <!-- Logo -->
-        <div class="text-center">
-          <div class="flex items-center justify-center mb-8">
-            <div class="flex items-center space-x-2 space-x-reverse">
-              <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <i data-lucide="message-circle" class="w-6 h-6 text-primary-foreground"></i>
-              </div>
-              <span class="text-2xl font-bold text-foreground">TChat</span>
-            </div>
-          </div>
-        </div>
+  <body class="rtl min-h-screen" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: 'LamaSans', sans-serif;">
+    
+    <div class="min-h-screen flex items-center justify-center py-12 px-4">
+      <div class="w-full max-w-sm">
+        <!-- Top Blue Line -->
+        <div class="w-full h-1 rounded-full mb-8" style="background: linear-gradient(to right, #4f46e5, #7c3aed);"></div>
         
         <!-- Login Form -->
-        <div class="bg-card rounded-xl shadow-sm p-8 border border-border">
-          <h2 class="text-center text-heading-lg text-foreground mb-8">تسجيل الدخول</h2>
+        <div class="bg-white/90 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/20">
+          <h1 class="text-center text-2xl font-bold text-gray-800 mb-8">تسجيل الدخول</h1>
           
           <form class="space-y-6" id="login-form">
-            <!-- Email Field -->
-            <div class="relative">
-              <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <i data-lucide="user" class="w-5 h-5 text-muted-foreground"></i>
+            <!-- Username Field -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2 text-right">اسم المستخدم</label>
+              <div class="relative">
+                <input
+                  id="username"
+                  type="text"
+                  required
+                  class="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 transition-all"
+                  placeholder="أدخل اسم المستخدم"
+                />
+                <i data-lucide="user" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></i>
               </div>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                class="w-full pl-3 pr-10 py-3 border border-input rounded-lg text-body-md bg-muted text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring focus:bg-card transition-colors"
-                placeholder="البريد الإلكتروني"
-              />
             </div>
             
             <!-- Password Field -->
-            <div class="relative">
-              <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <i data-lucide="eye" class="w-5 h-5 text-muted-foreground"></i>
-              </div>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                class="w-full pl-3 pr-10 py-3 border border-input rounded-lg text-body-md bg-muted text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring focus:bg-card transition-colors"
-                placeholder="كلمة المرور"
-              />
-            </div>
-
-            <!-- Remember Me & Forgot Password -->
-            <div class="flex items-center justify-between">
-              <div class="flex items-center">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2 text-right">كلمة المرور</label>
+              <div class="relative">
                 <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  id="password"
+                  type="password"
+                  required
+                  class="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 transition-all"
+                  placeholder="أدخل كلمة المرور"
                 />
-                <label for="remember-me" class="mr-2 block text-body-sm text-foreground">
-                  تذكرني
-                </label>
-              </div>
-              <div class="text-body-sm">
-                <a href="#" class="text-primary hover:text-primary-hover">
-                  هل نسيت كلمة المرور؟
-                </a>
+                <i data-lucide="lock" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></i>
               </div>
             </div>
 
             <!-- Login Button -->
-            <div>
-              <button
-                type="submit"
-                class="w-full py-3 px-4 bg-muted text-muted-foreground rounded-lg text-button-md font-medium hover:bg-muted/80 transition-colors disabled:opacity-50"
-                disabled
-              >
-                تسجيل الدخول
-              </button>
-            </div>
+            <button
+              type="submit"
+              class="w-full py-3 px-4 rounded-xl text-white font-medium transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);"
+              disabled
+            >
+              <span class="flex items-center justify-center">
+                <span>دخول</span>
+                <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
+              </span>
+            </button>
           </form>
+          
+          <!-- Footer -->
+          <div class="mt-8 text-center">
+            <p class="text-xs text-gray-500">© 2025 مناسبتي - جميع الحقوق محفوظة</p>
+          </div>
         </div>
       </div>
     </div>
@@ -116,12 +81,12 @@
         
         if (username.trim() && password.trim()) {
           submitBtn.disabled = false;
-          submitBtn.classList.remove('bg-muted', 'text-muted-foreground', 'hover:bg-muted/80');
-          submitBtn.classList.add('bg-indigo-600', 'text-white', 'hover:bg-indigo-700');
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
         } else {
           submitBtn.disabled = true;
-          submitBtn.classList.remove('bg-indigo-600', 'text-white', 'hover:bg-indigo-700');
-          submitBtn.classList.add('bg-muted', 'text-muted-foreground', 'hover:bg-muted/80');
+          submitBtn.style.opacity = '0.5';
+          submitBtn.style.cursor = 'not-allowed';
         }
       }
 
@@ -137,13 +102,13 @@
         const password = document.getElementById('password').value;
         
         // بيانات الدخول
-        if (username === 'admin' && password === 'tchat2024') {
+        if (username === 'admin' && password === 'admin') {
           // حفظ حالة تسجيل الدخول
           localStorage.setItem('tchat_logged_in', 'true');
           localStorage.setItem('tchat_user', username);
           
           // توجيه إلى لوحة التحكم
-          window.location.href = './index.html';
+          window.location.href = './dashboard.html';
         } else {
           alert('بيانات الدخول غير صحيحة!\n\nاسم المستخدم: admin\nكلمة المرور: tchat2024');
         }

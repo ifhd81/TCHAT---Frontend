@@ -525,6 +525,9 @@ html {
 body {
   background: linear-gradient(to bottom, #eef2ff 0%, #f8fafc 50%, #ffffff 100%) !important;
   min-height: 100vh;
+  font-family: 'LamaSans', 'Cairo', Arial, Helvetica, sans-serif;
+  direction: rtl;
+  font-variant-numeric: lining-nums;
 }
 
 .custom-pb {

@@ -7,20 +7,20 @@ if (!localStorage.getItem('tchat_logged_in')) {
 
 // إعداد التطبيق الأساسي مطابق للتصميم
 document.querySelector('#app').innerHTML = `
-  <div class="min-h-screen bg-background">
+  <div class="min-h-screen" style="background: linear-gradient(to bottom, #eef2ff 0%, #f8fafc 50%, #ffffff 100%)"
     <!-- Header -->
-    <header class="bg-card shadow-sm border-b border-border">
+    <header class="shadow-sm border-b border-gray-200" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);"
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center">
-            <h1 class="text-heading-lg text-foreground font-bold">TCHAT</h1>
-            <span class="mr-3 text-body-md text-muted-foreground">لوحة التحكم</span>
+            <h1 class="text-heading-lg font-bold" style="color: #1f2937;">TCHAT</h1>
+            <span class="mr-3 text-body-md" style="color: #6b7280;">لوحة التحكم</span>
           </div>
           <div class="flex items-center space-x-4 space-x-reverse">
-            <button id="refresh-btn" class="bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-button-sm hover:bg-primary/90 transition-colors">
+            <button id="refresh-btn" class="px-3 py-1.5 rounded-md text-button-sm transition-colors" style="background: #4f46e5; color: white;" onmouseover="this.style.background='#4338ca'" onmouseout="this.style.background='#4f46e5'">
               تحديث
             </button>
-            <button onclick="logout()" class="text-muted-foreground hover:text-foreground text-button-sm">
+            <button onclick="logout()" class="text-button-sm transition-colors" style="color: #6b7280;" onmouseover="this.style.color='#1f2937'" onmouseout="this.style.color='#6b7280'">
               خروج
             </button>
           </div>
@@ -30,8 +30,8 @@ document.querySelector('#app').innerHTML = `
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- جدول إجمالي الإيرادات -->
-      <div class="bg-card rounded-lg shadow-sm border border-border mb-8">
-        <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4 rounded-t-lg">
+      <div class="rounded-xl border shadow-sm mb-8" style="background: white; border-color: #e0e7ff; border-radius: 12px;">
+        <div class="p-4 rounded-t-xl" style="background: linear-gradient(to right, #4f46e5, #4338ca); color: white;">
           <h2 class="text-heading-md font-bold">إجمالي الإيرادات (SAR)</h2>
         </div>
         
@@ -55,8 +55,8 @@ document.querySelector('#app').innerHTML = `
       </div>
 
       <!-- جدول رقم الواتساب -->
-      <div class="bg-card rounded-lg shadow-sm border border-border">
-        <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4 rounded-t-lg">
+      <div class="rounded-xl border shadow-sm" style="background: white; border-color: #e0e7ff; border-radius: 12px;">
+        <div class="p-4 rounded-t-xl" style="background: linear-gradient(to right, #4f46e5, #4338ca); color: white;">
           <h2 class="text-heading-md font-bold">رقم الواتساب</h2>
         </div>
         

@@ -722,7 +722,7 @@
       content.innerHTML = `
         <div class="space-y-6">
           <!-- Stats Cards -->
-          <div class="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+          <div class="grid gap-4 md:grid-cols-3 lg:grid-cols-7">
             <div class="rounded-lg border bg-card p-4 text-center">
               <div class="text-heading-lg font-bold number">${campaign.total_recipients}</div>
               <div class="text-body-sm text-muted-foreground">إجمالي المستقبلين</div>
@@ -742,6 +742,10 @@
             <div class="rounded-lg border bg-card p-4 text-center">
               <div class="text-heading-lg font-bold text-warning number">${campaign.replied_count || 0}</div>
               <div class="text-body-sm text-muted-foreground">تم الرد عليها</div>
+            </div>
+            <div class="rounded-lg border bg-card p-4 text-center">
+              <div class="text-heading-lg font-bold text-purple-600 number">${campaign.clicked_count || 0}</div>
+              <div class="text-body-sm text-muted-foreground">نُقِر عليها</div>
             </div>
             <div class="rounded-lg border bg-card p-4 text-center">
               <div class="text-heading-lg font-bold text-destructive number">${campaign.failed_count}</div>
@@ -765,6 +769,7 @@
                     <th class="px-4 py-3 text-center">التسليم</th>
                     <th class="px-4 py-3 text-center">القراءة</th>
                     <th class="px-4 py-3 text-center">الرد</th>
+                    <th class="px-4 py-3 text-center">النقر</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-border">
@@ -798,10 +803,13 @@
                       <td class="px-4 py-3 text-center text-body-sm text-muted-foreground">
                         <span class="number">${recipient.replied_at ? new Date(recipient.replied_at).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'}) : '-'}</span>
                       </td>
+                      <td class="px-4 py-3 text-center text-body-sm text-muted-foreground">
+                        <span class="number">${recipient.clicked_at ? new Date(recipient.clicked_at).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'}) : '-'}</span>
+                      </td>
                     </tr>
                   `).join('') : `
                     <tr>
-                      <td colspan="7" class="h-32 text-center text-body-sm text-muted-foreground">
+                      <td colspan="8" class="h-32 text-center text-body-sm text-muted-foreground">
                         <div class="space-y-3">
                           <i data-lucide="users-x" class="h-8 w-8 mx-auto"></i>
                           <p>لا توجد مستقبلين في هذه الحملة</p>

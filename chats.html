@@ -290,7 +290,7 @@
                 ? 'bg-muted text-foreground' 
                 : 'bg-primary text-primary-foreground'
               }">
-                <p class="text-body-md">${message.content || 'رسالة غير نصية'}</p>
+                ${renderMessageContent(message)}
               </div>
               <div class="mt-1 px-2 text-body-sm text-muted-foreground ${isIncoming ? 'text-right' : 'text-left'}">
                 ${messageTime}
@@ -442,7 +442,7 @@
               ? 'bg-muted text-foreground' 
               : 'bg-primary text-primary-foreground'
             }">
-              <p class="text-body-md">${message.content || 'رسالة غير نصية'}</p>
+              ${renderMessageContent(message)}
             </div>
             <div class="mt-1 px-2 text-body-sm text-muted-foreground ${isIncoming ? 'text-right' : 'text-left'}">
               ${messageTime}
@@ -455,6 +455,176 @@
       messagesArea.insertAdjacentHTML('beforeend', messageHTML);
       messagesArea.scrollTop = messagesArea.scrollHeight;
       lucide.createIcons();
+    }
+
+    function renderMessageContent(message) {
+      const content = message.content || '';
+      const type = message.message_type || 'text';
+      const mediaId = message.media_id || '';
+      const mediaUrl = message.media_url || '';
+      
+      switch (type) {
+        case 'text':
+          return `<p class="text-body-md">${content}</p>`;
+          
+        case 'image':
+          return `
+            <div class="space-y-3">
+              ${mediaId ? `
+                <div class="rounded-lg overflow-hidden border border-border bg-muted/20">
+                  <img 
+                    src="https://graph.facebook.com/v22.0/${mediaId}" 
+                    alt="صورة مرسلة"
+                    class="w-full h-auto max-h-64 object-cover cursor-pointer"
+                    onclick="openImageModal('https://graph.facebook.com/v22.0/${mediaId}')"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
+                  />
+                  <div class="hidden items-center justify-center p-8 text-muted-foreground">
+                    <div class="text-center space-y-2">
+                      <i data-lucide="image-off" class="h-8 w-8 mx-auto"></i>
+                      <p class="text-body-sm">لا يمكن عرض الصورة</p>
+                    </div>
+                  </div>
+                </div>
+              ` : `
+                <div class="flex items-center gap-2 text-body-sm">
+                  <i data-lucide="image" class="h-4 w-4"></i>
+                  <span>صورة</span>
+                </div>
+              `}
+              ${content && content !== 'تم إرسال صورة' ? `<p class="text-body-md">${content}</p>` : ''}
+            </div>
+          `;
+          
+        case 'audio':
+        case 'voice':
+          return `
+            <div class="space-y-3">
+              ${mediaId ? `
+                <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/20 border border-border">
+                  <button 
+                    onclick="toggleAudio('${mediaId}')" 
+                    class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition"
+                  >
+                    <i data-lucide="play" class="h-4 w-4" id="play-icon-${mediaId}"></i>
+                  </button>
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 text-body-sm">
+                      <i data-lucide="${type === 'voice' ? 'mic' : 'headphones'}" class="h-4 w-4"></i>
+                      <span>${type === 'voice' ? 'تسجيل صوتي' : 'رسالة صوتية'}</span>
+                    </div>
+                    <div class="text-body-xs text-muted-foreground mt-1">اضغط للتشغيل</div>
+                  </div>
+                  <audio id="audio-${mediaId}" class="hidden">
+                    <source src="https://graph.facebook.com/v22.0/${mediaId}" type="audio/ogg">
+                    <source src="https://graph.facebook.com/v22.0/${mediaId}" type="audio/mpeg">
+                  </audio>
+                </div>
+              ` : `
+                <div class="flex items-center gap-2 text-body-sm">
+                  <i data-lucide="${type === 'voice' ? 'mic' : 'headphones'}" class="h-4 w-4"></i>
+                  <span>${type === 'voice' ? 'تسجيل صوتي' : 'رسالة صوتية'}</span>
+                </div>
+              `}
+            </div>
+          `;
+          
+        case 'document':
+          return `
+            <div class="space-y-2">
+              <div class="flex items-center gap-2 text-body-sm">
+                <i data-lucide="file-text" class="h-4 w-4"></i>
+                <span>مستند</span>
+              </div>
+              <p class="text-body-md">${content}</p>
+              ${mediaId ? `
+                <a 
+                  href="https://graph.facebook.com/v22.0/${mediaId}" 
+                  target="_blank"
+                  class="inline-flex items-center gap-2 text-body-sm text-primary hover:text-primary/80"
+                >
+                  <i data-lucide="download" class="h-3 w-3"></i>
+                  <span>تحميل المستند</span>
+                </a>
+              ` : ''}
+            </div>
+          `;
+          
+        case 'video':
+          return `
+            <div class="space-y-3">
+              ${mediaId ? `
+                <div class="rounded-lg overflow-hidden border border-border bg-muted/20">
+                  <video 
+                    controls 
+                    class="w-full h-auto max-h-64"
+                    preload="metadata"
+                  >
+                    <source src="https://graph.facebook.com/v22.0/${mediaId}" type="video/mp4">
+                    متصفحك لا يدعم تشغيل الفيديو
+                  </video>
+                </div>
+              ` : `
+                <div class="flex items-center gap-2 text-body-sm">
+                  <i data-lucide="video" class="h-4 w-4"></i>
+                  <span>فيديو</span>
+                </div>
+              `}
+              ${content && content !== 'تم إرسال فيديو' ? `<p class="text-body-md">${content}</p>` : ''}
+            </div>
+          `;
+          
+        default:
+          return `
+            <div class="flex items-center gap-2 text-body-sm">
+              <i data-lucide="help-circle" class="h-4 w-4"></i>
+              <span>${content || 'رسالة غير مدعومة'}</span>
+            </div>
+          `;
+      }
+    }
+
+    function toggleAudio(mediaId) {
+      const audio = document.getElementById(`audio-${mediaId}`);
+      const playIcon = document.getElementById(`play-icon-${mediaId}`);
+      
+      if (!audio) return;
+      
+      if (audio.paused) {
+        audio.play();
+        playIcon.setAttribute('data-lucide', 'pause');
+      } else {
+        audio.pause();
+        playIcon.setAttribute('data-lucide', 'play');
+      }
+      
+      lucide.createIcons();
+    }
+
+    function openImageModal(imageSrc) {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm';
+      modal.innerHTML = `
+        <div class="relative max-w-4xl max-h-[90vh] p-4">
+          <button 
+            onclick="this.parentElement.parentElement.remove()" 
+            class="absolute -top-2 -right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-background border border-border text-muted-foreground hover:text-foreground"
+          >
+            <i data-lucide="x" class="h-4 w-4"></i>
+          </button>
+          <img src="${imageSrc}" alt="صورة مكبرة" class="max-w-full max-h-full rounded-lg shadow-lg" />
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      lucide.createIcons();
+      
+      // إغلاق عند النقر خارج الصورة
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.remove();
+        }
+      });
     }
 
     function handleKeyPress(event) {

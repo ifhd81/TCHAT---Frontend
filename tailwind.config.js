@@ -7,50 +7,91 @@ export default {
   ],
   theme: {
     extend: {
+      borderRadius: {
+        lg: "0.3rem",
+        "2xl": "0.5rem",
+      },
       fontFamily: {
-        'lamasans': ['LamaSans', 'Cairo', 'Arial', 'Helvetica', 'sans-serif'],
+        sans: ["LamaSans", "ui-sans-serif", "system-ui", "sans-serif"],
+        lama: ["LamaSans", "ui-sans-serif", "system-ui", "sans-serif"],
+      },
+      fontWeight: {
+        bold: "800",
+        medium: "600",
       },
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        // Neutral Colors
+        neutral: {
+          50: "#f4f5f6",
+          100: "#f3f4f6", 
+          200: "#e5e7eb",
+          300: "#d1d5db",
+          400: "#9ca3af",
+          500: "#6b7280",
+          600: "#595b5d",
+          700: "#374151",
+          800: "#1f2937",
+          900: "#111827",
+        },
+        // Primary Colors (Green)
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          main: "#2e9066",
+          surface: "#f2f6f4",
+          focus: "#e4ede9",
+          border: "#d7e4de",
+          hover: "#1d7650",
+          pressed: "#103525",
+          DEFAULT: "#2e9066",
+          foreground: "#ffffff",
         },
+        // Secondary Colors (Orange)
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          main: "#ff9d18",
+          surface: "#fff5e8",
+          focus: "#ffebd1",
+          border: "#ffd8a3",
+          hover: "#e58400",
+          pressed: "#aa6910",
+          DEFAULT: "#ff9d18",
+          foreground: "#ffffff",
         },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
+        // Legacy support
+        sec: "#2e9066",
+        hover: "#1d7650",
+        iconsbg: "#f2f6f4",
+        dark: "#111827",
+        white: "white",
+        background: "#f4f5f6",
+        pageBg: "#f4f5f6",
+        foreground: "#111827",
+        error: "#ef4444",
+        success: "#10b981",
+        // Shadcn/ui color system
+        border: "#e5e7eb",
+        input: "#e5e7eb",
+        ring: "#2e9066",
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "#f3f4f6",
+          foreground: "#6b7280",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "#f3f4f6",
+          foreground: "#111827",
         },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+        destructive: {
+          DEFAULT: "#ef4444",
+          foreground: "#ffffff",
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+          DEFAULT: "#ffffff",
+          foreground: "#111827",
         },
-      },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        popover: {
+          DEFAULT: "#ffffff",
+          foreground: "#111827",
+        },
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-rtl")],
 }

@@ -8,65 +8,63 @@
     <link rel="stylesheet" href="./style.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   </head>
-  <body class="rtl min-h-screen" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: 'LamaSans', sans-serif;">
+  <body class="rtl min-h-screen" style="background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 50%, #ffffff 100%); font-family: 'LamaSans', sans-serif;">
     
     <div class="min-h-screen flex items-center justify-center py-12 px-4">
-      <div class="w-full max-w-sm">
+      <div class="w-full max-w-md">
         <!-- Top Blue Line -->
         <div class="w-full h-1 rounded-full mb-8" style="background: linear-gradient(to right, #4f46e5, #7c3aed);"></div>
         
         <!-- Login Form -->
-        <div class="bg-white/90 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/20">
-          <h1 class="text-center text-2xl font-bold text-gray-800 mb-8">تسجيل الدخول</h1>
+        <div class="bg-white/95 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-gray-200">
+          <h1 class="text-center text-heading-lg font-bold text-gray-800 mb-8">تسجيل الدخول</h1>
           
           <form class="space-y-6" id="login-form">
             <!-- Username Field -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2 text-right">اسم المستخدم</label>
+              <label class="block text-body-md font-medium text-gray-700 mb-2 text-right">اسم المستخدم</label>
               <div class="relative">
                 <input
                   id="username"
                   type="text"
                   required
-                  class="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 transition-all"
+                  class="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg text-body-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 transition-all"
                   placeholder="أدخل اسم المستخدم"
                 />
-                <i data-lucide="user" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                <i data-lucide="user" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
               </div>
             </div>
             
             <!-- Password Field -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2 text-right">كلمة المرور</label>
+              <label class="block text-body-md font-medium text-gray-700 mb-2 text-right">كلمة المرور</label>
               <div class="relative">
                 <input
                   id="password"
                   type="password"
                   required
-                  class="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 transition-all"
+                  class="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg text-body-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 transition-all"
                   placeholder="أدخل كلمة المرور"
                 />
-                <i data-lucide="lock" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                <i data-lucide="lock" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
               </div>
             </div>
 
             <!-- Login Button -->
             <button
               type="submit"
-              class="w-full py-3 px-4 rounded-xl text-white font-medium transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              class="w-full flex items-center justify-center py-3 px-4 rounded-xl text-white font-medium transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);"
               disabled
             >
-              <span class="flex items-center justify-center">
-                <span>دخول</span>
-                <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
-              </span>
+              <span class="text-button-md">دخول</span>
+              <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
             </button>
           </form>
           
           <!-- Footer -->
           <div class="mt-8 text-center">
-            <p class="text-xs text-gray-500">© 2025 مناسبتي - جميع الحقوق محفوظة</p>
+            <p class="text-body-sm text-gray-500">© 2025 مناسبتي - جميع الحقوق محفوظة</p>
           </div>
         </div>
       </div>
@@ -102,7 +100,7 @@
         const password = document.getElementById('password').value;
         
         // بيانات الدخول
-        if (username === 'admin' && password === 'tchat2024') {
+        if (username === 'admin' && password === 'admin') {
           // حفظ حالة تسجيل الدخول
           localStorage.setItem('tchat_logged_in', 'true');
           localStorage.setItem('tchat_user', username);
@@ -110,7 +108,17 @@
           // توجيه إلى لوحة التحكم
           window.location.href = './dashboard.html';
         } else {
-          alert('بيانات الدخول غير صحيحة!\n\nاسم المستخدم: admin\nكلمة المرور: tchat2024');
+          // إعادة تعيين النموذج بصمت
+          document.getElementById('username').value = '';
+          document.getElementById('password').value = '';
+          toggleLoginButton();
+          
+          // إضافة تأثير اهتزاز بسيط للنموذج
+          const form = document.getElementById('login-form');
+          form.style.animation = 'shake 0.5s ease-in-out';
+          setTimeout(() => {
+            form.style.animation = '';
+          }, 500);
         }
       });
 

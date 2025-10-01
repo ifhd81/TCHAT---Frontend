@@ -43,6 +43,13 @@
   animation: slide-up 0.3s ease-out;
 }
 
+/* Animation للاهتزاز عند خطأ تسجيل الدخول */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
 /* تخصيص خط إشعارات Sonner */
 [data-sonner-toaster] [data-sonner-toast] {
   font-family: 'LamaSans', ui-sans-serif, system-ui, sans-serif !important;
@@ -57,7 +64,7 @@
   font-family: 'LamaSans', ui-sans-serif, system-ui, sans-serif !important;
 }
 
-/* نظام أحجام الخطوط المخصص */
+/* نظام أحجام الخطوط المصغر - الحد الأقصى 24px */
 .text-heading-xl {
   font-size: 24px;
   line-height: 1.3;
@@ -65,55 +72,55 @@
 }
 
 .text-heading-lg {
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1.3;
   font-weight: 700 !important;
 }
 
 .text-heading-md {
-  font-size: 20px;
-  line-height: 1.4;
-  font-weight: 700 !important;
-}
-
-.text-heading-sm {
   font-size: 18px;
   line-height: 1.4;
   font-weight: 700 !important;
 }
 
-.text-body-lg {
+.text-heading-sm {
   font-size: 16px;
+  line-height: 1.4;
+  font-weight: 700 !important;
+}
+
+.text-body-lg {
+  font-size: 14px;
   line-height: 1.5;
   font-weight: 400 !important;
 }
 
 .text-body-md {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
   font-weight: 400 !important;
 }
 
 .text-body-sm {
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1.4;
   font-weight: 400 !important;
 }
 
 .text-button-lg {
-  font-size: 16px;
-  line-height: 1.2;
-  font-weight: 600 !important;
-}
-
-.text-button-md {
   font-size: 14px;
   line-height: 1.2;
   font-weight: 600 !important;
 }
 
+.text-button-md {
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 600 !important;
+}
+
 .text-button-sm {
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1.2;
   font-weight: 500 !important;
 }
@@ -126,37 +133,37 @@
 }
 
 .text-heading-lg-bold {
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1.3;
   font-weight: 800 !important;
 }
 
 .text-heading-md-bold {
-  font-size: 20px;
-  line-height: 1.4;
-  font-weight: 800 !important;
-}
-
-.text-heading-sm-bold {
   font-size: 18px;
   line-height: 1.4;
   font-weight: 800 !important;
 }
 
-.text-body-lg-bold {
+.text-heading-sm-bold {
   font-size: 16px;
-  line-height: 1.5;
-  font-weight: 700 !important;
+  line-height: 1.4;
+  font-weight: 800 !important;
 }
 
-.text-body-md-bold {
+.text-body-lg-bold {
   font-size: 14px;
   line-height: 1.5;
   font-weight: 700 !important;
 }
 
+.text-body-md-bold {
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 700 !important;
+}
+
 .text-body-sm-bold {
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1.4;
   font-weight: 700 !important;
 }

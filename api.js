@@ -76,15 +76,11 @@ async function loadWhatsAppStats() {
 // بيانات افتراضية لـ WhatsApp
 function getDefaultWhatsAppStats() {
   return {
-    phone_number: '966533934546',
-    display_name: 'مناسبتي',
-    status: 'متصل',
-    quality_rating: 'مرتفع',
-    daily_limit: 1000,
-    messages_sent: 0,
-    messages_read: 0,
-    messages_delivered: 0,
-    messages_failed: 0
+    display_phone_number: '966533934546',
+    verified_name: 'مناسبتي',
+    code_verification_status: 'VERIFIED',
+    quality_rating: 'GREEN',
+    throughput_level: 'STANDARD'
   };
 }
 

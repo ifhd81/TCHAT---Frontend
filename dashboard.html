@@ -239,16 +239,16 @@
                 }
               </td>
               <td class="px-6 py-4 text-right">
-                <span class="font-mono text-body-lg font-bold text-gray-900">${item.total_revenue.toLocaleString('ar-SA', {minimumFractionDigits: 2})}</span>
+                <span class="font-mono text-body-lg font-bold text-gray-900 number">${item.total_revenue.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
               </td>
               <td class="px-6 py-4 text-right">
-                <span class="font-mono text-body-md text-gray-900">${item.last_30_days.toLocaleString('ar-SA', {minimumFractionDigits: 2})}</span>
+                <span class="font-mono text-body-md text-gray-900 number">${item.last_30_days.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
               </td>
               <td class="px-6 py-4 text-right">
-                <span class="font-mono text-body-md text-gray-900">${item.previous_30_days.toLocaleString('ar-SA', {minimumFractionDigits: 2})}</span>
+                <span class="font-mono text-body-md text-gray-900 number">${item.previous_30_days.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
               </td>
               <td class="px-6 py-4 text-right">
-                <span class="text-body-lg font-bold text-gray-900">${item.attributed_orders}</span>
+                <span class="text-body-lg font-bold text-gray-900 number">${item.attributed_orders}</span>
               </td>
             </tr>
           `;
@@ -263,7 +263,7 @@
         tbody.innerHTML = `
           <tr class="border-t border-gray-200 hover:bg-gray-50">
             <td class="px-6 py-4 text-center">
-              <span class="font-mono text-gray-900">${stats.phone_number}</span>
+              <span class="font-mono text-gray-900 number">${stats.phone_number}</span>
             </td>
             <td class="px-6 py-4 text-center">
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -277,7 +277,7 @@
             </td>
             <td class="px-6 py-4 text-center">
               <div class="flex items-center justify-center space-x-2 space-x-reverse">
-                <span class="font-mono text-gray-900">${stats.daily_limit.toLocaleString('ar-SA')}</span>
+                <span class="font-mono text-gray-900 number">${stats.daily_limit.toLocaleString('en-US')}</span>
                 <i data-lucide="trending-up" class="w-4 h-4 text-blue-500"></i>
               </div>
             </td>

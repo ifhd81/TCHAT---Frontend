@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TCHAT - العملاء</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="./api.js"></script>
+</head>
+<body class="rtl min-h-screen bg-background" style="font-family: 'LamaSans', sans-serif;">
+  <header class="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div class="container mx-auto flex h-16 items-center justify-between px-4">
+      <div class="flex items-center gap-2">
+        <a href="./dashboard.html" class="inline-flex items-center gap-2 text-body-sm font-medium text-muted-foreground transition hover:text-foreground">
+          <i data-lucide="arrow-right" class="h-4 w-4"></i>
+          <span>العودة إلى اللوحة</span>
+        </a>
+      </div>
+      <span class="text-heading-md font-bold">العملاء</span>
+      <button onclick="logout()" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+        <i data-lucide="log-out" class="ml-2 h-4 w-4"></i>
+        <span class="text-body-md">تسجيل الخروج</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-8">
+    <section class="mb-6 flex items-center justify-between">
+      <div>
+        <h1 class="text-heading-lg font-bold text-foreground">جميع العملاء</h1>
+        <p class="text-body-sm text-muted-foreground">عرض آخر العملاء المسجلين في النظام</p>
+      </div>
+      <div></div>
+    </section>
+
+    <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
+      <div class="border-b border-border p-6">
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div class="flex items-center gap-3">
+            <i data-lucide="users" class="h-5 w-5 text-muted-foreground"></i>
+            <h2 class="text-heading-md font-semibold">قائمة العملاء</h2>
+          </div>
+          <p class="text-body-sm text-muted-foreground">يتم استعراض آخر العملاء المضافين إلى النظام. استخدم التحكم أسفل الجدول لتغيير عدد السجلات.</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full caption-bottom text-sm">
+          <thead class="bg-muted/50">
+            <tr class="border-b text-right text-body-sm font-semibold text-muted-foreground">
+              <th class="px-4 py-3">الاسم</th>
+              <th class="px-4 py-3">البريد</th>
+              <th class="px-4 py-3">الجوال</th>
+              <th class="px-4 py-3">منذ</th>
+            </tr>
+          </thead>
+          <tbody id="customers-table-body" class="divide-y divide-border">
+            <tr>
+              <td colspan="4" class="h-24 text-center text-body-sm text-muted-foreground">جاري التحميل...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between gap-4 border-t border-border px-6 py-4">
+        <div class="flex items-center gap-4 text-body-sm text-muted-foreground">
+          <div class="flex items-center gap-2 whitespace-nowrap">
+            <span>عدد السجلات</span>
+            <select id="limit-select" class="rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+          <div class="whitespace-nowrap">صفحة <span id="current-page">1</span> من <span id="total-pages">1</span></div>
+        </div>
+        <div class="flex items-center gap-2 sm:justify-end">
+          <button id="prev-page" class="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium text-muted-foreground transition-colors disabled:opacity-40 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" disabled>
+            <i data-lucide="chevron-right" class="h-4 w-4"></i>
+            <span>السابق</span>
+          </button>
+          <button id="next-page" class="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium text-muted-foreground transition-colors disabled:opacity-40 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+            <span>التالي</span>
+            <i data-lucide="chevron-left" class="h-4 w-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    if (!localStorage.getItem('tchat_logged_in')) {
+      window.location.href = './login.html';
+    }
+
+    let allCustomers = [];
+    let currentPage = 1;
+    let limit = 50;
+
+    const timeAgo = (value) => {
+      if (!value) return '-';
+      const date = new Date(value);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffMins < 1) return 'الآن';
+      if (diffMins < 60) return `منذ ${diffMins} دقيقة`;
+      if (diffHours < 24) return `منذ ${diffHours} ساعة`;
+      return `منذ ${diffDays} يوم`;
+    };
+
+    const formatNumber = (value) => {
+      if (!value) return '-';
+      const clean = String(value).replace(/[^0-9]/g, '');
+      if (!clean) return '-';
+      return clean;
+    };
+
+    function updatePaginationInfo() {
+      const total = allCustomers.length;
+      const totalPages = Math.max(1, Math.ceil(total / limit));
+      currentPage = Math.min(currentPage, totalPages);
+
+      const startIndex = (currentPage - 1) * limit;
+      const endIndex = Math.min(startIndex + limit, total);
+
+      document.getElementById('current-page').textContent = totalPages ? currentPage : 0;
+      document.getElementById('total-pages').textContent = totalPages;
+
+      document.getElementById('customers-total').textContent = new Intl.NumberFormat('en-US').format(total);
+
+      document.getElementById('prev-page').disabled = currentPage <= 1;
+      document.getElementById('next-page').disabled = currentPage >= totalPages;
+    }
+
+    function renderCustomersPage() {
+      const tbody = document.getElementById('customers-table-body');
+
+      if (!allCustomers.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="h-24 text-center text-body-sm text-muted-foreground">لا توجد بيانات عملاء</td></tr>';
+        updatePaginationInfo();
+        return;
+      }
+
+      const startIndex = (currentPage - 1) * limit;
+      const endIndex = Math.min(startIndex + limit, allCustomers.length);
+      const pageCustomers = allCustomers.slice(startIndex, endIndex);
+
+      tbody.innerHTML = pageCustomers.map((customer) => {
+        const email = customer.email || 'غير محدد';
+        const phone = formatNumber(customer.mobile || customer.phone);
+        const createdAgo = timeAgo(customer.created_at);
+        const sallaId = formatNumber(customer.salla_customer_id);
+
+        return `
+          <tr class="hover:bg-muted/40 transition-colors">
+            <td class="px-4 py-3">
+              <div class="flex items-center justify-start gap-3">
+                <div class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
+                  <span class="flex h-full w-full items-center justify-center bg-primary text-primary-foreground text-body-sm font-semibold">
+                    ${customer.name ? customer.name.charAt(0).toUpperCase() : '؟'}
+                  </span>
+                </div>
+                <div class="space-y-1 text-right">
+                  <div class="text-body-md font-semibold text-foreground">${customer.name || 'بدون اسم'}</div>
+                  <div class="text-body-sm text-muted-foreground">
+                    <span>رقم سلة:</span>
+                    <span class="number">${sallaId}</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-body-sm text-muted-foreground">${email}</td>
+            <td class="px-4 py-3 text-body-sm text-muted-foreground number">${phone}</td>
+            <td class="px-4 py-3 text-body-sm text-muted-foreground">${createdAgo}</td>
+          </tr>
+        `;
+      }).join('');
+
+      updatePaginationInfo();
+    }
+
+    function renderCustomers(customers) {
+      allCustomers = customers;
+      currentPage = 1;
+      renderCustomersPage();
+    }
+
+    async function loadAndRenderCustomers(newLimit = 50) {
+      const tbody = document.getElementById('customers-table-body');
+      tbody.innerHTML = '<tr><td colspan="4" class="h-24 text-center text-body-sm text-muted-foreground">جاري التحميل...</td></tr>';
+
+      limit = newLimit;
+      const customers = await loadCustomers(200);
+      renderCustomers(customers);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      const limitSelect = document.getElementById('limit-select');
+      const prevBtn = document.getElementById('prev-page');
+      const nextBtn = document.getElementById('next-page');
+
+      limitSelect.addEventListener('change', () => {
+        loadAndRenderCustomers(Number(limitSelect.value));
+      });
+
+      prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderCustomersPage();
+        }
+      });
+
+      nextBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(allCustomers.length / limit);
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderCustomersPage();
+        }
+      });
+
+      loadAndRenderCustomers(Number(limitSelect.value));
+    });
+
+    function logout() {
+      localStorage.removeItem('tchat_logged_in');
+      localStorage.removeItem('tchat_user');
+      localStorage.removeItem('tchat_token');
+      window.location.href = './login.html';
+    }
+  </script>
+</body>
+</html>

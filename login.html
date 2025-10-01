@@ -93,32 +93,79 @@
       document.getElementById('password').addEventListener('input', toggleLoginButton);
 
       // معالج تسجيل الدخول
-      document.getElementById('login-form').addEventListener('submit', function(e) {
+      document.getElementById('login-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         
-        // بيانات الدخول
-        if (username === 'admin' && password === 'admin') {
-          // حفظ حالة تسجيل الدخول
-          localStorage.setItem('tchat_logged_in', 'true');
-          localStorage.setItem('tchat_user', username);
+        const submitBtn = document.querySelector('button[type="submit"]');
+        
+        // تعطيل الزر أثناء المعالجة
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="text-button-md">جاري التحقق...</span>';
+        
+        try {
+          // إرسال طلب تسجيل الدخول إلى Backend
+          const response = await fetch('https://tchat-production.up.railway.app/api/v1/auth/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username: username,
+              password: password
+            })
+          });
           
-          // توجيه إلى لوحة التحكم
-          window.location.href = './dashboard.html';
-        } else {
-          // إعادة تعيين النموذج بصمت
-          document.getElementById('username').value = '';
-          document.getElementById('password').value = '';
-          toggleLoginButton();
+          const data = await response.json();
           
-          // إضافة تأثير اهتزاز بسيط للنموذج
-          const form = document.getElementById('login-form');
-          form.style.animation = 'shake 0.5s ease-in-out';
-          setTimeout(() => {
-            form.style.animation = '';
-          }, 500);
+          if (data.success) {
+            // حفظ بيانات المستخدم والـ token
+            localStorage.setItem('tchat_logged_in', 'true');
+            localStorage.setItem('tchat_user', JSON.stringify(data.user));
+            localStorage.setItem('tchat_token', data.token);
+            
+            // توجيه إلى لوحة التحكم
+            window.location.href = './dashboard.html';
+          } else {
+            // إعادة تعيين النموذج عند الفشل
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            toggleLoginButton();
+            
+            // إضافة تأثير اهتزاز
+            const form = document.getElementById('login-form');
+            form.style.animation = 'shake 0.5s ease-in-out';
+            setTimeout(() => {
+              form.style.animation = '';
+            }, 500);
+          }
+        } catch (error) {
+          console.error('خطأ في تسجيل الدخول:', error);
+          
+          // في حالة عدم الاتصال، استخدم التحقق المحلي
+          if (username === 'admin' && password === 'admin') {
+            localStorage.setItem('tchat_logged_in', 'true');
+            localStorage.setItem('tchat_user', JSON.stringify({
+              username: 'admin',
+              full_name: 'المدير العام',
+              email: 'admin@tchat.com'
+            }));
+            window.location.href = './dashboard.html';
+          } else {
+            // تأثير اهتزاز عند الخطأ
+            const form = document.getElementById('login-form');
+            form.style.animation = 'shake 0.5s ease-in-out';
+            setTimeout(() => {
+              form.style.animation = '';
+            }, 500);
+          }
+        } finally {
+          // إعادة تفعيل الزر
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span class="text-button-md">دخول</span><i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>';
+          lucide.createIcons();
         }
       });
 

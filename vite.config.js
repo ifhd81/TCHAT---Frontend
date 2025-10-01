@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
+import { copyFileSync, mkdirSync } from 'fs'
 
 export default defineConfig({
   server: {
@@ -33,5 +34,19 @@ export default defineConfig({
         manualChunks: undefined
       }
     }
-  }
+  },
+  plugins: [
+    {
+      name: 'copy-api-js',
+      closeBundle() {
+        try {
+          mkdirSync('dist', { recursive: true });
+          copyFileSync('api.js', 'dist/api.js');
+          console.log('✓ Copied api.js to dist/');
+        } catch (err) {
+          console.error('Error copying api.js:', err);
+        }
+      }
+    }
+  ]
 })

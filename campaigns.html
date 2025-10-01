@@ -137,12 +137,37 @@
                 <label class="text-body-sm font-medium">مصدر البيانات</label>
                 <select id="recipients-source" onchange="handleRecipientsSourceChange()" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <option value="database">العملاء المسجلين</option>
+                  <option value="manual">إدخال يدوي</option>
                   <option value="csv">رفع ملف CSV</option>
                 </select>
               </div>
               <div class="space-y-2" id="csv-upload-section" style="display: none;">
                 <label class="text-body-sm font-medium">ملف CSV</label>
                 <input type="file" id="csv-file" accept=".csv" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+              </div>
+            </div>
+
+            <!-- Manual Input Section -->
+            <div id="manual-input-section" class="space-y-4" style="display: none;">
+              <div class="space-y-2">
+                <label class="text-body-sm font-medium">أرقام الهواتف والأسماء</label>
+                <textarea 
+                  id="manual-recipients" 
+                  placeholder="أدخل الأرقام والأسماء بالتنسيق التالي:&#10;966501234567,أحمد محمد&#10;966509876543,فاطمة علي&#10;966555555555,خالد السعيد&#10;&#10;أو أرقام فقط (سطر واحد لكل رقم):&#10;966501234567&#10;966509876543"
+                  rows="8" 
+                  class="flex min-h-[160px] w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-mono"
+                  oninput="parseManualRecipients()"
+                ></textarea>
+              </div>
+              <div class="flex items-center gap-4 text-body-sm text-muted-foreground">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="info" class="h-4 w-4"></i>
+                  <span>التنسيق: رقم الهاتف,الاسم (اختياري)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>عدد الأرقام المدخلة:</span>
+                  <span id="manual-count" class="font-semibold number">0</span>
+                </div>
               </div>
             </div>
 
@@ -412,16 +437,105 @@
     function handleRecipientsSourceChange() {
       const source = document.getElementById('recipients-source').value;
       const csvSection = document.getElementById('csv-upload-section');
+      const manualSection = document.getElementById('manual-input-section');
+      
+      // إخفاء جميع الأقسام أولاً
+      csvSection.style.display = 'none';
+      manualSection.style.display = 'none';
       
       if (source === 'csv') {
         csvSection.style.display = 'block';
+      } else if (source === 'manual') {
+        manualSection.style.display = 'block';
+        parseManualRecipients(); // تحديث العداد
       } else {
-        csvSection.style.display = 'none';
         loadRecipientsPreview();
       }
     }
 
-    // معاينة المستقبلين
+    // تحليل المستقبلين من الإدخال اليدوي
+    function parseManualRecipients() {
+      const manualText = document.getElementById('manual-recipients').value.trim();
+      const countEl = document.getElementById('manual-count');
+      
+      if (!manualText) {
+        selectedRecipients = [];
+        countEl.textContent = '0';
+        updateRecipientsPreview();
+        return;
+      }
+
+      const lines = manualText.split('\n').filter(line => line.trim());
+      selectedRecipients = [];
+
+      lines.forEach((line, index) => {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) return;
+
+        // تنظيف الرقم من المسافات والرموز
+        const cleanLine = trimmedLine.replace(/[\s\-\+]/g, '');
+        
+        if (cleanLine.includes(',')) {
+          // تنسيق: رقم,اسم
+          const [phone, name] = cleanLine.split(',').map(part => part.trim());
+          if (phone && /^966\d{9}$/.test(phone)) {
+            selectedRecipients.push({
+              customer_id: 0,
+              phone_number: phone,
+              customer_name: name || `عميل ${phone.slice(-4)}`
+            });
+          }
+        } else {
+          // رقم فقط
+          if (/^966\d{9}$/.test(cleanLine)) {
+            selectedRecipients.push({
+              customer_id: 0,
+              phone_number: cleanLine,
+              customer_name: `عميل ${cleanLine.slice(-4)}`
+            });
+          }
+        }
+      });
+
+      countEl.textContent = selectedRecipients.length;
+      updateRecipientsPreview();
+      updateBatchPreview();
+    }
+
+    // تحديث معاينة المستقبلين
+    function updateRecipientsPreview() {
+      const previewEl = document.getElementById('recipients-preview');
+      
+      if (selectedRecipients.length === 0) {
+        previewEl.innerHTML = `
+          <div class="text-center text-body-sm text-muted-foreground">
+            <i data-lucide="users" class="h-8 w-8 mx-auto mb-2"></i>
+            <p>لا توجد أرقام صحيحة</p>
+          </div>
+        `;
+        return;
+      }
+
+      previewEl.innerHTML = `
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-body-md font-semibold">المستقبلين المحددين</h4>
+            <span class="text-body-sm text-muted-foreground">${selectedRecipients.length} مستقبل</span>
+          </div>
+          <div class="grid gap-2 max-h-32 overflow-y-auto">
+            ${selectedRecipients.slice(0, 5).map(r => `
+              <div class="flex items-center justify-between text-body-sm">
+                <span>${r.customer_name}</span>
+                <span class="number">${r.phone_number}</span>
+              </div>
+            `).join('')}
+            ${selectedRecipients.length > 5 ? `<div class="text-center text-body-xs text-muted-foreground">و ${selectedRecipients.length - 5} مستقبل آخر...</div>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    // معاينة المستقبلين من قاعدة البيانات
     async function loadRecipientsPreview() {
       const previewEl = document.getElementById('recipients-preview');
       const source = document.getElementById('recipients-source').value;
@@ -435,26 +549,17 @@
             customer_name: customer.name
           })).filter(r => r.phone_number);
 
-          previewEl.innerHTML = `
-            <div class="space-y-3">
-              <div class="flex items-center justify-between">
-                <h4 class="text-body-md font-semibold">العملاء من قاعدة البيانات</h4>
-                <span class="text-body-sm text-muted-foreground">${selectedRecipients.length} عميل</span>
-              </div>
-              <div class="grid gap-2 max-h-32 overflow-y-auto">
-                ${selectedRecipients.slice(0, 5).map(r => `
-                  <div class="flex items-center justify-between text-body-sm">
-                    <span>${r.customer_name}</span>
-                    <span class="number">${r.phone_number}</span>
-                  </div>
-                `).join('')}
-                ${selectedRecipients.length > 5 ? `<div class="text-center text-body-xs text-muted-foreground">و ${selectedRecipients.length - 5} عميل آخر...</div>` : ''}
-              </div>
-            </div>
-          `;
+          updateRecipientsPreview();
         } catch (error) {
           previewEl.innerHTML = '<div class="text-center text-destructive text-body-sm">تعذر تحميل العملاء</div>';
         }
+      } else {
+        previewEl.innerHTML = `
+          <div class="text-center text-body-sm text-muted-foreground">
+            <i data-lucide="users" class="h-8 w-8 mx-auto mb-2"></i>
+            <p>سيتم عرض المستقبلين هنا</p>
+          </div>
+        `;
       }
       
       updateBatchPreview();

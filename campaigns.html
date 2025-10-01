@@ -56,9 +56,15 @@
             <i data-lucide="megaphone" class="h-5 w-5 text-muted-foreground"></i>
             <h2 class="text-heading-md font-semibold">الحملات الحالية</h2>
           </div>
-          <button onclick="refreshCampaigns()" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
-            <i data-lucide="refresh-cw" class="h-4 w-4"></i>
-          </button>
+          <div class="flex items-center gap-2">
+            <button onclick="updateAllCampaignStatuses()" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground">
+              <i data-lucide="zap" class="h-4 w-4"></i>
+              <span>تحديث الحالات</span>
+            </button>
+            <button onclick="refreshCampaigns()" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
+              <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1020,6 +1026,30 @@
       } catch (error) {
         console.error('خطأ في حذف الحملات:', error);
         alert('تعذر حذف الحملات. تحقق من الاتصال.');
+      }
+    }
+
+    // تحديث حالات جميع الحملات
+    async function updateAllCampaignStatuses() {
+      try {
+        const response = await fetch('https://tchat-production.up.railway.app/api/v1/campaigns/update-statuses', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+          }
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          alert(`تم فحص وتحديث ${result.updated_count} حملة`);
+          refreshCampaigns();
+        } else {
+          alert('فشل في تحديث الحالات: ' + (result.message || 'خطأ غير معروف'));
+        }
+      } catch (error) {
+        console.error('خطأ في تحديث الحالات:', error);
+        alert('تعذر تحديث الحالات. تحقق من الاتصال.');
       }
     }
 

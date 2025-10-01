@@ -763,9 +763,9 @@
             <div class="border-b border-border p-4">
               <div class="flex items-center justify-between">
                 <h3 class="text-heading-md font-semibold">تفاصيل المستقبلين</h3>
-                <button onclick="refreshCampaignStats(${campaign.id})" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
-                  <i data-lucide="refresh-cw" class="h-4 w-4"></i>
-                  <span>تحديث الإحصائيات</span>
+                <button onclick="fixCampaignStats(${campaign.id})" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
+                  <i data-lucide="calculator" class="h-4 w-4"></i>
+                  <span>إعادة حساب دقيق</span>
                 </button>
               </div>
             </div>
@@ -951,11 +951,10 @@
       }
     }
 
-    // تحديث إحصائيات حملة محددة
-    async function refreshCampaignStats(campaignId) {
+    // إعادة حساب إحصائيات الحملة بدقة
+    async function fixCampaignStats(campaignId) {
       try {
-        // معالجة webhooks غير المعالجة
-        const response = await fetch('https://tchat-production.up.railway.app/api/v1/campaigns/process-webhooks', {
+        const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}/fix-stats`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
@@ -965,15 +964,15 @@
         const result = await response.json();
         
         if (result.success) {
-          alert(`تم معالجة ${result.processed_count} webhook وتحديث الإحصائيات`);
+          alert('تم إعادة حساب الإحصائيات بدقة!');
           // إعادة تحميل تفاصيل الحملة
           viewCampaignDetails(campaignId);
         } else {
-          alert('فشل في تحديث الإحصائيات');
+          alert('فشل في إعادة حساب الإحصائيات: ' + (result.message || 'خطأ غير معروف'));
         }
       } catch (error) {
-        console.error('خطأ في تحديث الإحصائيات:', error);
-        alert('تعذر تحديث الإحصائيات');
+        console.error('خطأ في إعادة حساب الإحصائيات:', error);
+        alert('تعذر إعادة حساب الإحصائيات');
       }
     }
 

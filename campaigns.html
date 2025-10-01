@@ -36,10 +36,16 @@
         <h1 class="text-heading-lg font-bold text-foreground">إدارة الحملات التسويقية</h1>
         <p class="text-body-sm text-muted-foreground">إنشاء وإدارة حملات واتساب للعملاء</p>
       </div>
-      <button onclick="showCreateCampaignModal()" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90">
-        <i data-lucide="plus" class="h-4 w-4"></i>
-        <span>حملة جديدة</span>
-      </button>
+      <div class="flex items-center gap-3">
+        <button onclick="deleteAllCampaigns()" class="inline-flex items-center gap-2 rounded-md border border-destructive bg-destructive/10 px-4 py-2 text-button-md font-medium text-destructive shadow-sm transition hover:bg-destructive/20">
+          <i data-lucide="trash-2" class="h-4 w-4"></i>
+          <span>حذف الكل</span>
+        </button>
+        <button onclick="showCreateCampaignModal()" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90">
+          <i data-lucide="plus" class="h-4 w-4"></i>
+          <span>حملة جديدة</span>
+        </button>
+      </div>
     </section>
 
     <!-- Campaigns List -->
@@ -973,6 +979,47 @@
       } catch (error) {
         console.error('خطأ في إعادة حساب الإحصائيات:', error);
         alert('تعذر إعادة حساب الإحصائيات');
+      }
+    }
+
+    // حذف جميع الحملات
+    async function deleteAllCampaigns() {
+      // تأكيد أولي
+      if (!confirm('⚠️ تحذير: هل أنت متأكد من حذف جميع الحملات؟\n\nهذا الإجراء لا يمكن التراجع عنه وسيحذف:\n- جميع الحملات\n- جميع المستقبلين\n- جميع الإحصائيات\n\nاكتب "نعم احذف الكل" للمتابعة')) {
+        return;
+      }
+
+      // تأكيد ثاني مع كلمة مرور
+      const confirmText = prompt('للتأكيد النهائي، اكتب: DELETE_ALL_CAMPAIGNS');
+      
+      if (confirmText !== 'DELETE_ALL_CAMPAIGNS') {
+        alert('تم إلغاء العملية');
+        return;
+      }
+
+      try {
+        const response = await fetch('https://tchat-production.up.railway.app/api/v1/campaigns/delete-all', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+          },
+          body: JSON.stringify({
+            confirm_password: 'DELETE_ALL_CAMPAIGNS'
+          })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          alert(`تم حذف ${result.deleted_count} حملة بنجاح!`);
+          refreshCampaigns();
+        } else {
+          alert('فشل في حذف الحملات: ' + (result.message || 'خطأ غير معروف'));
+        }
+      } catch (error) {
+        console.error('خطأ في حذف الحملات:', error);
+        alert('تعذر حذف الحملات. تحقق من الاتصال.');
       }
     }
 

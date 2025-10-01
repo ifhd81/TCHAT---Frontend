@@ -393,7 +393,14 @@
         'running': 'قيد التشغيل',
         'completed': 'مكتملة',
         'paused': 'متوقفة',
-        'cancelled': 'ملغية'
+        'cancelled': 'ملغية',
+        'pending': 'في الانتظار',
+        'sent': 'أُرسِلت',
+        'delivered': 'وصلت',
+        'read': 'قُرِئت',
+        'replied': 'تم الرد عليها',
+        'clicked': 'نُقِر عليها',
+        'failed': 'فشلت'
       };
       return texts[status] || status;
     }
@@ -722,23 +729,23 @@
             </div>
             <div class="rounded-lg border bg-card p-4 text-center">
               <div class="text-heading-lg font-bold text-primary number">${campaign.sent_count}</div>
-              <div class="text-body-sm text-muted-foreground">تم الإرسال</div>
+              <div class="text-body-sm text-muted-foreground">أُرسِلت</div>
             </div>
             <div class="rounded-lg border bg-card p-4 text-center">
               <div class="text-heading-lg font-bold text-success number">${campaign.delivered_count}</div>
-              <div class="text-body-sm text-muted-foreground">تم التسليم</div>
+              <div class="text-body-sm text-muted-foreground">وصلت</div>
             </div>
             <div class="rounded-lg border bg-card p-4 text-center">
               <div class="text-heading-lg font-bold text-accent-foreground number">${campaign.read_count}</div>
-              <div class="text-body-sm text-muted-foreground">تم القراءة</div>
+              <div class="text-body-sm text-muted-foreground">قُرِئت</div>
             </div>
             <div class="rounded-lg border bg-card p-4 text-center">
               <div class="text-heading-lg font-bold text-warning number">${campaign.replied_count || 0}</div>
-              <div class="text-body-sm text-muted-foreground">تم الرد</div>
+              <div class="text-body-sm text-muted-foreground">تم الرد عليها</div>
             </div>
             <div class="rounded-lg border bg-card p-4 text-center">
               <div class="text-heading-lg font-bold text-destructive number">${campaign.failed_count}</div>
-              <div class="text-body-sm text-muted-foreground">فشل</div>
+              <div class="text-body-sm text-muted-foreground">فشلت</div>
             </div>
           </div>
 

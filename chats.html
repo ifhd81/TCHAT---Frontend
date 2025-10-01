@@ -128,16 +128,29 @@
       return phone.replace(/[^0-9]/g, '');
     };
 
-    async function loadAndRenderConversations() {
+    async function loadAndRenderConversations(showLoading = false) {
       const listEl = document.getElementById('conversations-list');
-      listEl.innerHTML = '<div class="p-4 text-center text-body-sm text-muted-foreground">جاري تحميل المحادثات...</div>';
+      
+      if (showLoading) {
+        listEl.innerHTML = '<div class="p-4 text-center text-body-sm text-muted-foreground">جاري تحميل المحادثات...</div>';
+      }
 
       try {
-        conversations = await loadConversations(100);
-        renderConversations();
+        const newConversations = await loadConversations(100);
+        
+        // مقارنة البيانات الجديدة مع القديمة لتجنب إعادة العرض غير الضرورية
+        const conversationsChanged = JSON.stringify(conversations) !== JSON.stringify(newConversations);
+        
+        if (conversationsChanged) {
+          conversations = newConversations;
+          renderConversations();
+          console.log('📝 تم تحديث قائمة المحادثات');
+        }
       } catch (error) {
         console.error('خطأ في تحميل المحادثات:', error);
-        listEl.innerHTML = '<div class="p-4 text-center text-destructive text-body-sm">تعذر تحميل المحادثات</div>';
+        if (showLoading) {
+          listEl.innerHTML = '<div class="p-4 text-center text-destructive text-body-sm">تعذر تحميل المحادثات</div>';
+        }
       }
     }
 
@@ -217,8 +230,8 @@
       chatHeader.classList.remove('hidden');
       document.getElementById('message-input-area').classList.remove('hidden');
 
-      // تحميل وعرض الرسائل
-      await loadAndRenderMessages(conversationId);
+      // تحميل وعرض الرسائل مع مؤشر التحميل
+      await loadAndRenderMessages(conversationId, true);
       
       // تحديث حالة المحادثة في القائمة
       document.querySelectorAll('.conversation-item').forEach(item => {
@@ -227,16 +240,31 @@
       document.querySelector(`[data-conversation-id="${conversationId}"]`)?.classList.add('bg-accent');
     }
 
-    async function loadAndRenderMessages(conversationId) {
+    let currentMessages = [];
+
+    async function loadAndRenderMessages(conversationId, showLoading = false) {
       const messagesArea = document.getElementById('messages-area');
-      messagesArea.innerHTML = '<div class="flex items-center justify-center h-full text-body-sm text-muted-foreground">جاري تحميل الرسائل...</div>';
+      
+      if (showLoading) {
+        messagesArea.innerHTML = '<div class="flex items-center justify-center h-full text-body-sm text-muted-foreground">جاري تحميل الرسائل...</div>';
+      }
 
       try {
-        const messages = await loadConversationMessages(conversationId, 100);
-        renderMessages(messages);
+        const newMessages = await loadConversationMessages(conversationId, 100);
+        
+        // مقارنة الرسائل الجديدة مع القديمة
+        const messagesChanged = JSON.stringify(currentMessages) !== JSON.stringify(newMessages);
+        
+        if (messagesChanged) {
+          currentMessages = newMessages;
+          renderMessages(newMessages);
+          console.log(`💬 تم تحديث ${newMessages.length} رسالة في المحادثة ${conversationId}`);
+        }
       } catch (error) {
         console.error('خطأ في تحميل الرسائل:', error);
-        messagesArea.innerHTML = '<div class="flex items-center justify-center h-full text-destructive text-body-sm">تعذر تحميل الرسائل</div>';
+        if (showLoading) {
+          messagesArea.innerHTML = '<div class="flex items-center justify-center h-full text-destructive text-body-sm">تعذر تحميل الرسائل</div>';
+        }
       }
     }
 
@@ -288,10 +316,23 @@
     }
 
     async function refreshConversations() {
+      console.log('🔄 تحديث المحادثات...');
+      const previousConversationId = currentConversationId;
+      
       await loadAndRenderConversations();
-      if (currentConversationId) {
-        await loadAndRenderMessages(currentConversationId);
+      
+      // إذا كانت هناك محادثة مفتوحة، حدّث رسائلها
+      if (previousConversationId) {
+        await loadAndRenderMessages(previousConversationId, false);
+        
+        // إعادة تحديد المحادثة النشطة في القائمة
+        document.querySelectorAll('.conversation-item').forEach(item => {
+          item.classList.remove('bg-accent');
+        });
+        document.querySelector(`[data-conversation-id="${previousConversationId}"]`)?.classList.add('bg-accent');
       }
+      
+      console.log('✅ تم تحديث المحادثات');
     }
 
     function markAsRead() {
@@ -308,10 +349,21 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
-      loadAndRenderConversations();
+      loadAndRenderConversations(true); // عرض loading في التحميل الأول
       
-      // تحديث تلقائي كل 30 ثانية
-      setInterval(refreshConversations, 30000);
+      // تحديث تلقائي كل 30 ثانية للمحادثات (بدون loading indicator)
+      setInterval(() => {
+        console.log('⏰ تحديث تلقائي - كل 30 ثانية');
+        loadAndRenderConversations(false); // تحديث صامت
+      }, 30000);
+      
+      // تحديث أسرع للرسائل في المحادثة النشطة (كل 10 ثوان)
+      setInterval(() => {
+        if (currentConversationId) {
+          console.log('💬 تحديث سريع للرسائل');
+          loadAndRenderMessages(currentConversationId, false); // تحديث صامت
+        }
+      }, 10000);
     });
 
     async function sendMessage() {
@@ -356,10 +408,11 @@
           
           messageInput.value = '';
           
-          // تحديث المحادثة
+          // تحديث المحادثة فوراً بعد الإرسال
           setTimeout(() => {
+            console.log('🔄 تحديث بعد إرسال الرسالة');
             refreshConversations();
-          }, 1000);
+          }, 2000);
         } else {
           alert('فشل في إرسال الرسالة: ' + (result.message || 'خطأ غير معروف'));
         }

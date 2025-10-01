@@ -8,89 +8,95 @@
     <link rel="stylesheet" href="./style.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   </head>
-  <body class="rtl min-h-screen" style="background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 50%, #ffffff 100%); font-family: 'LamaSans', sans-serif;">
-    
-    <div class="min-h-screen flex items-center justify-center py-12 px-4">
-      <div class="w-full max-w-md">
-        <!-- Top Blue Line -->
-        <div class="w-full h-1 rounded-full mb-8" style="background: linear-gradient(to right, #4f46e5, #7c3aed);"></div>
-        
-        <!-- Login Form -->
-        <div class="bg-white/95 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-gray-200">
-          <h1 class="text-center text-heading-lg font-bold text-gray-800 mb-8">تسجيل الدخول</h1>
-          
-          <form class="space-y-6" id="login-form">
-            <!-- Username Field -->
-            <div>
-              <label class="block text-body-md font-medium text-gray-700 mb-2 text-right">اسم المستخدم</label>
-              <div class="relative">
-                <input
-                  id="username"
-                  type="text"
-                  required
-                  class="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg text-body-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 transition-all"
-                  placeholder="أدخل اسم المستخدم"
-                />
-                <i data-lucide="user" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-              </div>
-            </div>
-            
-            <!-- Password Field -->
-            <div>
-              <label class="block text-body-md font-medium text-gray-700 mb-2 text-right">كلمة المرور</label>
-              <div class="relative">
-                <input
-                  id="password"
-                  type="password"
-                  required
-                  class="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg text-body-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 transition-all"
-                  placeholder="أدخل كلمة المرور"
-                />
-                <i data-lucide="lock" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-              </div>
-            </div>
+  <body class="rtl min-h-screen bg-background text-foreground">
 
-            <!-- Login Button -->
-            <button
-              type="submit"
-              class="w-full flex items-center justify-center py-3 px-4 rounded-xl text-white font-medium transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);"
-              disabled
-            >
-              <span class="text-button-md">دخول</span>
-              <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
-            </button>
-          </form>
-          
-          <!-- Footer -->
-          <div class="mt-8 text-center">
-            <p class="text-body-sm text-gray-500">© 2025 مناسبتي - جميع الحقوق محفوظة</p>
+    <!-- محتوى الصفحة -->
+    <main class="container mx-auto flex min-h-screen items-center justify-center px-4 py-12">
+      <div class="w-full max-w-md">
+        <div class="mb-8 text-center">
+          <h1 class="text-heading-lg font-bold text-foreground">مرحباً بعودتك</h1>
+          <p class="text-body-sm text-muted-foreground mt-2">سجّل الدخول للوصول إلى لوحة التحكم</p>
+        </div>
+
+        <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div class="space-y-6 px-6 py-8">
+            <form class="space-y-5" id="login-form" novalidate>
+              <div class="space-y-2">
+                <label for="username" class="text-body-sm font-medium text-foreground">اسم المستخدم</label>
+                <div class="relative">
+                  <input
+                    id="username"
+                    type="text"
+                    required
+                    autocomplete="username"
+                    class="flex h-11 w-full rounded-lg border border-input bg-background px-4 pr-11 text-body-md text-foreground placeholder:text-muted-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    placeholder="أدخل اسم المستخدم"
+                  />
+                  <i data-lucide="user" class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"></i>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <label for="password" class="text-body-sm font-medium text-foreground">كلمة المرور</label>
+                <div class="relative">
+                  <input
+                    id="password"
+                    type="password"
+                    required
+                    autocomplete="current-password"
+                    class="flex h-11 w-full rounded-lg border border-input bg-background px-4 pr-11 text-body-md text-foreground placeholder:text-muted-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    placeholder="أدخل كلمة المرور"
+                  />
+                  <button type="button" id="toggle-password" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground">
+                    <i data-lucide="eye" class="h-4 w-4"></i>
+                  </button>
+                  <i data-lucide="lock" class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"></i>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-button-md font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                disabled
+              >
+                <span class="text-button-md font-semibold">تسجيل الدخول</span>
+                <i data-lucide="arrow-left" class="h-4 w-4"></i>
+              </button>
+            </form>
+
+            <p class="text-center text-body-sm text-muted-foreground">© 2025 مناسبتي - جميع الحقوق محفوظة</p>
           </div>
         </div>
       </div>
-    </div>
+    </main>
 
     <script>
+      const passwordInput = document.getElementById('password');
+      const togglePasswordBtn = document.getElementById('toggle-password');
+      const submitBtn = document.querySelector('button[type="submit"]');
+      const defaultButtonTemplate = '<span class="text-button-md font-semibold">تسجيل الدخول</span><i data-lucide="arrow-left" class="h-4 w-4"></i>';
+
       // تفعيل/إلغاء تفعيل زر تسجيل الدخول
       function toggleLoginButton() {
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
-        const submitBtn = document.querySelector('button[type="submit"]');
-        
-        if (username.trim() && password.trim()) {
-          submitBtn.disabled = false;
-          submitBtn.style.opacity = '1';
-          submitBtn.style.cursor = 'pointer';
-        } else {
-          submitBtn.disabled = true;
-          submitBtn.style.opacity = '0.5';
-          submitBtn.style.cursor = 'not-allowed';
-        }
+        submitBtn.disabled = !(username.trim() && password.trim());
       }
 
       // إضافة مستمعات الأحداث للحقول
       document.getElementById('username').addEventListener('input', toggleLoginButton);
       document.getElementById('password').addEventListener('input', toggleLoginButton);
+
+      // تبديل إظهار كلمة المرور
+      togglePasswordBtn.addEventListener('click', () => {
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        togglePasswordBtn.innerHTML = isPassword
+          ? '<i data-lucide="eye-off" class="h-4 w-4"></i>'
+          : '<i data-lucide="eye" class="h-4 w-4"></i>';
+        lucide.createIcons();
+        passwordInput.focus();
+      });
 
       // معالج تسجيل الدخول
       document.getElementById('login-form').addEventListener('submit', async function(e) {
@@ -98,12 +104,9 @@
         
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
-        
-        const submitBtn = document.querySelector('button[type="submit"]');
-        
         // تعطيل الزر أثناء المعالجة
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="text-button-md">جاري التحقق...</span>';
+        submitBtn.innerHTML = '<span class="text-button-md font-semibold">جاري التحقق...</span><i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i>';
         
         try {
           // إرسال طلب تسجيل الدخول إلى Backend
@@ -164,7 +167,7 @@
         } finally {
           // إعادة تفعيل الزر
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<span class="text-button-md">دخول</span><i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>';
+          submitBtn.innerHTML = defaultButtonTemplate;
           lucide.createIcons();
         }
       });
@@ -172,6 +175,7 @@
       // تهيئة أيقونات Lucide
       document.addEventListener('DOMContentLoaded', function() {
         lucide.createIcons();
+        toggleLoginButton();
       });
     </script>
   </body>

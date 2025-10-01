@@ -8,180 +8,231 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="./api.js"></script>
   </head>
-  <body class="rtl min-h-screen" style="background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 50%, #ffffff 100%); font-family: 'LamaSans', sans-serif;">
+  <body class="rtl min-h-screen bg-background" style="font-family: 'LamaSans', sans-serif;">
     
     <div class="min-h-screen">
       
-      <!-- Header with Navigation -->
-      <header class="border-b border-gray-200 p-4" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
-        <div class="flex items-center justify-between">
-          <!-- Logo and Title -->
-          <div class="flex items-center space-x-3 space-x-reverse">
-            <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
-              T
-            </div>
-            <h1 class="text-heading-md font-bold text-gray-900">TCHAT</h1>
-          </div>
-          
-          <!-- Navigation Menu -->
-          <nav class="flex items-center space-x-6 space-x-reverse">
-            <a href="#" class="flex items-center px-3 py-2 text-body-sm font-medium rounded-lg text-white" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
-              <i data-lucide="home" class="w-4 h-4 ml-2"></i>
-              الرئيسية
-            </a>
-            
-            <a href="#" class="flex items-center px-3 py-2 text-body-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
-              <i data-lucide="shopping-cart" class="w-4 h-4 ml-2"></i>
-              السلات المتروكة
-            </a>
-            
-            <a href="#" class="flex items-center px-3 py-2 text-body-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
-              <i data-lucide="message-circle" class="w-4 h-4 ml-2"></i>
-              رسائل WhatsApp
-            </a>
-            
-            <a href="#" class="flex items-center px-3 py-2 text-body-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
-              <i data-lucide="settings" class="w-4 h-4 ml-2"></i>
-              الإعدادات
-            </a>
-          </nav>
-          
-          <!-- User Menu and Logout -->
+      <!-- Header -->
+      <header class="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div class="container mx-auto flex h-16 items-center px-4">
           <div class="flex items-center space-x-4 space-x-reverse">
             <div class="flex items-center space-x-2 space-x-reverse">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
-                ا
+              <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <i data-lucide="message-square" class="h-5 w-5"></i>
               </div>
-              <span class="text-body-sm text-gray-700">المدير العام</span>
+              <span class="text-heading-md font-bold">TCHAT</span>
             </div>
-            
-            <button onclick="logout()" class="flex items-center px-3 py-2 text-body-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors">
-              <i data-lucide="log-out" class="w-4 h-4 ml-2"></i>
-              <span>خروج</span>
+          </div>
+
+          <div class="mr-auto flex items-center space-x-4 space-x-reverse">
+            <button onclick="logout()" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+              <i data-lucide="log-out" class="ml-2 h-4 w-4"></i>
+              <span class="text-body-md">تسجيل الخروج</span>
             </button>
           </div>
         </div>
       </header>
 
       <!-- Main Content -->
-      <div class="flex-1">
+      <main class="container mx-auto px-4 py-6">
+        
+        <!-- Stats Cards -->
+        <div class="grid gap-4 md:grid-cols-4 mb-6">
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="p-6 flex flex-row items-center justify-between space-y-0 pb-2">
+              <h3 class="tracking-tight text-body-md font-medium">إجمالي العملاء</h3>
+              <i data-lucide="users" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <div class="p-6 pt-0">
+              <div class="text-heading-xl font-bold number" id="total-customers-header">0</div>
+              <p class="text-body-sm text-muted-foreground">عميل نشط</p>
+            </div>
+          </div>
 
-        <!-- Main Content -->
-        <main class="p-6">
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="p-6 flex flex-row items-center justify-between space-y-0 pb-2">
+              <h3 class="tracking-tight text-body-md font-medium">إجمالي الإيرادات</h3>
+              <i data-lucide="dollar-sign" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <div class="p-6 pt-0">
+              <div class="text-heading-xl font-bold number" id="total-revenue">0</div>
+              <p class="text-body-sm text-muted-foreground">ريال سعودي</p>
+            </div>
+          </div>
 
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="p-6 flex flex-row items-center justify-between space-y-0 pb-2">
+              <h3 class="tracking-tight text-body-md font-medium">السلات المتروكة</h3>
+              <i data-lucide="shopping-cart" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <div class="p-6 pt-0">
+              <div class="text-heading-xl font-bold number" id="total-carts-header">0</div>
+              <p class="text-body-sm text-muted-foreground">مجموع السلات المتروكة</p>
+            </div>
+          </div>
+
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="p-6 flex flex-row items-center justify-between space-y-0 pb-2">
+              <h3 class="tracking-tight text-body-md font-medium">الرسائل المرسلة</h3>
+              <i data-lucide="send" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <div class="p-6 pt-0">
+              <div class="text-heading-xl font-bold number" id="total-messages-header">0</div>
+              <p class="text-body-sm text-muted-foreground">رسالة واتساب</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tables Grid -->
+        <div class="grid gap-4 md:grid-cols-2">
+          
           <!-- Revenue Table -->
-          <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-8">
-            <div class="p-4 rounded-t-xl" style="background: linear-gradient(135deg, #a855f7, #3b82f6);">
-              <h2 class="text-heading-sm font-bold text-white text-right">إجمالي الإيرادات (SAR)</h2>
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="flex flex-col space-y-1.5 p-6 border-b">
+              <h3 class="text-heading-md font-semibold leading-none tracking-tight">الحملات والإيرادات</h3>
+              <p class="text-body-sm text-muted-foreground">نتائج الحملات التسويقية</p>
             </div>
-            
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-6 py-4 text-right text-body-sm font-medium text-gray-700"></th>
-                    <th class="px-6 py-4 text-right text-body-sm font-medium text-gray-700">الحالة</th>
-                    <th class="px-6 py-4 text-right text-body-sm font-medium text-gray-700">إجمالي الإيرادات<br><span class="font-normal text-gray-500">(منذ البدء)</span></th>
-                    <th class="px-6 py-4 text-right text-body-sm font-medium text-gray-700">إجمالي الإيرادات<br><span class="font-normal text-gray-500">(30 يوماً سابقة)</span></th>
-                    <th class="px-6 py-4 text-right text-body-sm font-medium text-gray-700">إجمالي الإيرادات<br><span class="font-normal text-gray-500">(آخر 30 يوماً)</span></th>
-                    <th class="px-6 py-4 text-right text-body-sm font-medium text-gray-700">الطلبات المنسوبة<br><span class="font-normal text-gray-500">(آخر 30 يوماً)</span></th>
-                  </tr>
-                </thead>
-                <tbody id="revenue-table-tbody" class="divide-y divide-gray-200">
-                  <!-- البيانات ستُحمل من Backend -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Meta WhatsApp Numbers Table -->
-          <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-8">
-            <div class="p-4 rounded-t-xl" style="background: linear-gradient(135deg, #a855f7, #3b82f6);">
-              <h2 class="text-heading-sm font-bold text-white text-right">أرقام الواتساب من Meta</h2>
-              <p class="text-body-sm text-white/80 text-right">البيانات الحقيقية من Meta Business API</p>
-            </div>
-            
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-6 py-3 text-center text-body-sm font-medium text-gray-700">ID</th>
-                    <th class="px-6 py-3 text-center text-body-sm font-medium text-gray-700">رقم الهاتف</th>
-                    <th class="px-6 py-3 text-center text-body-sm font-medium text-gray-700">الاسم المتحقق</th>
-                    <th class="px-6 py-3 text-center text-body-sm font-medium text-gray-700">حالة التحقق</th>
-                    <th class="px-6 py-3 text-center text-body-sm font-medium text-gray-700">تقييم الجودة</th>
-                  </tr>
-                </thead>
-                <tbody id="meta-phone-numbers-tbody">
-                  <!-- البيانات ستُحمل من Meta API -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Abandoned Carts and Customers Table -->
-          <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
-            <div class="p-4 rounded-t-xl" style="background: linear-gradient(135deg, #3b82f6, #a855f7);">
-              <h2 class="text-heading-sm font-bold text-white text-right">العملاء والسلات المتروكة</h2>
-              <p class="text-body-sm text-white/80 text-right">العملاء المسجلين مع سلاتهم المتروكة وحالة الإرسال</p>
-            </div>
-            
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-6 py-3 text-center text-body-sm font-medium text-gray-700">اسم العميل</th>
-                    <th class="px-6 py-3 text-center text-body-sm font-medium text-gray-700">رقم الجوال</th>
-                    <th class="px-6 py-3 text-center text-body-sm font-medium text-gray-700">قيمة السلة</th>
-                    <th class="px-6 py-3 text-center text-body-sm font-medium text-gray-700">عدد المنتجات</th>
-                    <th class="px-6 py-3 text-center text-body-sm font-medium text-gray-700">حالة الإرسال</th>
-                    <th class="px-6 py-3 text-center text-body-sm font-medium text-gray-700">منذ</th>
-                  </tr>
-                </thead>
-                <tbody id="abandoned-carts-tbody">
-                  <!-- البيانات ستُحمل من Backend -->
-                </tbody>
-              </table>
-            </div>
-            
-            <!-- Pagination -->
-            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
-              <div class="flex items-center justify-between">
-                <div class="text-body-sm text-gray-600">
-                  عرض <span id="current-range">1-10</span> من <span id="total-items">0</span> عنصر
-                </div>
-                
-                <div class="flex items-center space-x-2 space-x-reverse">
-                  <button 
-                    id="prev-btn" 
-                    onclick="previousPage()" 
-                    class="flex items-center px-3 py-2 text-body-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled
-                  >
-                    <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
-                    السابق
-                  </button>
-                  
-                  <span class="text-body-sm text-gray-600">
-                    صفحة <span id="current-page">1</span> من <span id="total-pages">1</span>
-                  </span>
-                  
-                  <button 
-                    id="next-btn" 
-                    onclick="nextPage()" 
-                    class="flex items-center px-3 py-2 text-body-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    التالي
-                    <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
-                  </button>
-                </div>
+            <div class="p-6">
+              <div class="relative w-full overflow-auto">
+                <table class="w-full caption-bottom text-sm">
+                  <thead class="[&_tr]:border-b">
+                    <tr class="border-b transition-colors hover:bg-muted/50">
+                      <th class="h-12 px-4 text-right align-middle font-medium text-muted-foreground text-body-sm">الحملة</th>
+                      <th class="h-12 px-4 text-center align-middle font-medium text-muted-foreground text-body-sm">الحالة</th>
+                      <th class="h-12 px-4 text-center align-middle font-medium text-muted-foreground text-body-sm">الإيرادات</th>
+                      <th class="h-12 px-4 text-center align-middle font-medium text-muted-foreground text-body-sm">الطلبات</th>
+                    </tr>
+                  </thead>
+                  <tbody id="revenue-table-tbody" class="[&_tr:last-child]:border-0">
+                    <!-- Data loaded from backend -->
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
-        </main>
+
+          <!-- Abandoned Carts Table -->
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="flex flex-col space-y-1.5 p-6 border-b">
+              <h3 class="text-heading-md font-semibold leading-none tracking-tight">السلات المتروكة</h3>
+              <p class="text-body-sm text-muted-foreground">العملاء وحالة الإرسال</p>
+            </div>
+            <div class="p-6">
+              <div class="relative w-full overflow-auto">
+                <table class="w-full caption-bottom text-sm">
+                  <thead class="[&_tr]:border-b">
+                    <tr class="border-b transition-colors hover:bg-muted/50">
+                      <th class="h-12 px-4 text-right align-middle font-medium text-muted-foreground text-body-sm">العميل</th>
+                      <th class="h-12 px-4 text-center align-middle font-medium text-muted-foreground text-body-sm">الجوال</th>
+                      <th class="h-12 px-4 text-center align-middle font-medium text-muted-foreground text-body-sm">المبلغ</th>
+                      <th class="h-12 px-4 text-center align-middle font-medium text-muted-foreground text-body-sm">الحالة</th>
+                      <th class="h-12 px-4 text-center align-middle font-medium text-muted-foreground text-body-sm">التوقيت</th>
+                    </tr>
+                  </thead>
+                  <tbody id="abandoned-carts-tbody" class="[&_tr:last-child]:border-0">
+                    <!-- Data loaded from backend -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="flex items-center justify-between px-6 py-4 border-t">
+              <div class="text-body-sm text-muted-foreground">
+                <span id="current-range">1-10</span> من <span id="total-items">0</span>
+              </div>
+              <div class="flex items-center space-x-2 space-x-reverse">
+                <button 
+                  id="prev-btn" 
+                  onclick="previousPage()" 
+                  class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
+                  disabled
+                >
+                  <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                </button>
+                <div class="text-body-sm">
+                  <span id="current-page">1</span> / <span id="total-pages">1</span>
+                </div>
+                <button 
+                  id="next-btn" 
+                  onclick="nextPage()" 
+                  class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
+                >
+                  <i data-lucide="chevron-left" class="h-4 w-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- WhatsApp Numbers Table -->
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm md:col-span-2">
+            <div class="flex flex-col space-y-1.5 p-6 border-b">
+              <h3 class="text-heading-md font-semibold leading-none tracking-tight">أرقام واتساب المرتبطة بميتا</h3>
+              <p class="text-body-sm text-muted-foreground">تفاصيل الأرقام والجودة وحالة التحقق</p>
+            </div>
+            <div class="p-6">
+              <div class="relative w-full overflow-auto">
+                <table class="w-full caption-bottom text-sm">
+                  <thead class="[&_tr]:border-b">
+                    <tr class="border-b transition-colors hover:bg-muted/50">
+                      <th class="h-12 px-4 text-right align-middle font-medium text-muted-foreground text-body-sm">المعرف</th>
+                      <th class="h-12 px-4 text-center align-middle font-medium text-muted-foreground text-body-sm">رقم الواتساب</th>
+                      <th class="h-12 px-4 text-center align-middle font-medium text-muted-foreground text-body-sm">الاسم الموثق</th>
+                      <th class="h-12 px-4 text-center align-middle font-medium text-muted-foreground text-body-sm">حالة التحقق</th>
+                      <th class="h-12 px-4 text-center align-middle font-medium text-muted-foreground text-body-sm">تقييم الجودة</th>
+                      <th class="h-12 px-4 text-center align-middle font-medium text-muted-foreground text-body-sm">مستوى الإرسال</th>
+                    </tr>
+                  </thead>
+                  <tbody id="meta-phone-numbers-tbody" class="[&_tr:last-child]:border-0">
+                    <!-- Data loaded from backend -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </main>
     </div>
 
     <script>
+      const TABLE_STATES = {
+        loading: (colspan, message = 'جاري التحميل...') => `
+          <tr>
+            <td colspan="${colspan}" class="h-24 text-center text-body-md text-muted-foreground">
+              <div class="inline-flex items-center space-x-2 space-x-reverse">
+                <svg class="h-4 w-4 animate-spin text-muted-foreground" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                <span>${message}</span>
+              </div>
+            </td>
+          </tr>
+        `,
+        empty: (colspan, message = 'لا توجد بيانات متاحة') => `
+          <tr>
+            <td colspan="${colspan}" class="h-24 text-center text-body-md text-muted-foreground">${message}</td>
+          </tr>
+        `,
+        error: (colspan, message = 'تعذّر تحميل البيانات') => `
+          <tr>
+            <td colspan="${colspan}" class="h-24 text-center text-body-md text-destructive">
+              <div class="inline-flex items-center space-x-2 space-x-reverse">
+                <i data-lucide="alert-triangle" class="h-4 w-4"></i>
+                <span>${message}</span>
+              </div>
+            </td>
+          </tr>
+        `,
+      };
+
+      function setTableState(tbodyId, state, colspan, message) {
+        const tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+        tbody.innerHTML = TABLE_STATES[state](colspan, message);
+      }
+
       // تحقق من تسجيل الدخول
       if (!localStorage.getItem('tchat_logged_in')) {
         window.location.href = './login.html';
@@ -197,17 +248,36 @@
       async function loadDashboardData() {
         try {
           console.log('بدء تحميل بيانات لوحة التحكم...');
+
+          setTableState('revenue-table-tbody', 'loading', 4);
+          setTableState('abandoned-carts-tbody', 'loading', 5);
+          setTableState('meta-phone-numbers-tbody', 'loading', 6);
           
           // تحميل بيانات الإيرادات
           const revenueData = await loadRevenueData();
           console.log('Revenue Data:', revenueData);
           renderRevenueTable(revenueData);
           
-          // تحميل أرقام WhatsApp من Meta
-          const metaPhoneNumbers = await loadMetaPhoneNumbers();
-          console.log('Meta Phone Numbers:', metaPhoneNumbers);
-          renderMetaPhoneNumbersTable(metaPhoneNumbers);
+          // تحديث الإحصائيات في header
+          const systemStats = await loadSystemStats();
+          if (systemStats) {
+            document.getElementById('total-customers-header').textContent = systemStats.total_customers || 0;
+            document.getElementById('total-carts-header').textContent = systemStats.total_abandoned_carts || 0;
+            document.getElementById('total-messages-header').textContent = systemStats.total_whatsapp_sent || 0;
+            if (systemStats.total_revenue) {
+              document.getElementById('total-revenue').textContent = Number(systemStats.total_revenue).toLocaleString('en-US', { minimumFractionDigits: 0 });
+            }
+          }
           
+          // تحميل أرقام واتساب من ميتا
+          try {
+            const metaPhoneNumbers = await loadMetaPhoneNumbers();
+            renderMetaPhoneNumbersTable(metaPhoneNumbers);
+          } catch (error) {
+            console.error('تعذّر تحميل أرقام واتساب:', error);
+            setTableState('meta-phone-numbers-tbody', 'error', 6, 'تعذّر تحميل أرقام واتساب');
+          }
+
           // تحميل بيانات السلات المتروكة
           const abandonedCarts = await loadAbandonedCarts(50); // جلب 50 عنصر
           console.log('Abandoned Carts:', abandonedCarts);
@@ -218,41 +288,40 @@
           
         } catch (error) {
           console.error('خطأ في تحميل بيانات لوحة التحكم:', error);
+          setTableState('revenue-table-tbody', 'error', 4, 'تعذّر تحميل بيانات الإيرادات');
+          setTableState('abandoned-carts-tbody', 'error', 5, 'تعذّر تحميل بيانات السلات المتروكة');
+          setTableState('meta-phone-numbers-tbody', 'error', 6, 'تعذّر تحميل أرقام واتساب');
         }
       }
 
       // عرض جدول الإيرادات
       function renderRevenueTable(data) {
         const tbody = document.getElementById('revenue-table-tbody');
-        if (!data || data.length === 0) return;
+        if (!tbody) return;
+        if (!data || data.length === 0) {
+          tbody.innerHTML = TABLE_STATES.empty(4, 'لا توجد بيانات إيرادات متاحة');
+          return;
+        }
         
-        tbody.innerHTML = data.map(item => {
-          const statusClass = item.status === 'فعالة' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800';
-          const isTotal = item.campaign_name === 'الحملات التسويقية';
-          const borderClass = isTotal ? 'border-t-2 border-gray-300' : '';
+        tbody.innerHTML = data.slice(0, 5).map(item => {
+          const isActive = item.status === 'فعالة';
+          const statusBadge = isActive 
+            ? '<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-success/10 text-success">فعالة</span>'
+            : '<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-warning/10 text-warning">متوقفة</span>';
           
           return `
-            <tr class="hover:bg-gray-50 ${borderClass}">
-              <td class="px-6 py-4 text-right">
-                <span class="text-body-md text-gray-900 ${isTotal ? 'font-bold' : 'font-medium'}">${item.campaign_name}</span>
+            <tr class="border-b transition-colors hover:bg-muted/50">
+              <td class="p-4 align-middle text-right">
+                <div class="font-medium text-body-md">${item.campaign_name}</div>
               </td>
-              <td class="px-6 py-4 text-right">
-                ${item.status.includes('ذات إيرادات') ? 
-                  `<span class="text-body-sm text-gray-600">${item.status}</span>` :
-                  `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">${item.status}</span>`
-                }
+              <td class="p-4 align-middle text-center">
+                ${statusBadge}
               </td>
-              <td class="px-6 py-4 text-right">
-                <span class="font-mono text-body-lg font-bold text-gray-900 number">${item.total_revenue.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+              <td class="p-4 align-middle text-center">
+                <div class="font-mono font-medium number">${item.total_revenue.toLocaleString('en-US', {minimumFractionDigits: 0})}</div>
               </td>
-              <td class="px-6 py-4 text-right">
-                <span class="font-mono text-body-md text-gray-900 number">${item.last_30_days.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
-              </td>
-              <td class="px-6 py-4 text-right">
-                <span class="font-mono text-body-md text-gray-900 number">${item.previous_30_days.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
-              </td>
-              <td class="px-6 py-4 text-right">
-                <span class="text-body-lg font-bold text-gray-900 number">${item.attributed_orders}</span>
+              <td class="p-4 align-middle text-center">
+                <div class="font-medium text-primary number">${item.attributed_orders}</div>
               </td>
             </tr>
           `;
@@ -262,71 +331,62 @@
       // عرض جدول أرقام WhatsApp من Meta
       function renderMetaPhoneNumbersTable(phoneNumbers) {
         const tbody = document.getElementById('meta-phone-numbers-tbody');
+        if (!tbody) return;
         if (!phoneNumbers || phoneNumbers.length === 0) {
-          console.error('لا توجد أرقام WhatsApp من Meta');
-          tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">لا توجد أرقام WhatsApp</td></tr>';
+          tbody.innerHTML = TABLE_STATES.empty(6, 'لا توجد أرقام واتساب مرتبطة');
           return;
         }
         
-        console.log('عرض أرقام Meta WhatsApp:', phoneNumbers);
-        console.log('عدد الأرقام:', phoneNumbers.length);
-        
         tbody.innerHTML = phoneNumbers.map(phone => {
-          // تنسيق تقييم الجودة
-          let qualityText = phone.quality_rating;
-          let qualityClass = 'bg-gray-100 text-gray-800';
-          
-          if (qualityText === 'GREEN') {
-            qualityText = 'مرتفع';
-            qualityClass = 'bg-green-100 text-green-800';
-          } else if (qualityText === 'YELLOW') {
-            qualityText = 'متوسط';
-            qualityClass = 'bg-yellow-100 text-yellow-800';
-          } else if (qualityText === 'RED') {
-            qualityText = 'منخفض';
-            qualityClass = 'bg-red-100 text-red-800';
+          let qualityBadge = '<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-muted text-muted-foreground">غير محدد</span>';
+          if (phone.quality_rating === 'GREEN') {
+            qualityBadge = '<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-success/10 text-success">مرتفع</span>';
+          } else if (phone.quality_rating === 'YELLOW') {
+            qualityBadge = '<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-warning/10 text-warning">متوسط</span>';
+          } else if (phone.quality_rating === 'RED') {
+            qualityBadge = '<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-destructive/10 text-destructive">منخفض</span>';
           }
           
-          // تنظيف رقم الهاتف (إزالة المسافات والرموز)
-          const cleanPhoneNumber = phone.display_phone_number.replace(/[\s\+\-]/g, '');
-          
-          // تحديد حالة التحقق
-          const verificationStatus = phone.code_verification_status === 'VERIFIED' ? 'متحقق' : 'غير متحقق';
-          const statusClass = phone.code_verification_status === 'VERIFIED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+          const cleanPhoneNumber = phone.display_phone_number ? phone.display_phone_number.replace(/[\s\+\-]/g, '') : 'غير محدد';
+          const verificationStatus = phone.code_verification_status === 'VERIFIED'
+            ? '<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-success/10 text-success"><i data-lucide="shield-check" class="h-3 w-3 ml-1"></i>متحقق</span>'
+            : '<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-muted text-muted-foreground"><i data-lucide="shield-alert" class="h-3 w-3 ml-1"></i>غير متحقق</span>';
+          const throughputLevel = phone.throughput_level ? phone.throughput_level : 'غير محدد';
           
           return `
-            <tr class="border-t border-gray-200 hover:bg-gray-50">
-              <td class="px-6 py-4 text-center">
-                <span class="font-mono text-body-sm text-gray-900 number">${phone.id}</span>
+            <tr class="border-b transition-colors hover:bg-muted/50">
+              <td class="p-4 align-middle text-right">
+                <span class="font-mono text-body-sm text-muted-foreground number">${phone.id}</span>
               </td>
-              <td class="px-6 py-4 text-center">
-                <span class="font-mono text-body-md text-gray-900 number">${cleanPhoneNumber}</span>
+              <td class="p-4 align-middle text-center">
+                <div class="font-mono font-medium number">${cleanPhoneNumber}</div>
               </td>
-              <td class="px-6 py-4 text-center">
-                <span class="text-body-md text-gray-900 font-medium">${phone.verified_name}</span>
+              <td class="p-4 align-middle text-center">
+                <div class="text-body-md font-medium">${phone.verified_name || 'غير محدد'}</div>
               </td>
-              <td class="px-6 py-4 text-center">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
-                  ${verificationStatus}
-                </span>
+              <td class="p-4 align-middle text-center">
+                ${verificationStatus}
               </td>
-              <td class="px-6 py-4 text-center">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${qualityClass}">
-                  ${qualityText}
-                </span>
+              <td class="p-4 align-middle text-center">
+                ${qualityBadge}
+              </td>
+              <td class="p-4 align-middle text-center">
+                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-accent text-accent-foreground">${throughputLevel}</span>
               </td>
             </tr>
           `;
         }).join('');
         
-        console.log('تم عرض الجدول بنجاح');
+        lucide.createIcons();
       }
 
-      // عرض جدول السلات المتروكة والعملاء
+      // عرض جدول السلات المتروكة
       function renderAbandonedCartsTable(carts) {
         const tbody = document.getElementById('abandoned-carts-tbody');
+        if (!tbody) return;
         if (!carts || carts.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">لا توجد سلات متروكة</td></tr>';
+          tbody.innerHTML = TABLE_STATES.empty(5, 'لا توجد سلات متروكة حالياً');
+          updatePaginationInfo();
           return;
         }
         
@@ -337,34 +397,44 @@
           
           // تحديد حالة الإرسال
           const messageSent = cart.reminder_sent;
-          const sendingStatus = messageSent ? 'تم الإرسال' : 'لم يتم الإرسال';
-          const statusClass = messageSent ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+          const statusBadge = messageSent 
+            ? '<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-success/10 text-success"><i data-lucide="check" class="w-3 h-3 ml-1"></i>تم</span>'
+            : '<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-muted text-muted-foreground"><i data-lucide="x" class="w-3 h-3 ml-1"></i>لم يتم</span>';
+          
+          // تنظيف رقم الجوال
+          const cleanMobile = cart.customer_mobile ? cart.customer_mobile.replace(/[\s\+\-]/g, '') : 'غير محدد';
+          
+          // أول حرف من الاسم
+          const initial = cart.customer_name ? cart.customer_name.charAt(0).toUpperCase() : '؟';
           
           return `
-            <tr class="border-t border-gray-200 hover:bg-gray-50">
-              <td class="px-6 py-4 text-center">
-                <span class="text-body-md text-gray-900 font-medium">${cart.customer_name || 'غير محدد'}</span>
+            <tr class="border-b transition-colors hover:bg-muted/50">
+              <td class="p-4 align-middle text-right">
+                <div class="flex items-center space-x-3 space-x-reverse">
+                  <div class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
+                    <span class="flex h-full w-full items-center justify-center bg-primary text-primary-foreground font-medium">${initial}</span>
+                  </div>
+                  <div class="font-medium text-body-md">${cart.customer_name || 'غير محدد'}</div>
+                </div>
               </td>
-              <td class="px-6 py-4 text-center">
-                <span class="font-mono text-body-md text-gray-900 number">${cart.customer_mobile || 'غير محدد'}</span>
+              <td class="p-4 align-middle text-center">
+                <div class="font-mono text-body-sm text-muted-foreground number">${cleanMobile}</div>
               </td>
-              <td class="px-6 py-4 text-center">
-                <span class="font-mono text-body-md text-gray-900 number">${cart.total_amount ? cart.total_amount.toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'} ${cart.currency || 'SAR'}</span>
+              <td class="p-4 align-middle text-center">
+                <div class="font-mono font-medium number">${cart.total_amount ? cart.total_amount.toLocaleString('en-US', {minimumFractionDigits: 0}) : '0'}</div>
               </td>
-              <td class="px-6 py-4 text-center">
-                <span class="text-body-md text-gray-900 number">${cart.items_count || 0}</span>
+              <td class="p-4 align-middle text-center">
+                ${statusBadge}
               </td>
-              <td class="px-6 py-4 text-center">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
-                  ${sendingStatus}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-center">
-                <span class="text-body-sm text-gray-600">${timeAgo}</span>
+              <td class="p-4 align-middle text-center">
+                <div class="text-body-sm text-muted-foreground">${timeAgo}</div>
               </td>
             </tr>
           `;
         }).join('');
+        
+        // إعادة تهيئة الأيقونات
+        lucide.createIcons();
       }
 
       // حساب الوقت المنقضي

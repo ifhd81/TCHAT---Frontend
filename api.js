@@ -36,28 +36,28 @@ async function loadSystemStats() {
 // تحميل جميع أرقام WhatsApp من Meta
 async function loadMetaPhoneNumbers() {
   try {
-    const response = await fetch(`${API_BASE_URL}/meta/phone-numbers`);
-    const data = await response.json();
+    const data = await apiRequest('/meta/phone-numbers');
     
     console.log('Meta Phone Numbers Response:', data);
     
-    if (data.success && data.data) {
+    if (data.success && Array.isArray(data.data)) {
       return data.data;
+    } else if (data.success && data.data) {
+      return [data.data];
     } else {
       console.error('فشل في جلب أرقام Meta:', data);
-      return [getDefaultWhatsAppStats()];
+      return [];
     }
   } catch (error) {
     console.error('خطأ في تحميل أرقام Meta:', error);
-    return [getDefaultWhatsAppStats()];
+    throw error;
   }
 }
 
 // تحميل إحصائيات WhatsApp
 async function loadWhatsAppStats() {
   try {
-    const response = await fetch(`${API_BASE_URL}/stats/whatsapp`);
-    const data = await response.json();
+    const data = await apiRequest('/stats/whatsapp');
     
     console.log('WhatsApp Stats Response:', data);
     
@@ -109,8 +109,7 @@ async function loadWhatsAppWebhooks(limit = 10) {
 // تحميل السلات المتروكة
 async function loadAbandonedCarts(limit = 20) {
   try {
-    const response = await fetch(`${API_BASE_URL}/abandoned-carts?limit=${limit}`);
-    const data = await response.json();
+    const data = await apiRequest(`/abandoned-carts?limit=${limit}`);
     
     console.log('Abandoned Carts Response:', data);
     

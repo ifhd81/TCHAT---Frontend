@@ -20,67 +20,48 @@ export default {
         medium: "600",
       },
       colors: {
-        // النظام الجديد - Indigo Based
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#4f46e5", // Indigo-600
-          foreground: "#ffffff",
-          hover: "#4338ca", // Indigo-700
-          50: "#eef2ff",
-          500: "#6366f1", // Indigo-500
-          600: "#4f46e5", // Indigo-600
-          700: "#4338ca", // Indigo-700
-        },
-        background: "#ffffff", // أبيض
-        foreground: "#1f2937", // Gray-800
-        card: {
-          DEFAULT: "#ffffff",
-          foreground: "#1f2937",
-        },
-        popover: {
-          DEFAULT: "#ffffff", 
-          foreground: "#1f2937",
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: "#f9fafb", // Gray-50
-          foreground: "#1f2937",
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
         },
         muted: {
-          DEFAULT: "#f3f4f6", // Gray-100
-          foreground: "#6b7280", // Gray-500
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "#f3f4f6",
-          foreground: "#1f2937",
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
         },
-        border: "#e5e7eb", // Gray-200
-        input: "#e5e7eb", // Gray-200  
-        ring: "#6366f1", // Indigo-500
-        // ألوان الحالة
-        success: "#10b981", // Emerald-500
-        warning: "#f59e0b", // Amber-500
-        destructive: {
-          DEFAULT: "#ef4444", // Red-500
-          foreground: "#ffffff",
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
         },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        success: "#10b981",
+        warning: "#f59e0b",
         error: "#ef4444",
-        // ألوان الرسوم البيانية
         chart: {
-          1: "#10b981", // أخضر
-          2: "#3b82f6", // أزرق  
-          3: "#8b5cf6", // بنفسجي
-          4: "#f59e0b", // برتقالي
-          5: "#ef4444", // أحمر
-        },
-        // Sidebar colors
-        sidebar: {
-          DEFAULT: "rgba(255, 255, 255, 0.95)",
-          foreground: "#1f2937",
-          primary: "#4f46e5",
-          "primary-foreground": "#ffffff",
-          accent: "#eef2ff", // Indigo-50
-          "accent-foreground": "#4f46e5",
-          border: "rgba(79, 70, 229, 0.1)",
-          ring: "#6366f1",
+          1: "hsl(var(--chart-1))",
+          2: "hsl(var(--chart-2))",
+          3: "hsl(var(--chart-3))",
+          4: "hsl(var(--chart-4))",
+          5: "hsl(var(--chart-5))",
         },
       },
     },

@@ -526,6 +526,115 @@
       updateBatchPreview();
     }
 
+    // معالجة رفع ملف CSV
+    function handleCSVUpload(event) {
+      const file = event.target.files[0];
+      
+      if (!file) {
+        selectedRecipients = [];
+        updateRecipientsPreview();
+        updateBatchPreview();
+        return;
+      }
+
+      if (!file.name.endsWith('.csv')) {
+        alert('يرجى رفع ملف CSV فقط');
+        event.target.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        try {
+          const text = e.target.result;
+          const lines = text.split('\n').filter(line => line.trim());
+          selectedRecipients = [];
+
+          // تخطي السطر الأول إذا كان يحتوي على رؤوس الأعمدة
+          const startIndex = lines[0].toLowerCase().includes('phone') || lines[0].toLowerCase().includes('name') || lines[0].toLowerCase().includes('رقم') || lines[0].toLowerCase().includes('اسم') ? 1 : 0;
+
+          for (let i = startIndex; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+
+            // دعم الفواصل المختلفة (comma, semicolon, tab)
+            const separator = line.includes(';') ? ';' : line.includes('\t') ? '\t' : ',';
+            const parts = line.split(separator).map(part => part.trim().replace(/^["']+|["']+$/g, '')); // إزالة علامات الاقتباس فقط من البداية والنهاية
+
+            if (parts.length === 0) continue;
+
+            let phone = '';
+            let name = '';
+
+            if (parts.length === 1) {
+              // رقم فقط - تنظيف الرقم من المسافات والرموز
+              phone = parts[0].replace(/[\s\-\+]/g, '');
+            } else if (parts.length >= 2) {
+              // رقم واسم (يمكن أن يكون الرقم في العمود الأول أو الثاني)
+              const cleanPart0 = parts[0].replace(/[\s\-\+]/g, '');
+              const cleanPart1 = parts[1].replace(/[\s\-\+]/g, '');
+              
+              if (/^966\d{9}$/.test(cleanPart0)) {
+                // العمود الأول رقم صحيح
+                phone = cleanPart0;
+                name = parts[1]; // الاحتفاظ بالمسافات في الاسم
+              } else if (/^966\d{9}$/.test(cleanPart1)) {
+                // العمود الثاني رقم صحيح
+                name = parts[0]; // الاحتفاظ بالمسافات في الاسم
+                phone = cleanPart1;
+              } else {
+                // محاولة تنظيف الرقم
+                phone = cleanPart0.replace(/^0+/, ''); // إزالة الأصفار من البداية
+                if (!phone.startsWith('966')) {
+                  phone = '966' + phone;
+                }
+                name = parts[1]; // الاحتفاظ بالمسافات في الاسم
+              }
+            }
+
+            // تنظيف الرقم النهائي (إزالة كل شيء ما عدا الأرقام)
+            phone = phone.replace(/[^\d]/g, '');
+            
+            // محاولة تصحيح الأرقام التي تبدأ بـ 05
+            if (phone.startsWith('05') && phone.length === 10) {
+              phone = '966' + phone.substring(1);
+            } else if (phone.startsWith('5') && phone.length === 9) {
+              phone = '966' + phone;
+            }
+
+            // تنظيف الاسم (إزالة المسافات الزائدة فقط)
+            name = name.trim().replace(/\s+/g, ' ');
+
+            // التحقق من صحة الرقم
+            if (/^966\d{9}$/.test(phone)) {
+              selectedRecipients.push({
+                customer_id: 0,
+                phone_number: phone,
+                customer_name: name || `عميل ${phone.slice(-4)}`
+              });
+            }
+          }
+
+          if (selectedRecipients.length === 0) {
+            alert('لم يتم العثور على أرقام صحيحة في الملف.\n\nالتنسيق المطلوب:\n- رقم الهاتف يجب أن يبدأ بـ 966 أو 05\n- مثال: 966501234567 أو 0501234567\n- يمكن إضافة الاسم في العمود الثاني');
+          } else {
+            updateRecipientsPreview();
+            updateBatchPreview();
+          }
+        } catch (error) {
+          console.error('خطأ في قراءة ملف CSV:', error);
+          alert('حدث خطأ في قراءة الملف. تأكد من أن الملف بصيغة CSV صحيحة.');
+        }
+      };
+
+      reader.onerror = function() {
+        alert('فشل في قراءة الملف');
+      };
+
+      reader.readAsText(file, 'UTF-8');
+    }
+
     // تحديث معاينة المستقبلين
     function updateRecipientsPreview() {
       const previewEl = document.getElementById('recipients-preview');
@@ -1094,6 +1203,9 @@
       // إضافة مستمعات للتحديث التلقائي
       document.getElementById('batch-size').addEventListener('change', updateBatchPreview);
       document.getElementById('batch-interval').addEventListener('change', updateBatchPreview);
+      
+      // إضافة مستمع لرفع ملف CSV
+      document.getElementById('csv-file').addEventListener('change', handleCSVUpload);
     });
 
     function logout() {

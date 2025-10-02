@@ -334,7 +334,7 @@
         
         html += `
           <tr class="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer" onclick="showWebhookDetails(${actualIndex})">
-            <td class="p-3 text-body-sm number">${time}</td>
+            <td class="p-3 text-body-sm">${time}</td>
             <td class="p-3 text-body-sm">${eventType}</td>
             <td class="p-3 text-body-sm">${source}</td>
             <td class="p-3">${status}</td>
@@ -478,20 +478,31 @@
 
     function formatDateTime(dateString) {
       if (!dateString) return '-';
-      const date = new Date(dateString);
-      const now = new Date();
       
+      // تحليل التاريخ بشكل صحيح
+      let date = new Date(dateString);
+      
+      // التحقق من صحة التاريخ
+      if (isNaN(date.getTime())) {
+        return '-';
+      }
+      
+      const now = new Date();
       const diffMs = now - date;
       const diffMins = Math.floor(diffMs / 60000);
       const diffHours = Math.floor(diffMs / 3600000);
       const diffDays = Math.floor(diffMs / 86400000);
       
+      // عرض نسبي للتواريخ الحديثة
       if (diffMins < 1) return 'الآن';
+      if (diffMins === 1) return 'منذ دقيقة واحدة';
       if (diffMins < 60) return `منذ ${diffMins} دقيقة`;
+      if (diffHours === 1) return 'منذ ساعة واحدة';
       if (diffHours < 24) return `منذ ${diffHours} ساعة`;
+      if (diffDays === 1) return 'منذ يوم واحد';
       if (diffDays < 7) return `منذ ${diffDays} يوم`;
       
-      // تنسيق مخصص للتاريخ
+      // تنسيق مخصص للتواريخ القديمة
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
@@ -503,17 +514,26 @@
 
     function getTimeAgo(dateString) {
       if (!dateString) return '-';
-      const date = new Date(dateString);
-      const now = new Date();
       
+      let date = new Date(dateString);
+      
+      // التحقق من صحة التاريخ
+      if (isNaN(date.getTime())) {
+        return '-';
+      }
+      
+      const now = new Date();
       const diffMs = now - date;
       const diffMins = Math.floor(diffMs / 60000);
       const diffHours = Math.floor(diffMs / 3600000);
       const diffDays = Math.floor(diffMs / 86400000);
       
       if (diffMins < 1) return 'الآن';
+      if (diffMins === 1) return 'دقيقة واحدة';
       if (diffMins < 60) return `${diffMins} دقيقة`;
+      if (diffHours === 1) return 'ساعة واحدة';
       if (diffHours < 24) return `${diffHours} ساعة`;
+      if (diffDays === 1) return 'يوم واحد';
       return `${diffDays} يوم`;
     }
   </script>

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TCHAT - سجل الويب هوك</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="./api.js"></script>
+</head>
+<body class="rtl min-h-screen bg-background" style="font-family: 'LamaSans', sans-serif;">
+  
+  <div class="min-h-screen">
+    
+    <!-- Header -->
+    <header class="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div class="container mx-auto flex h-16 items-center px-4">
+        <div class="flex items-center space-x-2 space-x-reverse">
+          <span class="text-heading-md font-bold">TCHAT</span>
+        </div>
+
+        <div class="flex-1 flex justify-center space-x-3 space-x-reverse">
+          <button
+            id="customers-button"
+            type="button"
+            class="inline-flex items-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <i data-lucide="users" class="h-4 w-4"></i>
+            <span>العملاء</span>
+          </button>
+          <a
+            href="./templates.html"
+            class="inline-flex items-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
+            <span>القوالب</span>
+          </a>
+          <a
+            href="./campaigns.html"
+            class="inline-flex items-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <i data-lucide="megaphone" class="h-4 w-4"></i>
+            <span>الحملات</span>
+          </a>
+          <a
+            href="./chats.html"
+            class="inline-flex items-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative"
+          >
+            <div class="relative">
+              <i data-lucide="message-circle" class="h-4 w-4"></i>
+              <div id="unread-indicator" class="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive hidden"></div>
+            </div>
+            <span>الدردشات</span>
+          </a>
+          <a
+            href="./webhooks.html"
+            class="inline-flex items-center gap-2 rounded-full border border-input bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <i data-lucide="webhook" class="h-4 w-4"></i>
+            <span>سجل الويب هوك</span>
+          </a>
+        </div>
+
+        <div class="flex items-center space-x-4 space-x-reverse">
+          <button onclick="logout()" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+            <i data-lucide="log-out" class="ml-2 h-4 w-4"></i>
+            <span class="text-body-md">تسجيل الخروج</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+      
+      <!-- Page Header -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-heading-xl font-bold mb-2">سجل الويب هوك</h1>
+            <p class="text-body-md text-muted-foreground">عرض جميع أحداث الويب هوك الواردة من WhatsApp وسلة</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="refreshWebhooks()" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground">
+              <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+              <span>تحديث</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid gap-4 md:grid-cols-3 mb-6">
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+          <div class="p-6 flex flex-row items-center justify-between space-y-0 pb-2">
+            <h3 class="tracking-tight text-body-md font-medium">إجمالي الأحداث</h3>
+            <i data-lucide="webhook" class="h-4 w-4 text-muted-foreground"></i>
+          </div>
+          <div class="p-6 pt-0">
+            <div class="text-heading-xl font-bold number" id="total-webhooks">0</div>
+            <p class="text-body-sm text-muted-foreground">حدث webhook</p>
+          </div>
+        </div>
+
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+          <div class="p-6 flex flex-row items-center justify-between space-y-0 pb-2">
+            <h3 class="tracking-tight text-body-md font-medium">أحداث اليوم</h3>
+            <i data-lucide="calendar" class="h-4 w-4 text-muted-foreground"></i>
+          </div>
+          <div class="p-6 pt-0">
+            <div class="text-heading-xl font-bold number" id="today-webhooks">0</div>
+            <p class="text-body-sm text-muted-foreground">حدث جديد</p>
+          </div>
+        </div>
+
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+          <div class="p-6 flex flex-row items-center justify-between space-y-0 pb-2">
+            <h3 class="tracking-tight text-body-md font-medium">آخر حدث</h3>
+            <i data-lucide="clock" class="h-4 w-4 text-muted-foreground"></i>
+          </div>
+          <div class="p-6 pt-0">
+            <div class="text-body-lg font-bold" id="last-webhook-time">-</div>
+            <p class="text-body-sm text-muted-foreground">منذ</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Webhooks Table -->
+      <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+        <div class="p-6">
+          <h2 class="text-heading-lg font-semibold mb-4">سجل الأحداث</h2>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+              <thead>
+                <tr class="border-b border-border">
+                  <th class="text-right p-3 text-body-sm font-medium text-muted-foreground">الوقت</th>
+                  <th class="text-right p-3 text-body-sm font-medium text-muted-foreground">نوع الحدث</th>
+                  <th class="text-right p-3 text-body-sm font-medium text-muted-foreground">المصدر</th>
+                  <th class="text-right p-3 text-body-sm font-medium text-muted-foreground">الحالة</th>
+                  <th class="text-right p-3 text-body-sm font-medium text-muted-foreground">التفاصيل</th>
+                </tr>
+              </thead>
+              <tbody id="webhooks-table-body">
+                <tr>
+                  <td colspan="5" class="text-center p-6 text-body-sm text-muted-foreground">
+                    جاري تحميل البيانات...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Modal for Webhook Details -->
+  <div id="webhook-modal" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 hidden">
+    <div class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl max-h-[90vh] overflow-auto rounded-lg border bg-card p-6 shadow-lg">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-heading-lg font-semibold">تفاصيل الويب هوك</h3>
+        <button onclick="closeWebhookModal()" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent">
+          <i data-lucide="x" class="h-4 w-4"></i>
+        </button>
+      </div>
+      
+      <div id="webhook-details" class="space-y-4">
+        <!-- Details will be inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // حالة الصفحة
+    let webhooksData = [];
+    let currentPage = 1;
+    const webhooksPerPage = 50;
+
+    // تسجيل الخروج
+    function logout() {
+      localStorage.removeItem('tchat_logged_in');
+      localStorage.removeItem('tchat_token');
+      window.location.href = './login.html';
+    }
+
+    // التحقق من تسجيل الدخول
+    if (!localStorage.getItem('tchat_logged_in')) {
+      window.location.href = './login.html';
+    }
+
+    // تحميل البيانات عند تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', async function() {
+      lucide.createIcons();
+      await loadWebhooksData();
+      
+      // التحقق من المحادثات غير المقروءة
+      checkUnreadConversations();
+
+      // إضافة مستمع لزر العملاء
+      document.getElementById('customers-button').addEventListener('click', function() {
+        window.location.href = './customers.html';
+      });
+    });
+
+    // تحميل بيانات الويب هوك
+    async function loadWebhooksData() {
+      try {
+        const data = await loadWhatsAppWebhooks(100);
+        
+        if (data && data.data) {
+          webhooksData = data.data;
+          
+          // تحديث الإحصائيات
+          updateWebhookStats();
+          
+          // عرض الجدول
+          displayWebhooksTable();
+        } else {
+          console.error('لا توجد بيانات webhook');
+          document.getElementById('webhooks-table-body').innerHTML = `
+            <tr>
+              <td colspan="5" class="text-center p-6 text-body-sm text-muted-foreground">
+                لا توجد أحداث webhook حتى الآن
+              </td>
+            </tr>
+          `;
+        }
+      } catch (error) {
+        console.error('خطأ في تحميل بيانات webhook:', error);
+        document.getElementById('webhooks-table-body').innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center p-6 text-body-sm text-destructive">
+              حدث خطأ في تحميل البيانات
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    // تحديث إحصائيات الويب هوك
+    function updateWebhookStats() {
+      const totalWebhooks = webhooksData.length;
+      document.getElementById('total-webhooks').textContent = totalWebhooks;
+
+      // حساب أحداث اليوم
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayWebhooks = webhooksData.filter(webhook => {
+        const webhookDate = new Date(webhook.created_at);
+        webhookDate.setHours(0, 0, 0, 0);
+        return webhookDate >= today;
+      }).length;
+      document.getElementById('today-webhooks').textContent = todayWebhooks;
+
+      // آخر حدث
+      if (webhooksData.length > 0) {
+        const lastWebhook = webhooksData[0];
+        const timeAgo = getTimeAgo(lastWebhook.created_at);
+        document.getElementById('last-webhook-time').textContent = timeAgo;
+      }
+    }
+
+    // عرض جدول الويب هوك
+    function displayWebhooksTable() {
+      const tbody = document.getElementById('webhooks-table-body');
+      
+      if (webhooksData.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center p-6 text-body-sm text-muted-foreground">
+              لا توجد أحداث webhook حتى الآن
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      let html = '';
+      webhooksData.forEach((webhook, index) => {
+        const eventType = getEventTypeArabic(webhook.event_type);
+        const source = getSourceBadge(webhook);
+        const status = getStatusBadge(webhook.status);
+        const time = formatDateTime(webhook.created_at);
+        
+        html += `
+          <tr class="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer" onclick="showWebhookDetails(${index})">
+            <td class="p-3 text-body-sm number">${time}</td>
+            <td class="p-3 text-body-sm">${eventType}</td>
+            <td class="p-3 text-body-sm">${source}</td>
+            <td class="p-3">${status}</td>
+            <td class="p-3">
+              <button class="inline-flex items-center gap-1 text-body-sm text-primary hover:underline">
+                <span>عرض التفاصيل</span>
+                <i data-lucide="chevron-left" class="h-3 w-3"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    // عرض تفاصيل الويب هوك
+    function showWebhookDetails(index) {
+      const webhook = webhooksData[index];
+      const modal = document.getElementById('webhook-modal');
+      const details = document.getElementById('webhook-details');
+      
+      const eventType = getEventTypeArabic(webhook.event_type);
+      const time = formatDateTime(webhook.created_at);
+      
+      let html = `
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-body-sm text-muted-foreground mb-1">نوع الحدث</p>
+              <p class="text-body-md font-medium">${eventType}</p>
+            </div>
+            <div>
+              <p class="text-body-sm text-muted-foreground mb-1">الوقت</p>
+              <p class="text-body-md font-medium number">${time}</p>
+            </div>
+            <div>
+              <p class="text-body-sm text-muted-foreground mb-1">المصدر</p>
+              <p class="text-body-md font-medium">${webhook.source || 'WhatsApp'}</p>
+            </div>
+            <div>
+              <p class="text-body-sm text-muted-foreground mb-1">الحالة</p>
+              <p class="text-body-md font-medium">${webhook.status || 'تم المعالجة'}</p>
+            </div>
+          </div>
+          
+          <div>
+            <p class="text-body-sm text-muted-foreground mb-2">البيانات الأولية (JSON)</p>
+            <div class="rounded-md bg-muted p-4 overflow-auto max-h-96">
+              <pre class="text-body-xs number">${JSON.stringify(JSON.parse(webhook.payload), null, 2)}</pre>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      details.innerHTML = html;
+      modal.classList.remove('hidden');
+    }
+
+    // إغلاق نافذة التفاصيل
+    function closeWebhookModal() {
+      document.getElementById('webhook-modal').classList.add('hidden');
+    }
+
+    // تحديث البيانات
+    async function refreshWebhooks() {
+      await loadWebhooksData();
+    }
+
+    // دوال مساعدة
+    function getEventTypeArabic(eventType) {
+      const types = {
+        'message': 'رسالة واردة',
+        'message_status': 'حالة الرسالة',
+        'order.created': 'طلب جديد',
+        'order.updated': 'تحديث طلب',
+        'order.cancelled': 'إلغاء طلب',
+        'abandoned.cart': 'سلة متروكة'
+      };
+      return types[eventType] || eventType || 'غير محدد';
+    }
+
+    function getSourceBadge(webhook) {
+      const source = webhook.source || 'whatsapp';
+      const badges = {
+        'whatsapp': '<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-800">WhatsApp</span>',
+        'salla': '<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800">سلة</span>'
+      };
+      return badges[source] || `<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800">${source}</span>`;
+    }
+
+    function getStatusBadge(status) {
+      const badges = {
+        'processed': '<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-800">تمت المعالجة</span>',
+        'pending': '<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-yellow-100 text-yellow-800">قيد الانتظار</span>',
+        'failed': '<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-red-100 text-red-800">فشلت</span>'
+      };
+      return badges[status] || badges['processed'];
+    }
+
+    function formatDateTime(dateString) {
+      if (!dateString) return '-';
+      const date = new Date(dateString);
+      const now = new Date();
+      
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+      
+      if (diffMins < 1) return 'الآن';
+      if (diffMins < 60) return `منذ ${diffMins} دقيقة`;
+      if (diffHours < 24) return `منذ ${diffHours} ساعة`;
+      if (diffDays < 7) return `منذ ${diffDays} يوم`;
+      
+      return date.toLocaleDateString('ar-SA', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function getTimeAgo(dateString) {
+      if (!dateString) return '-';
+      const date = new Date(dateString);
+      const now = new Date();
+      
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+      
+      if (diffMins < 1) return 'الآن';
+      if (diffMins < 60) return `${diffMins} دقيقة`;
+      if (diffHours < 24) return `${diffHours} ساعة`;
+      return `${diffDays} يوم`;
+    }
+  </script>
+</body>
+</html>
+

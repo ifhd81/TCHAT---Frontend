@@ -29,6 +29,7 @@ export default defineConfig({
         customers: resolve(__dirname, 'customers.html'),
         campaigns: resolve(__dirname, 'campaigns.html'),
         templates: resolve(__dirname, 'templates.html'),
+        webhooks: resolve(__dirname, 'webhooks.html'),
       },
       output: {
         manualChunks: undefined

@@ -151,6 +151,39 @@
             </table>
           </div>
         </div>
+
+        <!-- Pagination -->
+        <div class="flex items-center justify-between gap-4 border-t border-border px-6 py-4">
+          <div class="flex items-center gap-4 text-body-sm text-muted-foreground">
+            <div class="flex items-center gap-2 whitespace-nowrap">
+              <span>عدد السجلات</span>
+              <select id="limit-select" class="rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+            <div class="whitespace-nowrap">
+              <span>عرض </span>
+              <span id="showing-start" class="number">0</span>
+              <span> - </span>
+              <span id="showing-end" class="number">0</span>
+              <span> من </span>
+              <span id="total-webhooks-display" class="number">0</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 sm:justify-end">
+            <button id="prev-page" onclick="previousPage()" class="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium text-muted-foreground transition-colors disabled:opacity-40 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" disabled>
+              <i data-lucide="chevron-right" class="h-4 w-4 ml-1"></i>
+              <span>السابق</span>
+            </button>
+            <button id="next-page" onclick="nextPage()" class="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium text-muted-foreground transition-colors disabled:opacity-40 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" disabled>
+              <span>التالي</span>
+              <i data-lucide="chevron-left" class="h-4 w-4 mr-1"></i>
+            </button>
+          </div>
+        </div>
       </div>
 
     </main>
@@ -176,7 +209,7 @@
     // حالة الصفحة
     let webhooksData = [];
     let currentPage = 1;
-    const webhooksPerPage = 50;
+    let webhooksPerPage = 50;
 
     // تسجيل الخروج
     function logout() {
@@ -201,6 +234,14 @@
       // إضافة مستمع لزر العملاء
       document.getElementById('customers-button').addEventListener('click', function() {
         window.location.href = './customers.html';
+      });
+
+      // إضافة مستمع لتغيير عدد السجلات
+      document.getElementById('limit-select').addEventListener('change', function() {
+        webhooksPerPage = parseInt(this.value);
+        currentPage = 1;
+        displayWebhooksTable();
+        updatePaginationInfo();
       });
     });
 
@@ -274,18 +315,25 @@
             </td>
           </tr>
         `;
+        updatePaginationInfo();
         return;
       }
 
+      // حساب البيانات للصفحة الحالية
+      const startIndex = (currentPage - 1) * webhooksPerPage;
+      const endIndex = startIndex + webhooksPerPage;
+      const currentWebhooks = webhooksData.slice(startIndex, endIndex);
+
       let html = '';
-      webhooksData.forEach((webhook, index) => {
+      currentWebhooks.forEach((webhook, displayIndex) => {
+        const actualIndex = startIndex + displayIndex;
         const eventType = getEventTypeArabic(webhook.event_type);
         const source = getSourceBadge(webhook);
         const status = getStatusBadge(webhook.status);
         const time = formatDateTime(webhook.created_at);
         
         html += `
-          <tr class="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer" onclick="showWebhookDetails(${index})">
+          <tr class="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer" onclick="showWebhookDetails(${actualIndex})">
             <td class="p-3 text-body-sm number">${time}</td>
             <td class="p-3 text-body-sm">${eventType}</td>
             <td class="p-3 text-body-sm">${source}</td>
@@ -302,6 +350,7 @@
 
       tbody.innerHTML = html;
       lucide.createIcons();
+      updatePaginationInfo();
     }
 
     // عرض تفاصيل الويب هوك
@@ -355,6 +404,45 @@
     // تحديث البيانات
     async function refreshWebhooks() {
       await loadWebhooksData();
+    }
+
+    // تحديث معلومات الـ pagination
+    function updatePaginationInfo() {
+      const totalWebhooks = webhooksData.length;
+      const totalPages = Math.ceil(totalWebhooks / webhooksPerPage);
+      const startIndex = (currentPage - 1) * webhooksPerPage + 1;
+      const endIndex = Math.min(currentPage * webhooksPerPage, totalWebhooks);
+
+      // تحديث النصوص
+      document.getElementById('showing-start').textContent = totalWebhooks > 0 ? startIndex : 0;
+      document.getElementById('showing-end').textContent = endIndex;
+      document.getElementById('total-webhooks-display').textContent = totalWebhooks;
+
+      // تحديث حالة الأزرار
+      const prevBtn = document.getElementById('prev-page');
+      const nextBtn = document.getElementById('next-page');
+
+      prevBtn.disabled = currentPage === 1;
+      nextBtn.disabled = currentPage >= totalPages || totalWebhooks === 0;
+
+      lucide.createIcons();
+    }
+
+    // الانتقال للصفحة التالية
+    function nextPage() {
+      const totalPages = Math.ceil(webhooksData.length / webhooksPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        displayWebhooksTable();
+      }
+    }
+
+    // الانتقال للصفحة السابقة
+    function previousPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        displayWebhooksTable();
+      }
     }
 
     // دوال مساعدة

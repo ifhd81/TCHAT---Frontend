@@ -327,7 +327,7 @@
       let html = '';
       currentWebhooks.forEach((webhook, displayIndex) => {
         const actualIndex = startIndex + displayIndex;
-        const eventType = getEventTypeArabic(webhook.event_type);
+        const eventType = getEventTypeArabic(webhook);
         const source = getSourceBadge(webhook);
         const status = getStatusBadge(webhook.status);
         const time = formatDateTime(webhook.created_at);
@@ -359,7 +359,7 @@
       const modal = document.getElementById('webhook-modal');
       const details = document.getElementById('webhook-details');
       
-      const eventType = getEventTypeArabic(webhook.event_type);
+      const eventType = getEventTypeArabic(webhook);
       const time = formatDateTime(webhook.created_at);
       
       let html = `
@@ -446,16 +446,92 @@
     }
 
     // دوال مساعدة
-    function getEventTypeArabic(eventType) {
-      const types = {
-        'message': 'رسالة واردة',
-        'message_status': 'حالة الرسالة',
-        'order.created': 'طلب جديد',
-        'order.updated': 'تحديث طلب',
-        'order.cancelled': 'إلغاء طلب',
-        'abandoned.cart': 'سلة متروكة'
-      };
-      return types[eventType] || eventType || 'غير محدد';
+    function getEventTypeArabic(webhook) {
+      // إذا كان هناك event_type مباشر
+      if (webhook.event_type) {
+        const types = {
+          'message': 'رسالة واردة',
+          'message_status': 'حالة الرسالة',
+          'order.created': 'طلب جديد',
+          'order.updated': 'تحديث طلب',
+          'order.cancelled': 'إلغاء طلب',
+          'abandoned.cart': 'سلة متروكة'
+        };
+        if (types[webhook.event_type]) {
+          return types[webhook.event_type];
+        }
+      }
+      
+      // التحقق من message_type و message_status
+      if (webhook.message_status) {
+        const statusTypes = {
+          'sent': 'تم الإرسال',
+          'delivered': 'تم التوصيل',
+          'read': 'تمت القراءة',
+          'failed': 'فشل الإرسال'
+        };
+        return statusTypes[webhook.message_status] || `حالة: ${webhook.message_status}`;
+      }
+      
+      if (webhook.message_type) {
+        const messageTypes = {
+          'text': 'رسالة نصية',
+          'image': 'صورة',
+          'video': 'فيديو',
+          'audio': 'صوت',
+          'document': 'مستند',
+          'sticker': 'ملصق',
+          'location': 'موقع',
+          'contacts': 'جهات اتصال',
+          'interactive': 'رسالة تفاعلية',
+          'button': 'زر',
+          'template': 'قالب'
+        };
+        return messageTypes[webhook.message_type] || `رسالة: ${webhook.message_type}`;
+      }
+      
+      // محاولة استخراج النوع من الـ payload
+      if (webhook.payload) {
+        try {
+          const payload = typeof webhook.payload === 'string' ? JSON.parse(webhook.payload) : webhook.payload;
+          
+          // التحقق من وجود messages في payload
+          if (payload.entry && payload.entry[0] && payload.entry[0].changes) {
+            const changes = payload.entry[0].changes[0];
+            if (changes.value && changes.value.messages && changes.value.messages[0]) {
+              const msg = changes.value.messages[0];
+              const messageTypes = {
+                'text': 'رسالة نصية',
+                'image': 'صورة',
+                'video': 'فيديو',
+                'audio': 'صوت',
+                'document': 'مستند',
+                'sticker': 'ملصق',
+                'location': 'موقع',
+                'contacts': 'جهات اتصال',
+                'interactive': 'رسالة تفاعلية'
+              };
+              return messageTypes[msg.type] || `رسالة: ${msg.type}`;
+            }
+            
+            // التحقق من وجود statuses
+            if (changes.value && changes.value.statuses && changes.value.statuses[0]) {
+              const status = changes.value.statuses[0].status;
+              const statusTypes = {
+                'sent': 'تم الإرسال',
+                'delivered': 'تم التوصيل',
+                'read': 'تمت القراءة',
+                'failed': 'فشل الإرسال'
+              };
+              return statusTypes[status] || `حالة: ${status}`;
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing payload:', e);
+        }
+      }
+      
+      return 'webhook واتساب';
     }
 
     function getSourceBadge(webhook) {

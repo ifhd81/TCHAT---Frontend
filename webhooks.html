@@ -362,6 +362,123 @@
       const eventType = getEventTypeArabic(webhook);
       const time = formatDateTime(webhook.created_at);
       
+      // استخراج معلومات إضافية من الـ payload
+      let additionalInfo = '';
+      let messageContent = '';
+      let phoneNumbers = '';
+      
+      try {
+        const payload = typeof webhook.payload === 'string' ? JSON.parse(webhook.payload) : webhook.payload;
+        
+        // استخراج معلومات الرسالة
+        if (payload.entry && payload.entry[0] && payload.entry[0].changes) {
+          const changes = payload.entry[0].changes[0];
+          
+          // رسائل واردة
+          if (changes.value && changes.value.messages && changes.value.messages[0]) {
+            const msg = changes.value.messages[0];
+            
+            // رقم المرسل
+            if (msg.from) {
+              phoneNumbers = `
+                <div class="col-span-2">
+                  <p class="text-body-sm text-muted-foreground mb-1">رقم المرسل</p>
+                  <p class="text-body-md font-medium number" dir="ltr">+${msg.from}</p>
+                </div>
+              `;
+            }
+            
+            // محتوى الرسالة
+            if (msg.text && msg.text.body) {
+              messageContent = `
+                <div class="col-span-2">
+                  <p class="text-body-sm text-muted-foreground mb-1">محتوى الرسالة</p>
+                  <div class="rounded-md bg-muted/50 p-3 mt-1">
+                    <p class="text-body-md">${msg.text.body}</p>
+                  </div>
+                </div>
+              `;
+            } else if (msg.image && msg.image.caption) {
+              messageContent = `
+                <div class="col-span-2">
+                  <p class="text-body-sm text-muted-foreground mb-1">تعليق الصورة</p>
+                  <div class="rounded-md bg-muted/50 p-3 mt-1">
+                    <p class="text-body-md">${msg.image.caption}</p>
+                  </div>
+                </div>
+              `;
+            } else if (msg.video && msg.video.caption) {
+              messageContent = `
+                <div class="col-span-2">
+                  <p class="text-body-sm text-muted-foreground mb-1">تعليق الفيديو</p>
+                  <div class="rounded-md bg-muted/50 p-3 mt-1">
+                    <p class="text-body-md">${msg.video.caption}</p>
+                  </div>
+                </div>
+              `;
+            } else if (msg.document) {
+              messageContent = `
+                <div class="col-span-2">
+                  <p class="text-body-sm text-muted-foreground mb-1">اسم الملف</p>
+                  <div class="rounded-md bg-muted/50 p-3 mt-1">
+                    <p class="text-body-md">${msg.document.filename || 'مستند'}</p>
+                    ${msg.document.caption ? `<p class="text-body-sm text-muted-foreground mt-1">${msg.document.caption}</p>` : ''}
+                  </div>
+                </div>
+              `;
+            }
+            
+            // معرف الرسالة
+            if (msg.id) {
+              additionalInfo += `
+                <div>
+                  <p class="text-body-sm text-muted-foreground mb-1">معرف الرسالة</p>
+                  <p class="text-body-sm font-mono">${msg.id}</p>
+                </div>
+              `;
+            }
+          }
+          
+          // حالات الرسائل
+          if (changes.value && changes.value.statuses && changes.value.statuses[0]) {
+            const status = changes.value.statuses[0];
+            
+            if (status.recipient_id) {
+              phoneNumbers = `
+                <div class="col-span-2">
+                  <p class="text-body-sm text-muted-foreground mb-1">رقم المستلم</p>
+                  <p class="text-body-md font-medium number" dir="ltr">+${status.recipient_id}</p>
+                </div>
+              `;
+            }
+            
+            if (status.id) {
+              additionalInfo += `
+                <div>
+                  <p class="text-body-sm text-muted-foreground mb-1">معرف الرسالة</p>
+                  <p class="text-body-sm font-mono">${status.id}</p>
+                </div>
+              `;
+            }
+          }
+          
+          // اسم العميل
+          if (changes.value && changes.value.contacts && changes.value.contacts[0]) {
+            const contact = changes.value.contacts[0];
+            if (contact.profile && contact.profile.name) {
+              additionalInfo += `
+                <div>
+                  <p class="text-body-sm text-muted-foreground mb-1">اسم العميل</p>
+                  <p class="text-body-md font-medium">${contact.profile.name}</p>
+                </div>
+              `;
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Error parsing webhook details:', e);
+      }
+      
       let html = `
         <div class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
@@ -371,22 +488,18 @@
             </div>
             <div>
               <p class="text-body-sm text-muted-foreground mb-1">الوقت</p>
-              <p class="text-body-md font-medium number">${time}</p>
+              <p class="text-body-md font-medium">${time}</p>
             </div>
-            <div>
-              <p class="text-body-sm text-muted-foreground mb-1">المصدر</p>
-              <p class="text-body-md font-medium">${webhook.source || 'WhatsApp'}</p>
-            </div>
-            <div>
-              <p class="text-body-sm text-muted-foreground mb-1">الحالة</p>
-              <p class="text-body-md font-medium">${webhook.status || 'تم المعالجة'}</p>
-            </div>
+            ${phoneNumbers}
+            ${additionalInfo}
           </div>
           
+          ${messageContent}
+          
           <div>
-            <p class="text-body-sm text-muted-foreground mb-2">البيانات الأولية (JSON)</p>
+            <p class="text-body-sm text-muted-foreground mb-2">البيانات الكاملة (JSON)</p>
             <div class="rounded-md bg-muted p-4 overflow-auto max-h-96">
-              <pre class="text-body-xs number">${JSON.stringify(JSON.parse(webhook.payload), null, 2)}</pre>
+              <pre class="text-body-xs" style="direction: ltr; text-align: left;">${JSON.stringify(JSON.parse(webhook.payload), null, 2)}</pre>
             </div>
           </div>
         </div>

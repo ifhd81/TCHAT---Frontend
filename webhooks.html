@@ -190,7 +190,7 @@
   </div>
 
   <!-- Modal for Webhook Details -->
-  <div id="webhook-modal" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 hidden">
+  <div id="webhook-modal" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 hidden" onclick="if(event.target === this) closeWebhookModal()">
     <div class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl max-h-[90vh] overflow-auto rounded-lg border bg-card p-6 shadow-lg">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-heading-lg font-semibold">تفاصيل الويب هوك</h3>
@@ -355,9 +355,24 @@
 
     // عرض تفاصيل الويب هوك
     function showWebhookDetails(index) {
+      console.log('showWebhookDetails called with index:', index);
+      console.log('Total webhooks:', webhooksData.length);
+      
       const webhook = webhooksData[index];
+      console.log('Webhook data:', webhook);
+      
+      if (!webhook) {
+        console.error('Webhook not found at index:', index);
+        return;
+      }
+      
       const modal = document.getElementById('webhook-modal');
       const details = document.getElementById('webhook-details');
+      
+      if (!modal || !details) {
+        console.error('Modal elements not found');
+        return;
+      }
       
       const eventType = getEventTypeArabic(webhook);
       const time = formatDateTime(webhook.created_at);
@@ -479,6 +494,16 @@
         console.error('Error parsing webhook details:', e);
       }
       
+      // تحضير JSON للعرض
+      let jsonDisplay = '';
+      try {
+        const payloadObj = typeof webhook.payload === 'string' ? JSON.parse(webhook.payload) : webhook.payload;
+        jsonDisplay = JSON.stringify(payloadObj, null, 2);
+      } catch (e) {
+        console.error('Error formatting JSON:', e);
+        jsonDisplay = typeof webhook.payload === 'string' ? webhook.payload : JSON.stringify(webhook.payload);
+      }
+      
       let html = `
         <div class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
@@ -499,7 +524,7 @@
           <div>
             <p class="text-body-sm text-muted-foreground mb-2">البيانات الكاملة (JSON)</p>
             <div class="rounded-md bg-muted p-4 overflow-auto max-h-96">
-              <pre class="text-body-xs" style="direction: ltr; text-align: left;">${JSON.stringify(JSON.parse(webhook.payload), null, 2)}</pre>
+              <pre class="text-body-xs" style="direction: ltr; text-align: left; white-space: pre-wrap; word-break: break-word;">${jsonDisplay}</pre>
             </div>
           </div>
         </div>
@@ -507,6 +532,13 @@
       
       details.innerHTML = html;
       modal.classList.remove('hidden');
+      
+      // إعادة تفعيل الأيقونات في المودال
+      setTimeout(() => {
+        lucide.createIcons();
+      }, 50);
+      
+      console.log('Webhook details displayed successfully');
     }
 
     // إغلاق نافذة التفاصيل

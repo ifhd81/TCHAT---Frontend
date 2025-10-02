@@ -195,3 +195,18 @@ async function checkUnreadConversations() {
     return 0;
   }
 }
+
+// حذف جميع سجلات الويب هوك
+async function deleteAllWebhooks() {
+  try {
+    const response = await apiRequest('/whatsapp/webhooks', {
+      method: 'DELETE',
+    });
+    
+    console.log('Delete webhooks response:', response);
+    return response;
+  } catch (error) {
+    console.error('خطأ في حذف سجلات الويب هوك:', error);
+    throw error;
+  }
+}

@@ -697,6 +697,80 @@
             </div>
           `;
           
+        case 'sticker':
+          return `
+            <div class="flex items-center justify-center">
+              ${mediaId ? `
+                <div class="rounded-lg overflow-hidden bg-transparent">
+                  <img 
+                    src="https://tchat-production.up.railway.app/api/v1/media/${mediaId}" 
+                    alt="${content || 'ملصق'}"
+                    class="w-32 h-32 object-contain cursor-pointer"
+                    onclick="openImageModal('https://tchat-production.up.railway.app/api/v1/media/${mediaId}')"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
+                  />
+                  <div class="hidden items-center justify-center p-4 text-muted-foreground">
+                    <div class="text-center space-y-2">
+                      <i data-lucide="sticker" class="h-8 w-8 mx-auto"></i>
+                      <p class="text-body-sm">${content || 'ملصق'}</p>
+                    </div>
+                  </div>
+                </div>
+              ` : `
+                <div class="flex items-center gap-2 text-body-sm p-4">
+                  <i data-lucide="smile" class="h-5 w-5"></i>
+                  <span>${content || 'ملصق'}</span>
+                </div>
+              `}
+            </div>
+          `;
+          
+        case 'location':
+          const coords = mediaId ? mediaId.split(',') : [];
+          const lat = coords[0] || '';
+          const lng = coords[1] || '';
+          const googleMapsUrl = lat && lng ? \`https://www.google.com/maps?q=\${lat},\${lng}\` : '';
+          
+          return \`
+            <div class="space-y-3">
+              <div class="flex items-center gap-2 text-body-sm">
+                <i data-lucide="map-pin" class="h-4 w-4"></i>
+                <span class="font-medium">موقع جغرافي</span>
+              </div>
+              \${lat && lng ? \`
+                <div class="rounded-lg overflow-hidden border border-border bg-muted/20">
+                  <a href="\${googleMapsUrl}" target="_blank" rel="noopener noreferrer" class="block">
+                    <img 
+                      src="https://maps.googleapis.com/maps/api/staticmap?center=\${lat},\${lng}&zoom=15&size=400x200&markers=color:red%7C\${lat},\${lng}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"
+                      alt="خريطة الموقع"
+                      class="w-full h-48 object-cover"
+                      onerror="this.parentElement.innerHTML='<div class=\\'flex items-center justify-center h-48 text-muted-foreground\\'><div class=\\'text-center space-y-2\\'><i data-lucide=\\'map-pin\\' class=\\'h-8 w-8 mx-auto\\'></i><p class=\\'text-body-sm\\'>خريطة الموقع</p></div></div>'"
+                    />
+                  </a>
+                </div>
+                <div class="flex gap-2">
+                  <a 
+                    href="\${googleMapsUrl}" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground px-4 py-2 text-body-sm font-medium hover:bg-primary/90 transition"
+                  >
+                    <i data-lucide="navigation" class="h-4 w-4"></i>
+                    <span>فتح في الخرائط</span>
+                  </a>
+                </div>
+                <p class="text-body-xs text-muted-foreground">
+                  \${content || \`الإحداثيات: \${lat}, \${lng}\`}
+                </p>
+              \` : \`
+                <div class="flex items-center gap-2 text-body-sm">
+                  <i data-lucide="map-pin" class="h-4 w-4"></i>
+                  <span>\${content || 'موقع جغرافي'}</span>
+                </div>
+              \`}
+            </div>
+          \`;
+          
         default:
           return `
             <div class="flex items-center gap-2 text-body-sm">

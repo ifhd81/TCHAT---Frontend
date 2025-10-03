@@ -93,7 +93,7 @@
             </div>
             <div class="p-6 pt-0">
               <div class="text-heading-xl font-bold number" id="total-revenue">0</div>
-              <p class="text-body-sm text-muted-foreground">ريال سعودي</p>
+              <p class="text-body-sm text-muted-foreground" id="revenue-subtitle">من السلات المتروكة المحولة</p>
             </div>
           </div>
 
@@ -328,8 +328,16 @@
             document.getElementById('total-customers-header').textContent = systemStats.total_customers || 0;
             document.getElementById('total-carts-header').textContent = systemStats.total_abandoned_carts || 0;
             document.getElementById('total-messages-header').textContent = systemStats.total_whatsapp_sent || 0;
-            if (systemStats.total_revenue) {
-              document.getElementById('total-revenue').textContent = Number(systemStats.total_revenue).toLocaleString('en-US', { minimumFractionDigits: 0 });
+            
+            // عرض الإيرادات من السلات المتروكة المحولة
+            const totalRevenue = systemStats.total_revenue || 0;
+            const purchasedCarts = systemStats.purchased_carts || 0;
+            document.getElementById('total-revenue').textContent = totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            
+            // تحديث النص التوضيحي
+            const revenueSubtitle = document.getElementById('revenue-subtitle');
+            if (revenueSubtitle) {
+              revenueSubtitle.textContent = `من ${purchasedCarts} سلة متروكة محولة`;
             }
           }
           

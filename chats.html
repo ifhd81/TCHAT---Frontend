@@ -35,9 +35,14 @@
       <div class="border-b border-border p-4">
         <div class="flex items-center justify-between">
           <h2 class="text-heading-md font-semibold">المحادثات</h2>
-          <button onclick="refreshConversations()" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
-            <i data-lucide="refresh-cw" class="h-4 w-4"></i>
-          </button>
+          <div class="flex gap-2">
+            <button onclick="testNotificationSound()" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground hover:bg-accent" title="اختبار الصوت">
+              <i data-lucide="volume-2" class="h-4 w-4"></i>
+            </button>
+            <button onclick="refreshConversations()" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
+              <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+            </button>
+          </div>
         </div>
         <p class="text-body-sm text-muted-foreground mt-1">المحادثات النشطة مع العملاء</p>
       </div>
@@ -117,6 +122,11 @@
 
   </main>
 
+  <!-- صوت التنبيه للرسائل الجديدة -->
+  <audio id="message-sound" preload="auto">
+    <source src="./message-sound-sounds.mp3" type="audio/mpeg">
+  </audio>
+
   <script>
     if (!localStorage.getItem('tchat_logged_in')) {
       window.location.href = './login.html';
@@ -124,6 +134,11 @@
 
     let currentConversationId = null;
     let conversations = [];
+    let previousMessageCount = 0; // لتتبع عدد الرسائل
+    let audioEnabled = false; // لتتبع تفعيل الصوت
+    
+    // تحميل آخر عدد رسائل محفوظ من localStorage
+    let conversationLastCounts = JSON.parse(localStorage.getItem('tchat_conversation_counts') || '{}');
 
     const timeAgo = (value) => {
       if (!value) return '-';
@@ -155,6 +170,33 @@
       try {
         const newConversations = await loadConversations(100);
         
+        // التحقق من وجود محادثات جديدة أو رسائل جديدة
+        let shouldPlaySound = false;
+        
+        if (!showLoading && conversations.length > 0) {
+          // البحث عن محادثات جديدة تماماً
+          const oldIds = new Set(conversations.map(c => c.id));
+          const newConvs = newConversations.filter(c => !oldIds.has(c.id) && !c.is_read);
+          
+          if (newConvs.length > 0) {
+            console.log('🆕 محادثة جديدة!', newConvs);
+            shouldPlaySound = true;
+          }
+          
+          // البحث عن محادثات تحولت من مقروءة إلى غير مقروءة (رسالة جديدة)
+          for (const newConv of newConversations) {
+            const oldConv = conversations.find(c => c.id === newConv.id);
+            if (oldConv) {
+              // تحقق إذا كان هناك رسالة جديدة (last_message_at تغير)
+              if (newConv.last_message_at !== oldConv.last_message_at && !newConv.is_read) {
+                console.log('💬 رسالة جديدة في محادثة:', newConv.customer_name);
+                shouldPlaySound = true;
+                break;
+              }
+            }
+          }
+        }
+        
         // مقارنة البيانات الجديدة مع القديمة لتجنب إعادة العرض غير الضرورية
         const conversationsChanged = JSON.stringify(conversations) !== JSON.stringify(newConversations);
         
@@ -162,6 +204,12 @@
           conversations = newConversations;
           renderConversations();
           console.log('📝 تم تحديث قائمة المحادثات');
+        }
+        
+        // تشغيل صوت التنبيه
+        if (shouldPlaySound) {
+          console.log('🔔 تشغيل صوت للمحادثة الجديدة/الرسالة الجديدة');
+          playNotificationSound();
         }
       } catch (error) {
         console.error('خطأ في تحميل المحادثات:', error);
@@ -187,6 +235,20 @@
         const initial = conv.customer_name && conv.customer_name !== '.' 
           ? conv.customer_name.charAt(0).toUpperCase() 
           : phoneFormatted.charAt(-3) || '؟';
+        
+        // حساب عدد الرسائل الجديدة
+        let newMessageCount = 0;
+        if (isUnread) {
+          const lastKnownCount = conversationLastCounts[conv.id];
+          if (lastKnownCount !== undefined) {
+            // المحادثة تم فتحها سابقاً، احسب الفرق
+            newMessageCount = Math.max(0, conv.message_count - lastKnownCount);
+          } else {
+            // محادثة جديدة تماماً لم يتم فتحها من قبل - اعرض "جديد" فقط
+            // لا نعرض عدد لأنه قد يكون مضللاً
+            newMessageCount = -1; // قيمة خاصة لعرض "جديد" بدون عدد
+          }
+        }
 
         return `
           <div 
@@ -209,7 +271,8 @@
                   </div>
                   <div class="flex items-center justify-between mt-1">
                     <p class="text-body-sm text-muted-foreground number">${phoneFormatted}</p>
-                    ${conv.message_count > 0 ? `<span class="inline-flex items-center justify-center h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs font-medium">${conv.message_count}</span>` : ''}
+                    ${isUnread && newMessageCount === -1 ? `<span class="inline-flex items-center justify-center h-6 px-2 rounded-full bg-destructive text-destructive-foreground text-xs font-medium">جديد</span>` : ''}
+                    ${(newMessageCount > 0 && isUnread) ? `<span class="inline-flex items-center justify-center h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs font-medium">${newMessageCount}</span>` : ''}
                   </div>
                 </div>
               </div>
@@ -250,11 +313,26 @@
       // تحميل وعرض الرسائل مع مؤشر التحميل
       await loadAndRenderMessages(conversationId, true);
       
+      // وضع علامة مقروء تلقائياً عند فتح المحادثة
+      if (!conversation.is_read) {
+        conversation.is_read = true;
+        chatStatus.textContent = 'مقروءة';
+        console.log('✅ تم وضع علامة مقروء على المحادثة تلقائياً');
+      }
+      
+      // حفظ عدد الرسائل الحالي كآخر عدد معروف لهذه المحادثة
+      conversationLastCounts[conversationId] = conversation.message_count;
+      localStorage.setItem('tchat_conversation_counts', JSON.stringify(conversationLastCounts));
+      console.log(`💾 تم حفظ عدد الرسائل: ${conversation.message_count} للمحادثة ${conversationId}`);
+      
       // تحديث حالة المحادثة في القائمة
       document.querySelectorAll('.conversation-item').forEach(item => {
         item.classList.remove('bg-accent');
       });
       document.querySelector(`[data-conversation-id="${conversationId}"]`)?.classList.add('bg-accent');
+      
+      // إعادة رسم القائمة لإزالة العداد الأحمر
+      renderConversations();
       
       // عرض تفاصيل العميل
       await loadAndDisplayCustomerDetails(conversation.customer_id, conversation.phone_number);
@@ -272,6 +350,21 @@
       try {
         const newMessages = await loadConversationMessages(conversationId, 100);
         
+        // التحقق من وجود رسائل واردة جديدة
+        let hasNewIncomingMessage = false;
+        if (newMessages.length > currentMessages.length && !showLoading) {
+          // البحث عن الرسائل الجديدة الواردة فقط
+          const currentIds = new Set(currentMessages.map(m => m.id));
+          const newIncomingMessages = newMessages.filter(msg => 
+            !currentIds.has(msg.id) && msg.direction === 'incoming'
+          );
+          
+          if (newIncomingMessages.length > 0) {
+            hasNewIncomingMessage = true;
+            console.log(`🆕 رسالة واردة جديدة! العدد: ${newIncomingMessages.length}`);
+          }
+        }
+        
         // مقارنة الرسائل الجديدة مع القديمة
         const messagesChanged = JSON.stringify(currentMessages) !== JSON.stringify(newMessages);
         
@@ -279,6 +372,11 @@
           currentMessages = newMessages;
           renderMessages(newMessages);
           console.log(`💬 تم تحديث ${newMessages.length} رسالة في المحادثة ${conversationId}`);
+        }
+        
+        // تشغيل صوت التنبيه إذا كانت هناك رسالة واردة جديدة
+        if (hasNewIncomingMessage) {
+          playNotificationSound();
         }
       } catch (error) {
         console.error('خطأ في تحميل الرسائل:', error);
@@ -371,11 +469,16 @@
       lucide.createIcons();
       loadAndRenderConversations(true); // عرض loading في التحميل الأول
       
-      // تحديث تلقائي كل 30 ثانية للمحادثات (بدون loading indicator)
+      // تفعيل الصوت عند أول تفاعل من المستخدم
+      document.body.addEventListener('click', enableAudio, { once: true });
+      document.body.addEventListener('touchstart', enableAudio, { once: true });
+      document.body.addEventListener('keydown', enableAudio, { once: true });
+      
+      // تحديث تلقائي كل 10 ثواني للمحادثات (بدون loading indicator)
       setInterval(() => {
-        console.log('⏰ تحديث تلقائي - كل 30 ثانية');
+        console.log('⏰ تحديث تلقائي - كل 10 ثواني');
         loadAndRenderConversations(false); // تحديث صامت
-      }, 30000);
+      }, 10000);
       
       // تحديث أسرع للرسائل في المحادثة النشطة (كل 10 ثوان)
       setInterval(() => {
@@ -789,6 +892,72 @@
 
     function viewCustomerCarts(customerId) {
       window.open(`./dashboard.html#abandoned-carts`, '_blank');
+    }
+
+    // تفعيل الصوت عند أول تفاعل من المستخدم
+    function enableAudio() {
+      if (!audioEnabled) {
+        const audio = document.getElementById('message-sound');
+        if (audio) {
+          // تشغيل وإيقاف فوري لتفعيل الصوت
+          audio.play().then(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            audioEnabled = true;
+            console.log('✅ تم تفعيل صوت التنبيه');
+          }).catch(() => {
+            console.log('⚠️ في انتظار تفاعل المستخدم لتفعيل الصوت');
+          });
+        }
+      }
+    }
+
+    function playNotificationSound() {
+      const audio = document.getElementById('message-sound');
+      
+      if (!audio) {
+        console.error('❌ عنصر الصوت غير موجود!');
+        alert('خطأ: ملف الصوت غير موجود');
+        return;
+      }
+      
+      console.log('🔍 حالة الصوت:', {
+        audioEnabled,
+        readyState: audio.readyState,
+        src: audio.src,
+        volume: audio.volume
+      });
+      
+      if (!audioEnabled) {
+        console.log('⚠️ الصوت غير مفعّل - تفعيله الآن...');
+        enableAudio();
+        // إعادة المحاولة بعد ثانية
+        setTimeout(() => playNotificationSound(), 1000);
+        return;
+      }
+      
+      console.log('🔔 محاولة تشغيل صوت التنبيه...');
+      audio.currentTime = 0;
+      audio.volume = 1.0;
+      
+      const playPromise = audio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('✅ تم تشغيل الصوت بنجاح!');
+          })
+          .catch(error => {
+            console.error('🔇 فشل تشغيل الصوت:', error);
+            alert('خطأ في تشغيل الصوت: ' + error.message);
+            audioEnabled = false;
+          });
+      }
+    }
+
+    function testNotificationSound() {
+      console.log('🧪 اختبار الصوت يدوياً...');
+      playNotificationSound();
     }
 
     function logout() {

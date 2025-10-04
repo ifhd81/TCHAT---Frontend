@@ -174,6 +174,9 @@ async function loadConversationMessages(conversationId, limit = 50) {
 }
 
 // فحص المحادثات غير المقروءة
+// متغير لحفظ عدد المحادثات غير المقروءة السابق
+let previousUnreadCount = 0;
+
 async function checkUnreadConversations() {
   try {
     const conversations = await loadConversations(50);
@@ -189,10 +192,31 @@ async function checkUnreadConversations() {
       }
     }
     
+    // تشغيل صوت الإشعار إذا زاد عدد المحادثات غير المقروءة
+    if (unreadCount > previousUnreadCount && previousUnreadCount !== null) {
+      playNotificationSound();
+    }
+    
+    previousUnreadCount = unreadCount;
+    
     return unreadCount;
   } catch (error) {
     console.error('خطأ في فحص المحادثات غير المقروءة:', error);
     return 0;
+  }
+}
+
+// تشغيل صوت الإشعار
+function playNotificationSound() {
+  try {
+    const audio = new Audio('./message-sound-sounds.mp3');
+    audio.volume = 0.5; // تعيين مستوى الصوت إلى 50%
+    audio.play().catch(error => {
+      console.error('خطأ في تشغيل صوت الإشعار:', error);
+    });
+    console.log('🔔 تم تشغيل صوت إشعار محادثة جديدة');
+  } catch (error) {
+    console.error('خطأ في تشغيل صوت الإشعار:', error);
   }
 }
 

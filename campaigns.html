@@ -383,7 +383,14 @@
           <tr class="hover:bg-muted/40 transition-colors">
             <td class="px-4 py-4">
               <div class="space-y-1">
-                <div class="text-body-md font-semibold">${campaign.name}</div>
+                <div class="flex items-center gap-2">
+                  <div class="text-body-md font-semibold">${campaign.name}</div>
+                  ${campaign.is_smart_send ? `
+                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground" title="حملة ذكية">
+                      <i data-lucide="zap" class="h-3 w-3"></i>
+                    </span>
+                  ` : ''}
+                </div>
                 <div class="text-body-sm text-muted-foreground">${campaign.description || 'بدون وصف'}</div>
                 <div class="text-body-xs text-muted-foreground">تم الإنشاء: <span class="number">${new Date(campaign.created_at).toLocaleDateString('en-GB')}</span></div>
               </div>
@@ -825,6 +832,8 @@
       createBtn.innerHTML = '<i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i><span>جاري الإنشاء...</span>';
 
       try {
+        const isSmartSend = document.getElementById('enable-smart-send').checked;
+        
         const campaignData = {
           name: name,
           description: description,
@@ -832,6 +841,7 @@
           template_language: 'ar',
           batch_size: sendType === 'all' ? selectedRecipients.length : batchSize,
           batch_interval_hours: sendType === 'all' ? 0 : batchInterval,
+          is_smart_send: isSmartSend,
           recipients: selectedRecipients
         };
 

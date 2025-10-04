@@ -624,21 +624,30 @@
           return `
             <div class="space-y-3">
               ${mediaId ? `
-                <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/20 border border-border">
-                  <button 
-                    onclick="toggleAudio('${mediaId}')" 
-                    class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition"
-                  >
-                    <i data-lucide="play" class="h-4 w-4" id="play-icon-${mediaId}"></i>
-                  </button>
-                  <div class="flex-1">
-                    <div class="flex items-center gap-2 text-body-sm">
-                      <i data-lucide="${type === 'voice' ? 'mic' : 'headphones'}" class="h-4 w-4"></i>
-                      <span>${type === 'voice' ? 'تسجيل صوتي' : 'رسالة صوتية'}</span>
+                <div class="space-y-2 p-3 rounded-lg bg-muted/20 border border-border">
+                  <div class="flex items-center gap-3">
+                    <button 
+                      onclick="toggleAudio('${mediaId}')" 
+                      class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition"
+                    >
+                      <i data-lucide="play" class="h-4 w-4" id="play-icon-${mediaId}"></i>
+                    </button>
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between gap-2 text-body-sm">
+                        <div class="flex items-center gap-2">
+                          <i data-lucide="${type === 'voice' ? 'mic' : 'headphones'}" class="h-4 w-4"></i>
+                          <span>${type === 'voice' ? 'تسجيل صوتي' : 'رسالة صوتية'}</span>
+                        </div>
+                        <span class="text-body-xs text-muted-foreground tabular-nums" id="audio-time-${mediaId}">0:00 / 0:00</span>
+                      </div>
+                      <div class="mt-2 relative">
+                        <div class="h-1 bg-muted rounded-full overflow-hidden">
+                          <div id="audio-progress-${mediaId}" class="h-full bg-primary transition-all duration-100" style="width: 0%"></div>
+                        </div>
+                      </div>
                     </div>
-                    <div class="text-body-xs text-muted-foreground mt-1">اضغط للتشغيل</div>
                   </div>
-                  <audio id="audio-${mediaId}" class="hidden">
+                  <audio id="audio-${mediaId}" class="hidden" preload="metadata">
                     <source src="https://tchat-production.up.railway.app/api/v1/media/${mediaId}" type="audio/ogg">
                     <source src="https://tchat-production.up.railway.app/api/v1/media/${mediaId}" type="audio/mpeg">
                   </audio>
@@ -799,18 +808,59 @@
       }
     }
 
+    function formatTime(seconds) {
+      if (isNaN(seconds)) return '0:00';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    function updateAudioProgress(mediaId) {
+      const audio = document.getElementById(`audio-${mediaId}`);
+      const progressBar = document.getElementById(`audio-progress-${mediaId}`);
+      const timeDisplay = document.getElementById(`audio-time-${mediaId}`);
+      
+      if (!audio || !progressBar || !timeDisplay) return;
+      
+      const currentTime = audio.currentTime;
+      const duration = audio.duration;
+      
+      if (duration > 0) {
+        const progress = (currentTime / duration) * 100;
+        progressBar.style.width = `${progress}%`;
+        timeDisplay.textContent = `${formatTime(currentTime)} / ${formatTime(duration)}`;
+      }
+    }
+    
     function toggleAudio(mediaId) {
       const audio = document.getElementById(`audio-${mediaId}`);
       const playIcon = document.getElementById(`play-icon-${mediaId}`);
+      const timeDisplay = document.getElementById(`audio-time-${mediaId}`);
       
       if (!audio) return;
       
-      // إضافة event listener عند انتهاء الصوت
+      // إضافة event listeners عند أول استخدام
       if (!audio.hasAttribute('data-listener-added')) {
+        // عند تحميل البيانات الوصفية، عرض المدة الكاملة
+        audio.addEventListener('loadedmetadata', () => {
+          timeDisplay.textContent = `0:00 / ${formatTime(audio.duration)}`;
+        });
+        
+        // تحديث التقدم باستمرار أثناء التشغيل
+        audio.addEventListener('timeupdate', () => {
+          updateAudioProgress(mediaId);
+        });
+        
+        // عند انتهاء الصوت
         audio.addEventListener('ended', () => {
           playIcon.setAttribute('data-lucide', 'play');
           lucide.createIcons();
+          // إعادة التقدم إلى الصفر
+          const progressBar = document.getElementById(`audio-progress-${mediaId}`);
+          if (progressBar) progressBar.style.width = '0%';
+          if (timeDisplay) timeDisplay.textContent = `0:00 / ${formatTime(audio.duration)}`;
         });
+        
         audio.setAttribute('data-listener-added', 'true');
       }
       

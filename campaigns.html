@@ -88,6 +88,35 @@
           </tbody>
         </table>
       </div>
+      
+      <!-- Pagination -->
+      <div class="border-t border-border p-4">
+        <div class="flex items-center justify-between">
+          <div class="text-body-sm text-muted-foreground">
+            عرض <span id="showing-from" class="font-medium number">0</span> - <span id="showing-to" class="font-medium number">0</span> من <span id="total-campaigns" class="font-medium number">0</span> حملة
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="goToFirstPage()" id="first-page-btn" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+              <i data-lucide="chevrons-right" class="h-4 w-4"></i>
+            </button>
+            <button onclick="goToPrevPage()" id="prev-page-btn" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+              <i data-lucide="chevron-right" class="h-4 w-4"></i>
+            </button>
+            <div class="flex items-center gap-1 px-2">
+              <span class="text-body-sm text-muted-foreground">صفحة</span>
+              <span id="current-page-num" class="font-medium number">1</span>
+              <span class="text-body-sm text-muted-foreground">من</span>
+              <span id="total-pages-num" class="font-medium number">1</span>
+            </div>
+            <button onclick="goToNextPage()" id="next-page-btn" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+              <i data-lucide="chevron-left" class="h-4 w-4"></i>
+            </button>
+            <button onclick="goToLastPage()" id="last-page-btn" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+              <i data-lucide="chevrons-left" class="h-4 w-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
   </main>
@@ -349,6 +378,10 @@
     let campaigns = [];
     let selectedRecipients = [];
     let availableTemplates = [];
+    
+    // Pagination variables
+    let currentPage = 1;
+    const itemsPerPage = 10;
 
     // تحميل الحملات
     async function loadAndRenderCampaigns() {
@@ -357,6 +390,7 @@
 
       try {
         campaigns = await loadCampaigns();
+        currentPage = 1; // إعادة تعيين الصفحة الحالية
         renderCampaigns();
       } catch (error) {
         console.error('خطأ في تحميل الحملات:', error);
@@ -369,10 +403,20 @@
       
       if (!campaigns.length) {
         tbody.innerHTML = '<tr><td colspan="7" class="h-24 text-center text-body-sm text-muted-foreground">لا توجد حملات حالياً</td></tr>';
+        updatePaginationInfo(0, 0, 0, 1, 1);
         return;
       }
 
-      tbody.innerHTML = campaigns.map(campaign => {
+      // حساب الصفحات
+      const totalPages = Math.ceil(campaigns.length / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = Math.min(startIndex + itemsPerPage, campaigns.length);
+      const currentCampaigns = campaigns.slice(startIndex, endIndex);
+      
+      // تحديث معلومات الـ pagination
+      updatePaginationInfo(startIndex + 1, endIndex, campaigns.length, currentPage, totalPages);
+
+      tbody.innerHTML = currentCampaigns.map(campaign => {
         const statusClass = getStatusBadgeClass(campaign.status);
         const statusText = getStatusText(campaign.status);
         const progressPercent = campaign.total_recipients > 0 
@@ -1576,6 +1620,59 @@
         
         // تحديث العداد
         document.getElementById('manual-count').textContent = smartSendFilteredRecipients.length;
+      }
+    }
+
+    // Pagination functions
+    function updatePaginationInfo(from, to, total, current, totalPages) {
+      document.getElementById('showing-from').textContent = from;
+      document.getElementById('showing-to').textContent = to;
+      document.getElementById('total-campaigns').textContent = total;
+      document.getElementById('current-page-num').textContent = current;
+      document.getElementById('total-pages-num').textContent = totalPages;
+      
+      // تحديث حالة الأزرار
+      const firstBtn = document.getElementById('first-page-btn');
+      const prevBtn = document.getElementById('prev-page-btn');
+      const nextBtn = document.getElementById('next-page-btn');
+      const lastBtn = document.getElementById('last-page-btn');
+      
+      firstBtn.disabled = current === 1;
+      prevBtn.disabled = current === 1;
+      nextBtn.disabled = current === totalPages;
+      lastBtn.disabled = current === totalPages;
+      
+      // تحديث الأيقونات
+      lucide.createIcons();
+    }
+    
+    function goToFirstPage() {
+      if (currentPage !== 1) {
+        currentPage = 1;
+        renderCampaigns();
+      }
+    }
+    
+    function goToPrevPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderCampaigns();
+      }
+    }
+    
+    function goToNextPage() {
+      const totalPages = Math.ceil(campaigns.length / itemsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderCampaigns();
+      }
+    }
+    
+    function goToLastPage() {
+      const totalPages = Math.ceil(campaigns.length / itemsPerPage);
+      if (currentPage !== totalPages) {
+        currentPage = totalPages;
+        renderCampaigns();
       }
     }
 

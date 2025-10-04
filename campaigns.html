@@ -420,19 +420,22 @@
             </td>
             <td class="px-4 py-4 text-center">
               <div class="flex items-center justify-center gap-1">
-                <button onclick="viewCampaignDetails(${campaign.id})" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
+                <button onclick="viewCampaignDetails(${campaign.id})" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground" title="عرض التفاصيل">
                   <i data-lucide="eye" class="h-3 w-3"></i>
                 </button>
                 ${campaign.status === 'draft' ? `
-                  <button onclick="startCampaign(${campaign.id})" class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground transition hover:bg-primary/90">
+                  <button onclick="startCampaign(${campaign.id})" class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground transition hover:bg-primary/90" title="بدء الحملة">
                     <i data-lucide="play" class="h-3 w-3"></i>
                   </button>
                 ` : ''}
                 ${campaign.status === 'running' || campaign.status === 'completed' ? `
-                  <button onclick="resendCampaign(${campaign.id})" class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-warning text-warning-foreground transition hover:bg-warning/90">
+                  <button onclick="resendCampaign(${campaign.id})" class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-warning text-warning-foreground transition hover:bg-warning/90" title="إعادة الإرسال">
                     <i data-lucide="repeat" class="h-3 w-3"></i>
                   </button>
                 ` : ''}
+                <button onclick="deleteCampaign(${campaign.id}, '${campaign.name}')" class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-destructive text-destructive-foreground transition hover:bg-destructive/90" title="حذف الحملة">
+                  <i data-lucide="trash-2" class="h-3 w-3"></i>
+                </button>
               </div>
             </td>
           </tr>
@@ -1333,6 +1336,36 @@
       } catch (error) {
         console.error('خطأ في إعادة حساب الإحصائيات:', error);
         alert('تعذر إعادة حساب الإحصائيات');
+      }
+    }
+
+    // حذف حملة واحدة
+    async function deleteCampaign(campaignId, campaignName) {
+      const confirmed = confirm(`هل أنت متأكد من حذف الحملة "${campaignName}"؟\n\n⚠️ سيتم حذف الحملة وجميع بياناتها نهائياً ولا يمكن التراجع عن هذا الإجراء.`);
+      
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+          }
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('✅ تم حذف الحملة بنجاح!');
+          refreshCampaigns();
+        } else {
+          alert('❌ فشل في حذف الحملة: ' + (result.error || result.message || 'خطأ غير معروف'));
+        }
+      } catch (error) {
+        console.error('خطأ في حذف الحملة:', error);
+        alert('❌ تعذر حذف الحملة. تحقق من الاتصال.');
       }
     }
 

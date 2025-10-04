@@ -805,6 +805,15 @@
       
       if (!audio) return;
       
+      // إضافة event listener عند انتهاء الصوت
+      if (!audio.hasAttribute('data-listener-added')) {
+        audio.addEventListener('ended', () => {
+          playIcon.setAttribute('data-lucide', 'play');
+          lucide.createIcons();
+        });
+        audio.setAttribute('data-listener-added', 'true');
+      }
+      
       if (audio.paused) {
         audio.play();
         playIcon.setAttribute('data-lucide', 'pause');

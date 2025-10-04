@@ -857,11 +857,20 @@
         const result = await response.json();
         
         if (result.success) {
-          alert('تم إنشاء الحملة بنجاح!');
+          let message = result.message || 'تم إنشاء الحملة بنجاح!';
+          
+          // إذا كانت هناك أرقام مستبعدة، أضف تفاصيل
+          if (result.excluded_count && result.excluded_count > 0) {
+            message += `\n\n📊 الإحصائيات:\n`;
+            message += `• المستقبلين النهائيين: ${result.final_count}\n`;
+            message += `• تم استبعاد: ${result.excluded_count} (تم الإرسال لهم خلال 10 أيام)`;
+          }
+          
+          alert(message);
           hideCreateCampaignModal();
           refreshCampaigns();
         } else {
-          alert('فشل في إنشاء الحملة: ' + (result.message || 'خطأ غير معروف'));
+          alert('فشل في إنشاء الحملة: ' + (result.message || result.error || 'خطأ غير معروف'));
         }
       } catch (error) {
         console.error('خطأ في إنشاء الحملة:', error);

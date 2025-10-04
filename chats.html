@@ -774,6 +774,21 @@
             `;
           }
           
+        case 'button':
+        case 'interactive':
+          return `
+            <div class="space-y-2">
+              <div class="flex items-center gap-2 rounded-lg border border-primary bg-primary/5 px-4 py-3">
+                <i data-lucide="hand-metal" class="h-5 w-5 text-primary"></i>
+                <span class="text-body-md font-medium">${content}</span>
+              </div>
+              <p class="text-body-xs text-muted-foreground px-2">
+                <i data-lucide="info" class="h-3 w-3 inline ml-1"></i>
+                رد على رسالة تفاعلية
+              </p>
+            </div>
+          `;
+          
         default:
           return `
             <div class="flex items-center gap-2 text-body-sm">

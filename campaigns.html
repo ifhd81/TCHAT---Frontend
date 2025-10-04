@@ -161,6 +161,17 @@
             </div>
             
             <div class="space-y-2">
+              <label class="text-body-sm font-medium flex items-center gap-2">
+                <i data-lucide="phone" class="h-4 w-4"></i>
+                <span>رقم الواتساب للإرسال</span>
+              </label>
+              <select id="whatsapp-phone-number" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" style="font-variant-numeric: lining-nums;">
+                <option value="">جاري تحميل الأرقام...</option>
+              </select>
+              <p class="text-body-xs text-muted-foreground">اختر الرقم الذي سيتم الإرسال منه في هذه الحملة</p>
+            </div>
+            
+            <div class="space-y-2">
               <label class="text-body-sm font-medium">وصف الحملة</label>
               <textarea id="campaign-description" placeholder="وصف مختصر للحملة" rows="3" class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
             </div>
@@ -527,12 +538,52 @@
       return texts[status] || status;
     }
 
+    // تحميل أرقام الواتساب
+    async function loadWhatsAppPhoneNumbers() {
+      const selectElement = document.getElementById('whatsapp-phone-number');
+      
+      try {
+        const phoneNumbers = await loadMetaPhoneNumbers();
+        
+        if (phoneNumbers && phoneNumbers.length > 0) {
+          selectElement.innerHTML = '<option value="">اختر رقم الواتساب</option>';
+          
+          phoneNumbers.forEach(phone => {
+            const option = document.createElement('option');
+            option.value = phone.id;
+            
+            // تنظيف وتنسيق رقم الهاتف
+            let displayNumber = phone.display_phone_number || phone.id;
+            // إزالة جميع الفراغات والرموز
+            displayNumber = displayNumber.replace(/[\s\+\-\(\)]/g, '');
+            
+            const verifiedName = phone.verified_name || 'غير محدد';
+            
+            option.textContent = `${displayNumber} - ${verifiedName}`;
+            option.setAttribute('data-phone-id', phone.id);
+            selectElement.appendChild(option);
+          });
+          
+          // اختيار أول رقم بشكل افتراضي
+          if (phoneNumbers.length > 0) {
+            selectElement.value = phoneNumbers[0].id;
+          }
+        } else {
+          selectElement.innerHTML = '<option value="">لا توجد أرقام متاحة</option>';
+        }
+      } catch (error) {
+        console.error('خطأ في تحميل أرقام الواتساب:', error);
+        selectElement.innerHTML = '<option value="">خطأ في تحميل الأرقام</option>';
+      }
+    }
+
     // عرض/إخفاء نافذة إنشاء الحملة
     function showCreateCampaignModal() {
       document.getElementById('create-campaign-modal').classList.remove('hidden');
       document.getElementById('create-campaign-modal').classList.add('flex');
       loadTemplatesForCampaign();
       loadRecipientsPreview();
+      loadWhatsAppPhoneNumbers();
     }
 
     function hideCreateCampaignModal() {
@@ -545,6 +596,7 @@
       document.getElementById('campaign-name').value = '';
       document.getElementById('campaign-description').value = '';
       document.getElementById('campaign-template').value = '';
+      document.getElementById('whatsapp-phone-number').value = '';
       document.getElementById('recipients-source').value = 'database';
       document.getElementById('csv-file').value = '';
       selectedRecipients = [];
@@ -877,12 +929,23 @@
 
       try {
         const isSmartSend = document.getElementById('enable-smart-send').checked;
+        const whatsappPhoneNumberID = document.getElementById('whatsapp-phone-number').value;
+        
+        // التحقق من اختيار رقم واتساب
+        if (!whatsappPhoneNumberID) {
+          alert('يرجى اختيار رقم الواتساب للإرسال');
+          createBtn.disabled = false;
+          createBtn.innerHTML = '<i data-lucide="send" class="h-4 w-4"></i><span>إنشاء الحملة</span>';
+          lucide.createIcons();
+          return;
+        }
         
         const campaignData = {
           name: name,
           description: description,
           template_name: templateName,
           template_language: 'ar',
+          whatsapp_phone_number_id: whatsappPhoneNumberID,
           batch_size: sendType === 'all' ? selectedRecipients.length : batchSize,
           batch_interval_hours: sendType === 'all' ? 0 : batchInterval,
           is_smart_send: isSmartSend,

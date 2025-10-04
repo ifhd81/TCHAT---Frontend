@@ -158,7 +158,23 @@
 
         <!-- Pagination -->
         <div class="flex items-center justify-between gap-4 border-t border-border px-6 py-4">
-          <div class="flex items-center gap-4 text-body-sm text-muted-foreground">
+          <div class="flex items-center gap-4 text-body-sm text-muted-foreground flex-wrap">
+            <div class="flex items-center gap-2 whitespace-nowrap">
+              <span>نوع الحدث</span>
+              <select id="event-type-filter" class="rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                <option value="all">الكل</option>
+                <option value="message">رسائل واردة</option>
+                <option value="status">حالات الرسائل</option>
+                <option value="sent">تم الإرسال</option>
+                <option value="delivered">تم التوصيل</option>
+                <option value="read">تمت القراءة</option>
+                <option value="failed">فشل الإرسال</option>
+                <option value="text">رسائل نصية</option>
+                <option value="image">صور</option>
+                <option value="video">فيديو</option>
+                <option value="document">مستندات</option>
+              </select>
+            </div>
             <div class="flex items-center gap-2 whitespace-nowrap">
               <span>عدد السجلات</span>
               <select id="limit-select" class="rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
@@ -246,8 +262,10 @@
   <script>
     // حالة الصفحة
     let webhooksData = [];
+    let allWebhooksData = []; // البيانات الأصلية قبل التصفية
     let currentPage = 1;
     let webhooksPerPage = 50;
+    let currentEventTypeFilter = 'all';
 
     // تسجيل الخروج
     function logout() {
@@ -281,6 +299,13 @@
         displayWebhooksTable();
         updatePaginationInfo();
       });
+
+      // إضافة مستمع لتصفية نوع الحدث
+      document.getElementById('event-type-filter').addEventListener('change', function() {
+        currentEventTypeFilter = this.value;
+        currentPage = 1;
+        filterWebhooksByEventType();
+      });
     });
 
     // تحميل بيانات الويب هوك
@@ -289,13 +314,13 @@
         const data = await loadWhatsAppWebhooks(100);
         
         if (data && data.data) {
-          webhooksData = data.data;
+          allWebhooksData = data.data; // حفظ البيانات الأصلية
           
-          // تحديث الإحصائيات
+          // تطبيق الفلتر الحالي
+          filterWebhooksByEventType();
+          
+          // تحديث الإحصائيات (استخدام البيانات الأصلية للإحصائيات)
           updateWebhookStats();
-          
-          // عرض الجدول
-          displayWebhooksTable();
         } else {
           console.error('لا توجد بيانات webhook');
           document.getElementById('webhooks-table-body').innerHTML = `
@@ -320,13 +345,14 @@
 
     // تحديث إحصائيات الويب هوك
     function updateWebhookStats() {
-      const totalWebhooks = webhooksData.length;
+      // استخدام البيانات الأصلية للإحصائيات
+      const totalWebhooks = allWebhooksData.length;
       document.getElementById('total-webhooks').textContent = totalWebhooks;
 
       // حساب أحداث اليوم
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const todayWebhooks = webhooksData.filter(webhook => {
+      const todayWebhooks = allWebhooksData.filter(webhook => {
         const webhookDate = new Date(webhook.created_at);
         webhookDate.setHours(0, 0, 0, 0);
         return webhookDate >= today;
@@ -334,8 +360,8 @@
       document.getElementById('today-webhooks').textContent = todayWebhooks;
 
       // آخر حدث
-      if (webhooksData.length > 0) {
-        const lastWebhook = webhooksData[0];
+      if (allWebhooksData.length > 0) {
+        const lastWebhook = allWebhooksData[0];
         const timeAgo = getTimeAgo(lastWebhook.created_at);
         document.getElementById('last-webhook-time').textContent = timeAgo;
       }
@@ -828,6 +854,64 @@
       const minutes = String(date.getMinutes()).padStart(2, '0');
       
       return `${year}/${month}/${day} - ${hours}:${minutes}`;
+    }
+
+    // تصفية البيانات حسب نوع الحدث
+    function filterWebhooksByEventType() {
+      if (currentEventTypeFilter === 'all') {
+        webhooksData = allWebhooksData;
+      } else {
+        webhooksData = allWebhooksData.filter(webhook => {
+          // التحقق من message_status
+          if (currentEventTypeFilter === 'sent' || currentEventTypeFilter === 'delivered' || 
+              currentEventTypeFilter === 'read' || currentEventTypeFilter === 'failed') {
+            return webhook.message_status === currentEventTypeFilter;
+          }
+          
+          // التحقق من message_type
+          if (currentEventTypeFilter === 'text' || currentEventTypeFilter === 'image' || 
+              currentEventTypeFilter === 'video' || currentEventTypeFilter === 'document') {
+            return webhook.message_type === currentEventTypeFilter;
+          }
+          
+          // فلتر "رسائل واردة"
+          if (currentEventTypeFilter === 'message') {
+            if (webhook.message_type) return true;
+            // التحقق من الـ payload
+            try {
+              const payload = typeof webhook.payload === 'string' ? JSON.parse(webhook.payload) : webhook.payload;
+              if (payload.entry && payload.entry[0] && payload.entry[0].changes) {
+                const changes = payload.entry[0].changes[0];
+                return changes.value && changes.value.messages && changes.value.messages.length > 0;
+              }
+            } catch (e) {
+              return false;
+            }
+          }
+          
+          // فلتر "حالات الرسائل"
+          if (currentEventTypeFilter === 'status') {
+            if (webhook.message_status) return true;
+            // التحقق من الـ payload
+            try {
+              const payload = typeof webhook.payload === 'string' ? JSON.parse(webhook.payload) : webhook.payload;
+              if (payload.entry && payload.entry[0] && payload.entry[0].changes) {
+                const changes = payload.entry[0].changes[0];
+                return changes.value && changes.value.statuses && changes.value.statuses.length > 0;
+              }
+            } catch (e) {
+              return false;
+            }
+          }
+          
+          return false;
+        });
+      }
+      
+      // إعادة التوجيه للصفحة الأولى وتحديث العرض
+      currentPage = 1;
+      displayWebhooksTable();
+      updatePaginationInfo();
     }
 
     function getTimeAgo(dateString) {

@@ -222,10 +222,66 @@
               </div>
               <div class="space-y-2">
                 <label class="text-body-sm font-medium">نوع الإرسال</label>
-                <select id="send-type" onchange="handleSendTypeChange()" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                  <option value="batch">مجزأ (موصى به)</option>
+                <select id="send-type" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <option value="batch" selected>مجزأ (موصى به)</option>
                   <option value="all">الكل دفعة واحدة</option>
                 </select>
+              </div>
+            </div>
+
+            <!-- Smart Send Checkbox -->
+            <div class="rounded-lg border border-border bg-card p-4">
+              <label class="flex items-start gap-3 cursor-pointer">
+                <input type="checkbox" id="enable-smart-send" onchange="handleSmartSendToggle()" class="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary focus:ring-offset-2" checked />
+                <div class="flex-1">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="zap" class="h-4 w-4 text-primary"></i>
+                    <span class="text-body-md font-semibold">تفعيل الإرسال الذكي</span>
+                    <span class="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary">موصى به</span>
+                  </div>
+                  <p class="text-body-sm text-muted-foreground mt-1">
+                    استبعاد الأرقام التي تم الإرسال لها خلال آخر <span class="font-semibold text-foreground">10 أيام</span> لتجنب الإزعاج وتحسين معدل التفاعل
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            <!-- Smart Send Info -->
+            <div id="smart-send-info" class="rounded-lg border border-primary bg-primary/5 p-4">
+              <div class="flex items-start gap-3">
+                <i data-lucide="zap" class="h-5 w-5 text-primary mt-0.5"></i>
+                <div class="flex-1">
+                  <h4 class="text-body-md font-semibold text-primary mb-1">الإرسال الذكي ✨</h4>
+                  <p class="text-body-sm text-muted-foreground mb-3">
+                    سيتم فحص الأرقام المدخلة واستبعاد من تم الإرسال لهم خلال آخر <span class="font-semibold text-foreground">10 أيام</span> لتجنب الإزعاج وتحسين معدل التفاعل.
+                  </p>
+                  <button onclick="runSmartSendCheck()" id="check-recipients-btn" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50">
+                    <i data-lucide="scan-search" class="h-4 w-4"></i>
+                    <span>فحص الأرقام الآن</span>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Smart Send Results -->
+              <div id="smart-send-results" class="mt-4 hidden">
+                <div class="grid gap-3 md:grid-cols-3">
+                  <div class="rounded-lg border border-border bg-card p-3">
+                    <div class="text-body-xs text-muted-foreground mb-1">إجمالي الأرقام</div>
+                    <div class="text-heading-sm font-bold" id="smart-total">0</div>
+                  </div>
+                  <div class="rounded-lg border border-green-500 bg-green-500/10 p-3">
+                    <div class="text-body-xs text-green-700 dark:text-green-400 mb-1">✅ مسموح بالإرسال</div>
+                    <div class="text-heading-sm font-bold text-green-600 dark:text-green-400" id="smart-allowed">0</div>
+                  </div>
+                  <div class="rounded-lg border border-orange-500 bg-orange-500/10 p-3">
+                    <div class="text-body-xs text-orange-700 dark:text-orange-400 mb-1">⚠️ مستبعد</div>
+                    <div class="text-heading-sm font-bold text-orange-600 dark:text-orange-400" id="smart-excluded">0</div>
+                  </div>
+                </div>
+                <div class="mt-3 text-body-xs text-muted-foreground">
+                  <i data-lucide="info" class="h-3 w-3 inline"></i>
+                  <span id="smart-message">تم الفحص بنجاح</span>
+                </div>
               </div>
             </div>
 
@@ -823,6 +879,11 @@
         
         if (result.success) {
           renderCampaignDetails(result.campaign, result.recipients || []);
+          
+          // تحميل أسباب الفشل إذا كانت هناك رسائل فاشلة
+          if (result.campaign.failed_count > 0) {
+            setTimeout(() => loadFailureReasons(campaignId), 500);
+          }
         } else {
           content.innerHTML = '<div class="text-center text-destructive text-body-sm">تعذر تحميل تفاصيل الحملة</div>';
         }
@@ -830,6 +891,160 @@
         console.error('خطأ في تحميل تفاصيل الحملة:', error);
         content.innerHTML = '<div class="text-center text-destructive text-body-sm">تعذر تحميل تفاصيل الحملة</div>';
       }
+    }
+
+    // دالة تحميل أسباب الفشل
+    async function loadFailureReasons(campaignId) {
+      const contentDiv = document.getElementById('failure-reasons-content');
+      if (!contentDiv) return;
+      
+      contentDiv.innerHTML = `
+        <div class="text-center text-body-sm text-muted-foreground">
+          <i data-lucide="loader-2" class="h-6 w-6 mx-auto mb-2 animate-spin"></i>
+          <p>جاري تحميل أسباب الفشل...</p>
+        </div>
+      `;
+      lucide.createIcons();
+      
+      try {
+        const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}/failure-reasons`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+          }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.reasons && result.reasons.length > 0) {
+          // ترتيب الأسباب حسب العدد (تنازلياً)
+          const sortedReasons = result.reasons.sort((a, b) => b.count - a.count);
+          
+          // حساب النسب المئوية
+          const total = result.total_failed;
+          
+          contentDiv.innerHTML = `
+            <div class="space-y-3">
+              ${sortedReasons.map((reason, index) => {
+                const percentage = ((reason.count / total) * 100).toFixed(1);
+                const barColor = getFailureReasonColor(reason.reason);
+                const icon = getFailureReasonIcon(reason.reason);
+                
+                return `
+                  <div class="rounded-lg border border-border bg-card p-4">
+                    <div class="flex items-start gap-3">
+                      <div class="flex-shrink-0">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-full ${barColor}/20">
+                          <i data-lucide="${icon}" class="h-5 w-5 ${barColor}"></i>
+                        </div>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                          <h4 class="text-body-md font-medium text-foreground">${reason.reason}</h4>
+                          <div class="flex items-center gap-2 flex-shrink-0">
+                            <span class="text-body-sm font-bold ${barColor}">${reason.count}</span>
+                            <span class="text-body-xs text-muted-foreground">(${percentage}%)</span>
+                          </div>
+                        </div>
+                        <div class="w-full bg-muted rounded-full h-2">
+                          <div class="${barColor} h-2 rounded-full transition-all" style="width: ${percentage}%"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            
+            <div class="mt-4 rounded-lg border border-border bg-muted/30 p-4">
+              <h4 class="text-body-sm font-semibold text-foreground mb-2">💡 نصائح لتقليل معدل الفشل:</h4>
+              <ul class="text-body-xs text-muted-foreground space-y-1">
+                ${getFailureRecommendations(sortedReasons).map(tip => `<li class="flex items-start gap-2"><span>•</span><span>${tip}</span></li>`).join('')}
+              </ul>
+            </div>
+          `;
+        } else {
+          contentDiv.innerHTML = `
+            <div class="text-center text-body-sm text-muted-foreground">
+              <i data-lucide="check-circle" class="h-8 w-8 mx-auto mb-2 text-success"></i>
+              <p>لا توجد تفاصيل متاحة عن أسباب الفشل</p>
+            </div>
+          `;
+        }
+        
+        lucide.createIcons();
+      } catch (error) {
+        console.error('خطأ في تحميل أسباب الفشل:', error);
+        contentDiv.innerHTML = `
+          <div class="text-center text-destructive text-body-sm">
+            <i data-lucide="alert-triangle" class="h-8 w-8 mx-auto mb-2"></i>
+            <p>تعذر تحميل أسباب الفشل</p>
+          </div>
+        `;
+        lucide.createIcons();
+      }
+    }
+
+    // دالة لتحديد لون حسب نوع الخطأ
+    function getFailureReasonColor(reason) {
+      if (reason.includes('طريقة الدفع') || reason.includes('Payment')) {
+        return 'text-red-600';
+      } else if (reason.includes('حماية النظام') || reason.includes('ecosystem')) {
+        return 'text-orange-600';
+      } else if (reason.includes('غير قابل للتسليم') || reason.includes('undeliverable')) {
+        return 'text-yellow-600';
+      } else if (reason.includes('تجربة') || reason.includes('experiment')) {
+        return 'text-purple-600';
+      } else if (reason.includes('محظور') || reason.includes('blocked')) {
+        return 'text-pink-600';
+      } else {
+        return 'text-gray-600';
+      }
+    }
+
+    // دالة لتحديد أيقونة حسب نوع الخطأ
+    function getFailureReasonIcon(reason) {
+      if (reason.includes('طريقة الدفع') || reason.includes('Payment')) {
+        return 'credit-card';
+      } else if (reason.includes('حماية النظام') || reason.includes('ecosystem')) {
+        return 'shield-alert';
+      } else if (reason.includes('غير قابل للتسليم') || reason.includes('undeliverable')) {
+        return 'phone-off';
+      } else if (reason.includes('تجربة') || reason.includes('experiment')) {
+        return 'flask';
+      } else if (reason.includes('محظور') || reason.includes('blocked')) {
+        return 'ban';
+      } else {
+        return 'alert-circle';
+      }
+    }
+
+    // دالة للحصول على نصائح مخصصة حسب أسباب الفشل
+    function getFailureRecommendations(reasons) {
+      const tips = [];
+      const topReason = reasons[0]?.reason || '';
+      
+      if (topReason.includes('طريقة الدفع')) {
+        tips.push('⚠️ عاجل: تحقق من طريقة الدفع في Meta Business Manager');
+        tips.push('تأكد من صلاحية البطاقة ووجود رصيد كافٍ');
+      }
+      
+      if (reasons.some(r => r.reason.includes('حماية النظام'))) {
+        tips.push('استخدم قوالب معتمدة من Meta فقط');
+        tips.push('لا ترسل لنفس العملاء بشكل متكرار');
+        tips.push('استخدم الإرسال الذكي لتجنب التكرار');
+      }
+      
+      if (reasons.some(r => r.reason.includes('غير قابل للتسليم'))) {
+        tips.push('نظّف قائمة الأرقام واحذف الأرقام غير الصحيحة');
+        tips.push('تحقق من صحة الأرقام قبل الإرسال');
+      }
+      
+      if (tips.length === 0) {
+        tips.push('قسّم الحملات إلى دفعات صغيرة (50-100 رسالة/ساعة)');
+        tips.push('راقب معدل الفشل لكل دفعة');
+      }
+      
+      return tips;
     }
 
     function renderCampaignDetails(campaign, recipients) {
@@ -878,6 +1093,30 @@
               <div class="text-body-sm text-muted-foreground">فشلت</div>
             </div>
           </div>
+
+          <!-- Failure Reasons Section -->
+          ${campaign.failed_count > 0 ? `
+            <div class="rounded-lg border border-destructive/30 bg-destructive/5" id="failure-reasons-section">
+              <div class="border-b border-destructive/20 p-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="alert-circle" class="h-5 w-5 text-destructive"></i>
+                    <h3 class="text-heading-md font-semibold text-destructive">أسباب الفشل (${campaign.failed_count})</h3>
+                  </div>
+                  <button onclick="loadFailureReasons(${campaign.id})" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium transition hover:bg-accent">
+                    <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+                    <span>تحديث</span>
+                  </button>
+                </div>
+              </div>
+              <div id="failure-reasons-content" class="p-4">
+                <div class="text-center text-body-sm text-muted-foreground">
+                  <i data-lucide="loader-2" class="h-6 w-6 mx-auto mb-2 animate-spin"></i>
+                  <p>جاري تحميل أسباب الفشل...</p>
+                </div>
+              </div>
+            </div>
+          ` : ''}
 
           <!-- Recipients Table -->
           <div class="rounded-lg border bg-card">
@@ -1166,6 +1405,128 @@
       await loadAndRenderCampaigns();
     }
 
+    // دالة معالجة تفعيل/إلغاء الإرسال الذكي
+    function handleSmartSendToggle() {
+      const smartSendEnabled = document.getElementById('enable-smart-send').checked;
+      const smartSendInfo = document.getElementById('smart-send-info');
+      
+      if (smartSendEnabled) {
+        smartSendInfo.classList.remove('hidden');
+      } else {
+        smartSendInfo.classList.add('hidden');
+        // إخفاء نتائج الفحص إذا كانت ظاهرة
+        const resultsDiv = document.getElementById('smart-send-results');
+        if (resultsDiv) {
+          resultsDiv.classList.add('hidden');
+        }
+        // إعادة تعيين المتغير
+        smartSendFilteredRecipients = null;
+      }
+    }
+
+    // متغير عام لتخزين نتائج الفحص الذكي
+    let smartSendFilteredRecipients = null;
+
+    // دالة فحص الإرسال الذكي
+    async function runSmartSendCheck() {
+      const checkBtn = document.getElementById('check-recipients-btn');
+      const resultsDiv = document.getElementById('smart-send-results');
+      
+      // جمع أرقام الهواتف من المستقبلين
+      let phoneNumbers = [];
+      const source = document.getElementById('recipients-source').value;
+      
+      if (source === 'manual') {
+        const manualText = document.getElementById('manual-recipients').value;
+        const lines = manualText.split('\n').filter(line => line.trim());
+        phoneNumbers = lines.map(line => {
+          const parts = line.split(',');
+          return parts[0].trim();
+        }).filter(phone => phone);
+      } else if (source === 'database') {
+        // استخدام المستقبلين من قاعدة البيانات
+        if (window.parsedRecipients && window.parsedRecipients.length > 0) {
+          phoneNumbers = window.parsedRecipients.map(r => r.phone_number);
+        }
+      }
+      
+      if (phoneNumbers.length === 0) {
+        alert('لا توجد أرقام للفحص. يرجى إضافة مستقبلين أولاً.');
+        return;
+      }
+      
+      // تعطيل الزر وإظهار رسالة التحميل
+      checkBtn.disabled = true;
+      checkBtn.innerHTML = '<i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i><span>جاري الفحص...</span>';
+      lucide.createIcons();
+      
+      try {
+        const response = await fetch('https://tchat-production.up.railway.app/api/v1/campaigns/smart-send-check', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+          },
+          body: JSON.stringify({
+            phone_numbers: phoneNumbers
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // حفظ الأرقام المسموحة للاستخدام عند إنشاء الحملة
+          smartSendFilteredRecipients = result.allowed_numbers;
+          
+          // عرض النتائج
+          document.getElementById('smart-total').textContent = result.total;
+          document.getElementById('smart-allowed').textContent = result.allowed;
+          document.getElementById('smart-excluded').textContent = result.excluded;
+          document.getElementById('smart-message').textContent = result.message;
+          
+          resultsDiv.classList.remove('hidden');
+          
+          // تحديث عدد المستقبلين في الواجهة
+          updateRecipientsPreview();
+          
+        } else {
+          alert('فشل في فحص الأرقام: ' + (result.error || 'خطأ غير معروف'));
+        }
+      } catch (error) {
+        console.error('خطأ في فحص الإرسال الذكي:', error);
+        alert('تعذر فحص الأرقام. تحقق من الاتصال.');
+      } finally {
+        // إعادة تفعيل الزر
+        checkBtn.disabled = false;
+        checkBtn.innerHTML = '<i data-lucide="scan-search" class="h-4 w-4"></i><span>فحص الأرقام الآن</span>';
+        lucide.createIcons();
+      }
+    }
+
+    // تحديث معاينة المستقبلين بعد الفحص الذكي
+    function updateRecipientsPreview() {
+      if (!smartSendFilteredRecipients || smartSendFilteredRecipients.length === 0) return;
+      
+      const source = document.getElementById('recipients-source').value;
+      
+      if (source === 'manual') {
+        // تحديث قائمة المستقبلين المدخلة يدوياً
+        const originalText = document.getElementById('manual-recipients').value;
+        const lines = originalText.split('\n').filter(line => line.trim());
+        
+        const filteredLines = lines.filter(line => {
+          const phone = line.split(',')[0].trim();
+          return smartSendFilteredRecipients.includes(phone);
+        });
+        
+        // تحديث textarea (اختياري - يمكن تعطيله إذا أردت إبقاء القائمة الأصلية)
+        // document.getElementById('manual-recipients').value = filteredLines.join('\n');
+        
+        // تحديث العداد
+        document.getElementById('manual-count').textContent = smartSendFilteredRecipients.length;
+      }
+    }
+
     // دوال API للحملات
     async function loadCampaigns(limit = 50) {
       try {
@@ -1206,6 +1567,9 @@
       
       // إضافة مستمع لرفع ملف CSV
       document.getElementById('csv-file').addEventListener('change', handleCSVUpload);
+      
+      // تفعيل الإرسال الذكي افتراضياً
+      handleSmartSendToggle();
     });
 
     function logout() {

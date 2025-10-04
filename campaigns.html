@@ -1186,6 +1186,95 @@
 
       content.innerHTML = `
         <div class="space-y-6">
+          <!-- Campaign Info Section -->
+          <div class="rounded-lg border bg-card">
+            <div class="border-b border-border px-6 py-4">
+              <h3 class="text-heading-md font-semibold flex items-center gap-2">
+                <i data-lucide="info" class="h-5 w-5 text-primary"></i>
+                <span>معلومات الحملة</span>
+              </h3>
+            </div>
+            <div class="p-6">
+              <div class="grid gap-6 md:grid-cols-2">
+                <!-- القسم الأيمن -->
+                <div class="space-y-4">
+                  <div>
+                    <label class="text-body-sm font-semibold text-muted-foreground block mb-1">اسم الحملة</label>
+                    <div class="flex items-center gap-2">
+                      <div class="text-body-md font-medium">${campaign.name}</div>
+                      ${campaign.is_smart_send ? `
+                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground" title="حملة ذكية">
+                          <i data-lucide="zap" class="h-3 w-3"></i>
+                        </span>
+                      ` : ''}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label class="text-body-sm font-semibold text-muted-foreground block mb-1">الوصف</label>
+                    <div class="text-body-md text-foreground">${campaign.description || 'بدون وصف'}</div>
+                  </div>
+                  
+                  <div>
+                    <label class="text-body-sm font-semibold text-muted-foreground block mb-1">القالب المستخدم</label>
+                    <div class="inline-flex items-center rounded-full border border-input px-3 py-1 text-body-sm font-semibold bg-accent text-accent-foreground">
+                      ${campaign.template_name}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label class="text-body-sm font-semibold text-muted-foreground block mb-1">رقم الواتساب</label>
+                    <div class="text-body-md font-semibold">
+                      ${campaign.whatsapp_phone_number_id ? `<span class="number">${campaign.whatsapp_phone_number_id}</span>` : 'الرقم الافتراضي'}
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- القسم الأيسر -->
+                <div class="space-y-4">
+                  <div>
+                    <label class="text-body-sm font-semibold text-muted-foreground block mb-1">تاريخ الإنشاء</label>
+                    <div class="text-body-md"><span class="number">${new Date(campaign.created_at).toLocaleDateString('en-GB', { 
+                      year: 'numeric', 
+                      month: '2-digit', 
+                      day: '2-digit'
+                    })}</span> - <span class="number">${new Date(campaign.created_at).toLocaleTimeString('en-GB', {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}</span></div>
+                  </div>
+                  
+                  <div>
+                    <label class="text-body-sm font-semibold text-muted-foreground block mb-1">الحالة</label>
+                    <span class="inline-flex items-center rounded-full border px-3 py-1 text-body-sm font-semibold ${getStatusBadgeClass(campaign.status)}">
+                      ${getStatusText(campaign.status)}
+                    </span>
+                  </div>
+                  
+                  <div>
+                    <label class="text-body-sm font-semibold text-muted-foreground block mb-1">إعدادات الإرسال</label>
+                    <div class="space-y-2">
+                      <div class="flex items-center gap-2 text-body-sm">
+                        <i data-lucide="users" class="h-4 w-4 text-muted-foreground"></i>
+                        <span>حجم الدفعة: <span class="font-semibold number">${campaign.batch_size}</span> عميل</span>
+                      </div>
+                      <div class="flex items-center gap-2 text-body-sm">
+                        <i data-lucide="clock" class="h-4 w-4 text-muted-foreground"></i>
+                        <span>الفترة: كل <span class="font-semibold number">${campaign.batch_interval_hours}</span> ساعة</span>
+                      </div>
+                      ${campaign.is_smart_send ? `
+                        <div class="flex items-center gap-2 text-body-sm text-primary">
+                          <i data-lucide="zap" class="h-4 w-4"></i>
+                          <span class="font-medium">إرسال ذكي ✨ (استبعاد المكرر)</span>
+                        </div>
+                      ` : ''}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Stats Cards -->
           <div class="grid gap-4 md:grid-cols-3 lg:grid-cols-7">
             <div class="rounded-lg border bg-card p-4 text-center">

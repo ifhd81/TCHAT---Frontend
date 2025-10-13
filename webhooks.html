@@ -268,11 +268,7 @@
     let currentEventTypeFilter = 'all';
 
     // تسجيل الخروج
-    function logout() {
-      localStorage.removeItem('tchat_logged_in');
-      localStorage.removeItem('tchat_token');
-      window.location.href = './login.html';
-    }
+    // دالة logout موجودة في api.js
 
     // التحقق من تسجيل الدخول
     if (!localStorage.getItem('tchat_logged_in')) {

@@ -1,20 +1,77 @@
 // إعدادات API
 const API_BASE_URL = 'https://tchat-production.up.railway.app/api/v1';
 
+// دالة لتجديد access token باستخدام refresh token
+async function refreshAccessToken() {
+  const refreshToken = localStorage.getItem('refresh_token');
+  
+  if (!refreshToken) {
+    console.error('لا يوجد refresh token');
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ refresh_token: refreshToken })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.access_token) {
+        localStorage.setItem('access_token', data.access_token);
+        console.log('✅ تم تجديد access token بنجاح');
+        return data.access_token;
+      }
+    }
+    
+    console.error('فشل تجديد access token');
+    return null;
+  } catch (error) {
+    console.error('خطأ في تجديد access token:', error);
+    return null;
+  }
+}
+
 // دالة مساعدة لإرسال طلبات API
 async function apiRequest(endpoint, options = {}) {
-  const token = localStorage.getItem('tchat_token');
+  const accessToken = localStorage.getItem('access_token');
   
   const defaultOptions = {
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
+      ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
     },
     ...options,
   };
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, defaultOptions);
+    
+    // معالجة انتهاء صلاحية الـ token (401 Unauthorized)
+    if (response.status === 401) {
+      console.warn('⚠️ Token منتهي الصلاحية - محاولة التجديد...');
+      
+      // محاولة تجديد الـ token
+      const newToken = await refreshAccessToken();
+      
+      if (newToken) {
+        // إعادة المحاولة مع الـ token الجديد
+        defaultOptions.headers.Authorization = `Bearer ${newToken}`;
+        const retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, defaultOptions);
+        return await retryResponse.json();
+      } else {
+        // فشل التجديد - إعادة توجيه لصفحة تسجيل الدخول
+        console.error('❌ فشل تجديد Token - إعادة التوجيه لتسجيل الدخول');
+        localStorage.clear();
+        window.location.href = './login.html';
+        throw new Error('Session expired - please login again');
+      }
+    }
+    
     return await response.json();
   } catch (error) {
     console.error(`خطأ في API ${endpoint}:`, error);
@@ -232,5 +289,40 @@ async function deleteAllWebhooks() {
   } catch (error) {
     console.error('خطأ في حذف سجلات الويب هوك:', error);
     throw error;
+  }
+}
+
+// تسجيل الخروج
+async function logout() {
+  try {
+    // استدعاء API لتسجيل الخروج (إذا كان متاحاً)
+    const accessToken = localStorage.getItem('access_token');
+    if (accessToken) {
+      try {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+      } catch (error) {
+        console.error('خطأ في استدعاء API logout:', error);
+      }
+    }
+  } finally {
+    // مسح جميع البيانات المحفوظة
+    localStorage.removeItem('tchat_logged_in');
+    localStorage.removeItem('tchat_user');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    
+    // إزالة التوكن القديم إذا كان موجوداً
+    localStorage.removeItem('tchat_token');
+    
+    console.log('✅ تم تسجيل الخروج بنجاح');
+    
+    // إعادة التوجيه إلى صفحة تسجيل الدخول
+    window.location.href = './login.html';
   }
 }

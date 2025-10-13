@@ -124,10 +124,15 @@
           const data = await response.json();
           
           if (data.success) {
-            // حفظ بيانات المستخدم والـ token
+            // حفظ بيانات المستخدم والـ JWT tokens
             localStorage.setItem('tchat_logged_in', 'true');
             localStorage.setItem('tchat_user', JSON.stringify(data.user));
-            localStorage.setItem('tchat_token', data.token);
+            localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('refresh_token', data.refresh_token);
+            
+            console.log('✅ تم تسجيل الدخول بنجاح');
+            console.log('📌 Access Token:', data.access_token ? 'تم الحفظ' : 'غير موجود');
+            console.log('📌 Refresh Token:', data.refresh_token ? 'تم الحفظ' : 'غير موجود');
             
             // توجيه إلى لوحة التحكم
             window.location.href = './dashboard.html';

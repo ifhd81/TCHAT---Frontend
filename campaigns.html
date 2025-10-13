@@ -956,7 +956,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           },
           body: JSON.stringify(campaignData)
         });
@@ -1000,7 +1000,7 @@
       try {
         const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
         });
         
@@ -1038,7 +1038,7 @@
       try {
         const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}/failure-reasons`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
         });
         
@@ -1436,7 +1436,7 @@
         const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}/start`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
         });
 
@@ -1464,7 +1464,7 @@
         const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}/resend`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
         });
 
@@ -1510,7 +1510,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           },
           body: JSON.stringify(campaignData)
         });
@@ -1535,7 +1535,7 @@
         const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}/fix-stats`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
         });
         
@@ -1566,7 +1566,7 @@
         const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}`, {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
         });
 
@@ -1604,7 +1604,7 @@
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           },
           body: JSON.stringify({
             confirm_password: 'DELETE_ALL_CAMPAIGNS'
@@ -1631,7 +1631,7 @@
         const response = await fetch('https://tchat-production.up.railway.app/api/v1/campaigns/update-statuses', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
         });
 
@@ -1713,7 +1713,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('tchat_token')}`
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           },
           body: JSON.stringify({
             phone_numbers: phoneNumbers
@@ -1873,12 +1873,7 @@
       handleSmartSendToggle();
     });
 
-    function logout() {
-      localStorage.removeItem('tchat_logged_in');
-      localStorage.removeItem('tchat_user');
-      localStorage.removeItem('tchat_token');
-      window.location.href = './login.html';
-    }
+    // دالة logout موجودة في api.js
   </script>
 </body>
 </html>

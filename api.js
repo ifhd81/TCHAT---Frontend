@@ -134,7 +134,7 @@ async function loadWhatsAppStats() {
 function getDefaultWhatsAppStats() {
   return {
     display_phone_number: '966533934546',
-    verified_name: 'مناسبتي',
+    verified_name: 'TCHAT',
     code_verification_status: 'VERIFIED',
     quality_rating: 'GREEN',
     throughput_level: 'STANDARD'

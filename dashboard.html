@@ -378,7 +378,9 @@
           return;
         }
         
-        tbody.innerHTML = data.slice(0, 5).map(item => {
+        const revenue = (item) => Number(item.total_revenue) || 0;
+        const orders = (item) => Number(item.attributed_orders) || 0;
+        tbody.innerHTML = data.map(item => {
           const isActive = item.status === 'فعالة';
           const statusBadge = isActive 
             ? '<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-success/10 text-success">فعالة</span>'
@@ -387,16 +389,16 @@
           return `
             <tr class="border-b transition-colors hover:bg-muted/50">
               <td class="p-4 align-middle text-right">
-                <div class="font-medium text-body-md">${item.campaign_name}</div>
+                <div class="font-medium text-body-md">${item.campaign_name || ''}</div>
               </td>
               <td class="p-4 align-middle text-center">
                 ${statusBadge}
               </td>
               <td class="p-4 align-middle text-center">
-                <div class="font-mono font-medium number">${item.total_revenue.toLocaleString('en-US', {minimumFractionDigits: 0})}</div>
+                <div class="font-mono font-medium number">${revenue(item).toLocaleString('en-US', {minimumFractionDigits: 0})}</div>
               </td>
               <td class="p-4 align-middle text-center">
-                <div class="font-medium text-primary number">${item.attributed_orders}</div>
+                <div class="font-medium text-primary number">${orders(item)}</div>
               </td>
             </tr>
           `;

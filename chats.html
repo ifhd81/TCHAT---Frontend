@@ -1275,13 +1275,19 @@
           const errorText = await response.text();
           console.error('خطأ في الاستجابة:', errorText);
           
-          // معالجة خطأ 401 (غير مصرح)
+          // معالجة خطأ 401 فقط — انتهاء الجلسة وتسجيل الخروج
           if (response.status === 401) {
             console.error('❌ انتهت صلاحية الرمز المميز');
             alert('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى');
             localStorage.removeItem('tchat_token');
             localStorage.removeItem('tchat_logged_in');
             window.location.href = './login.html';
+            return;
+          }
+          
+          // 404 أو غيره — رسالة واضحة بدون اعتبارها انتهاء جلسة
+          if (response.status === 404) {
+            alert('الرسالة غير موجودة أو لا يمكن جلب تفاصيلها.');
             return;
           }
           

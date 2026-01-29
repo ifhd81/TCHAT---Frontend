@@ -166,7 +166,7 @@
           : '';
 
         const updatedDate = template.quality_score?.date
-          ? new Date(template.quality_score.date * 1000).toLocaleString('ar-SA')
+          ? new Date(template.quality_score.date * 1000).toLocaleString('ar-SA', { numberingSystem: 'latn' })
           : 'غير متاح';
 
         return `

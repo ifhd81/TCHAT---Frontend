@@ -2047,10 +2047,10 @@
       const modal = document.getElementById('message-details-modal');
       const content = document.getElementById('message-details-content');
       
-      // تحويل التواريخ
-      const createdAt = new Date(message.created_at).toLocaleString('ar-SA');
+      // تحويل التواريخ (أرقام غربية 1234567890)
+      const createdAt = new Date(message.created_at).toLocaleString('ar-SA', { numberingSystem: 'latn' });
       const timestampReceived = message.timestamp_received ? 
-        new Date(message.timestamp_received * 1000).toLocaleString('ar-SA') : 'غير محدد';
+        new Date(message.timestamp_received * 1000).toLocaleString('ar-SA', { numberingSystem: 'latn' }) : 'غير محدد';
       
       // تحديد نوع المصدر
       let sourceTypeText = '';

@@ -5,6 +5,12 @@ if (API_BASE_URL === '__VITE_API_URL__') {
   API_BASE_URL = 'http://localhost:3000/api/v1';
 }
 
+// أيقونة مستخدم SVG (Lucide user) — تظهر دائماً دون الاعتماد على createIcons
+function userIconSvg(className) {
+  const c = className || 'h-5 w-5';
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${c} shrink-0"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+}
+
 // دالة لتجديد access token باستخدام refresh token
 async function refreshAccessToken() {
   const refreshToken = localStorage.getItem('refresh_token');

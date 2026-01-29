@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
-import { copyFileSync, mkdirSync } from 'fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'fs'
+
+// قراءة رابط API من .env أو متغيرات البيئة (Railway يضبط VITE_API_URL)
+const apiBaseUrl = process.env.VITE_API_URL || 'http://localhost:3000/api/v1'
 
 export default defineConfig({
   server: {
@@ -42,10 +45,12 @@ export default defineConfig({
       closeBundle() {
         try {
           mkdirSync('dist', { recursive: true });
-          copyFileSync('api.js', 'dist/api.js');
-          console.log('✓ Copied api.js to dist/');
+          let content = readFileSync(resolve(__dirname, 'api.js'), 'utf-8');
+          content = content.replace("'__VITE_API_URL__'", JSON.stringify(apiBaseUrl));
+          writeFileSync(resolve(__dirname, 'dist/api.js'), content);
+          console.log('✓ api.js written with API_BASE_URL:', apiBaseUrl);
         } catch (err) {
-          console.error('Error copying api.js:', err);
+          console.error('Error writing api.js:', err);
         }
       }
     }

@@ -1,5 +1,9 @@
-// إعدادات API
-const API_BASE_URL = 'https://tchat-production.up.railway.app/api/v1';
+// إعدادات API — يُستبدل عند البناء من VITE_API_URL (.env أو متغيرات البيئة)
+// إن لم يُستبدل (تطوير محلي) يُستخدم الرابط الافتراضي
+let API_BASE_URL = '__VITE_API_URL__';
+if (API_BASE_URL === '__VITE_API_URL__') {
+  API_BASE_URL = 'http://localhost:3000/api/v1';
+}
 
 // دالة لتجديد access token باستخدام refresh token
 async function refreshAccessToken() {

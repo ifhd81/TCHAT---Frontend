@@ -7,6 +7,7 @@
     <title>TCHAT - تسجيل الدخول</title>
     <link rel="stylesheet" href="./style.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="./api.js"></script>
   </head>
   <body class="rtl min-h-screen bg-background text-foreground">
 
@@ -109,8 +110,8 @@
         submitBtn.innerHTML = '<span class="text-button-md font-semibold">جاري التحقق...</span><i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i>';
         
         try {
-          // إرسال طلب تسجيل الدخول إلى Backend
-          const response = await fetch('https://tchat-production.up.railway.app/api/v1/auth/login', {
+          // إرسال طلب تسجيل الدخول إلى Backend (نفس الرابط المعرّف في api.js / VITE_API_URL)
+          const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

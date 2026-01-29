@@ -60,7 +60,9 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
-              <span id="chat-avatar" class="flex h-full w-full items-center justify-center bg-primary text-primary-foreground font-medium">؟</span>
+              <div id="chat-avatar" class="flex h-full w-full items-center justify-center bg-primary text-primary-foreground">
+                <i data-lucide="user" class="h-5 w-5"></i>
+              </div>
             </div>
             <div>
               <h3 id="chat-customer-name" class="text-body-md font-semibold">اختر محادثة</h3>
@@ -258,10 +260,6 @@
         const isUnread = !conv.is_read;
         const lastMessageTime = timeAgo(conv.last_message_at);
         const phoneFormatted = formatPhoneNumber(conv.phone_number);
-        const initial = conv.customer_name && conv.customer_name !== '.' 
-          ? conv.customer_name.charAt(0).toUpperCase() 
-          : phoneFormatted.charAt(-3) || '؟';
-        
         // حساب عدد الرسائل الجديدة
         let newMessageCount = 0;
         if (isUnread) {
@@ -285,7 +283,9 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3 flex-1">
                 <div class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
-                  <span class="flex h-full w-full items-center justify-center bg-primary text-primary-foreground font-medium">${initial}</span>
+                  <span class="flex h-full w-full items-center justify-center bg-primary text-primary-foreground">
+                    <i data-lucide="user" class="h-5 w-5"></i>
+                  </span>
                   ${isUnread ? '<div class="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive"></div>' : ''}
                 </div>
                 <div class="flex-1 min-w-0">
@@ -322,11 +322,9 @@
       const chatStatus = document.getElementById('chat-status');
 
       const phoneFormatted = formatPhoneNumber(conversation.phone_number);
-      const initial = conversation.customer_name && conversation.customer_name !== '.' 
-        ? conversation.customer_name.charAt(0).toUpperCase() 
-        : phoneFormatted.charAt(-3) || '؟';
 
-      chatAvatar.textContent = initial;
+      chatAvatar.innerHTML = '<i data-lucide="user" class="h-5 w-5 text-primary-foreground"></i>';
+      lucide.createIcons();
       chatCustomerName.textContent = conversation.customer_name && conversation.customer_name !== '.' 
         ? conversation.customer_name 
         : `عميل ${phoneFormatted}`;
@@ -463,8 +461,8 @@
             ${isIncoming ? `
               <div class="order-1 ml-3">
                 <div class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full bg-muted">
-                  <span class="flex h-full w-full items-center justify-center bg-primary text-primary-foreground text-xs font-medium">
-                    ${formatPhoneNumber(message.from_phone).slice(-3)}
+                  <span class="flex h-full w-full items-center justify-center bg-primary text-primary-foreground">
+                    <i data-lucide="user" class="h-4 w-4"></i>
                   </span>
                 </div>
               </div>
@@ -1030,7 +1028,6 @@
 
     function renderCustomerDetails(customer) {
       const detailsContent = document.getElementById('customer-details-content');
-      const initial = customer.name ? customer.name.charAt(0).toUpperCase() : '؟';
       const createdAt = customer.created_at ? toWesternNumerals(new Date(customer.created_at).toLocaleDateString('ar-SA')) : '-';
       const updatedAt = customer.updated_at ? toWesternNumerals(new Date(customer.updated_at).toLocaleDateString('ar-SA')) : '-';
 
@@ -1040,8 +1037,8 @@
           <div class="rounded-lg border bg-card p-4">
             <div class="flex items-center gap-4 mb-4">
               <div class="relative flex h-16 w-16 shrink-0 overflow-hidden rounded-full bg-muted">
-                <span class="flex h-full w-full items-center justify-center bg-primary text-primary-foreground text-heading-md font-bold">
-                  ${initial}
+                <span class="flex h-full w-full items-center justify-center bg-primary text-primary-foreground">
+                  <i data-lucide="user" class="h-8 w-8"></i>
                 </span>
               </div>
               <div class="flex-1">

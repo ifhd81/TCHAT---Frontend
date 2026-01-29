@@ -520,15 +520,14 @@
           // تنظيف رقم الجوال
           const cleanMobile = cart.customer_mobile ? cart.customer_mobile.replace(/[\s\+\-]/g, '') : 'غير محدد';
           
-          // أول حرف من الاسم
-          const initial = cart.customer_name ? cart.customer_name.charAt(0).toUpperCase() : '؟';
-          
           return `
             <tr class="border-b transition-colors hover:bg-muted/50">
               <td class="p-4 align-middle text-right">
                 <div class="flex items-center space-x-3 space-x-reverse">
                   <div class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
-                    <span class="flex h-full w-full items-center justify-center bg-primary text-primary-foreground font-medium">${initial}</span>
+                    <span class="flex h-full w-full items-center justify-center bg-primary text-primary-foreground">
+                      <i data-lucide="user" class="h-5 w-5"></i>
+                    </span>
                   </div>
                   <div class="font-medium text-body-md">${cart.customer_name || 'غير محدد'}</div>
                 </div>

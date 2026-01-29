@@ -8,13 +8,13 @@ const apiBaseUrl = process.env.VITE_API_URL || 'http://localhost:3000/api/v1'
 export default defineConfig({
   server: {
     host: true,
-    allowedHosts: 'all',
+    allowedHosts: true, // السماح بأي مضيف (تطوير)
     port: 5173,
     open: true
   },
   preview: {
     host: true,
-    allowedHosts: 'all',
+    allowedHosts: true, // السماح بأي مضيف (tchat-frontend، wa.herksa.com، إلخ)
     port: process.env.PORT || 4173,
     strictPort: false
   },

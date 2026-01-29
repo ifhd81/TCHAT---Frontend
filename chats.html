@@ -1020,11 +1020,19 @@
       }
     }
 
+    // تحويل الأرقام العربية الشرقية (٠١٢٣٤٥٦٧٨٩) إلى غربية (0123456789)
+    function toWesternNumerals(str) {
+      if (!str || typeof str !== 'string') return str;
+      const eastern = '٠١٢٣٤٥٦٧٨٩';
+      const western = '0123456789';
+      return str.replace(/[٠-٩]/g, c => western[eastern.indexOf(c)]);
+    }
+
     function renderCustomerDetails(customer) {
       const detailsContent = document.getElementById('customer-details-content');
       const initial = customer.name ? customer.name.charAt(0).toUpperCase() : '؟';
-      const createdAt = customer.created_at ? new Date(customer.created_at).toLocaleDateString('ar-SA') : '-';
-      const updatedAt = customer.updated_at ? new Date(customer.updated_at).toLocaleDateString('ar-SA') : '-';
+      const createdAt = customer.created_at ? toWesternNumerals(new Date(customer.created_at).toLocaleDateString('ar-SA')) : '-';
+      const updatedAt = customer.updated_at ? toWesternNumerals(new Date(customer.updated_at).toLocaleDateString('ar-SA')) : '-';
 
       detailsContent.innerHTML = `
         <div class="space-y-4">

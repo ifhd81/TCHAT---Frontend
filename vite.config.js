@@ -1,11 +1,15 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import { resolve } from 'path'
 import { mkdirSync, readFileSync, writeFileSync } from 'fs'
 
-// قراءة رابط API من .env أو متغيرات البيئة (Railway يضبط VITE_API_URL)
-const apiBaseUrl = process.env.VITE_API_URL || 'http://localhost:3000/api/v1'
+const apiJsPath = resolve(__dirname, 'api.js')
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  // تحميل .env من مجلد frontend (حتى لو شغّلت npm run dev من جذر المشروع)
+  const env = loadEnv(mode, __dirname, '')
+  const apiBaseUrl = env.VITE_API_URL || process.env.VITE_API_URL || 'http://localhost:3000/api/v1'
+
+  return {
   server: {
     host: true,
     allowedHosts: true, // السماح بأي مضيف (تطوير)
@@ -39,6 +43,28 @@ export default defineConfig({
     }
   },
   plugins: [
+    // في وضع التطوير: اعتراض طلب api.js وإرجاع نسخة مع رابط السيرفر من .env (سكربت عادي لا يمرّ بـ transform)
+    {
+      name: 'inject-api-url-dev',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          const path = req.url?.split('?')[0] || ''
+          if (path === '/api.js' || path.endsWith('/api.js')) {
+            try {
+              let content = readFileSync(apiJsPath, 'utf-8')
+              content = content.replace("'__VITE_API_URL__'", JSON.stringify(apiBaseUrl))
+              res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
+              res.end(content)
+              return
+            } catch (e) {
+              console.error('inject-api-url-dev:', e)
+            }
+          }
+          next()
+        })
+      }
+    },
+    // عند البناء: نسخ api.js مع الرابط الصحيح إلى dist
     {
       name: 'copy-api-js',
       closeBundle() {
@@ -54,4 +80,5 @@ export default defineConfig({
       }
     }
   ]
+  }
 })

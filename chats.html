@@ -160,6 +160,12 @@
       window.location.href = './login.html';
     }
 
+    // رابط الوسائط مع التوكن في query (لعمل img/video/audio في المتصفح دون إرسال رؤوس)
+    function getMediaUrl(mediaId) {
+      const t = localStorage.getItem('access_token') || localStorage.getItem('tchat_token') || '';
+      return `${typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'https://tchat-production.up.railway.app/api/v1'}/media/${mediaId}${t ? '?token=' + encodeURIComponent(t) : ''}`;
+    }
+
     let currentConversationId = null;
     let conversations = [];
     let previousMessageCount = 0; // لتتبع عدد الرسائل
@@ -642,10 +648,10 @@
               ${mediaId ? `
                 <div class="rounded-lg overflow-hidden border border-border bg-muted/20">
                   <img 
-                    src="https://tchat-production.up.railway.app/api/v1/media/${mediaId}" 
+                    src="${getMediaUrl(mediaId)}" 
                     alt="صورة مرسلة"
                     class="w-full h-auto max-h-64 object-cover cursor-pointer"
-                    onclick="openImageModal('https://tchat-production.up.railway.app/api/v1/media/${mediaId}')"
+                    onclick="openImageModal('${getMediaUrl(mediaId)}')"
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
                   />
                   <div class="hidden items-center justify-center p-8 text-muted-foreground">
@@ -694,8 +700,8 @@
                     </div>
                   </div>
                   <audio id="audio-${mediaId}" class="hidden" preload="metadata">
-                    <source src="https://tchat-production.up.railway.app/api/v1/media/${mediaId}" type="audio/ogg">
-                    <source src="https://tchat-production.up.railway.app/api/v1/media/${mediaId}" type="audio/mpeg">
+                    <source src="${getMediaUrl(mediaId)}" type="audio/ogg">
+                    <source src="${getMediaUrl(mediaId)}" type="audio/mpeg">
                   </audio>
                 </div>
               ` : `
@@ -717,7 +723,7 @@
               <p class="text-body-md">${content}</p>
               ${mediaId ? `
                 <a 
-                  href="https://tchat-production.up.railway.app/api/v1/media/${mediaId}" 
+                  href="${getMediaUrl(mediaId)}" 
                   target="_blank"
                   class="inline-flex items-center gap-2 text-body-sm text-primary hover:text-primary/80"
                 >
@@ -738,7 +744,7 @@
                     class="w-full h-auto max-h-64"
                     preload="metadata"
                   >
-                    <source src="https://tchat-production.up.railway.app/api/v1/media/${mediaId}" type="video/mp4">
+                    <source src="${getMediaUrl(mediaId)}" type="video/mp4">
                     متصفحك لا يدعم تشغيل الفيديو
                   </video>
                 </div>
@@ -758,10 +764,10 @@
               ${mediaId ? `
                 <div class="rounded-lg overflow-hidden bg-transparent">
                   <img 
-                    src="https://tchat-production.up.railway.app/api/v1/media/${mediaId}" 
+                    src="${getMediaUrl(mediaId)}" 
                     alt="${content || 'ملصق'}"
                     class="w-32 h-32 object-contain cursor-pointer"
-                    onclick="openImageModal('https://tchat-production.up.railway.app/api/v1/media/${mediaId}')"
+                    onclick="openImageModal('${getMediaUrl(mediaId)}')"
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
                   />
                   <div class="hidden items-center justify-center p-4 text-muted-foreground">
@@ -1228,27 +1234,21 @@
             allKeys: Object.keys(localStorage)
           });
           
-          // محاولة إعادة تسجيل الدخول تلقائياً
+          // محاولة إعادة تسجيل الدخول تلقائياً (نفس آلية api.js: refresh_token في body، حفظ access_token)
           console.log('🔄 محاولة إعادة تسجيل الدخول...');
-          const refreshToken = localStorage.getItem('tchat_refresh_token');
+          const refreshToken = localStorage.getItem('refresh_token') || localStorage.getItem('tchat_refresh_token');
           if (refreshToken && refreshToken !== 'null') {
             try {
-              const refreshResponse = await fetch('https://tchat-production.up.railway.app/api/v1/auth/refresh', {
+              const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
                 method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${refreshToken}`
-                }
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refresh_token: refreshToken })
               });
-              
-              if (refreshResponse.ok) {
-                const refreshData = await refreshResponse.json();
-                if (refreshData.success && refreshData.token) {
-                  localStorage.setItem('tchat_token', refreshData.token);
-                  console.log('✅ تم تجديد الرمز المميز بنجاح');
-                  // إعادة المحاولة
-                  return showMessageDetails(messageId);
-                }
+              const refreshData = await refreshResponse.json();
+              if (refreshResponse.ok && refreshData.success && refreshData.access_token) {
+                localStorage.setItem('access_token', refreshData.access_token);
+                console.log('✅ تم تجديد الرمز المميز بنجاح');
+                return showMessageDetails(messageId);
               }
             } catch (error) {
               console.error('❌ فشل في تجديد الرمز المميز:', error);
@@ -1256,14 +1256,16 @@
           }
           
           alert('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى');
-          localStorage.removeItem('tchat_token');
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
           localStorage.removeItem('tchat_logged_in');
+          localStorage.removeItem('tchat_token');
           localStorage.removeItem('tchat_refresh_token');
           window.location.href = './login.html';
           return;
         }
         
-        const response = await fetch(`https://tchat-production.up.railway.app/api/v1/messages/${messageId}`, {
+        const response = await fetch(`${API_BASE_URL}/messages/${messageId}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -1275,23 +1277,22 @@
           const errorText = await response.text();
           console.error('خطأ في الاستجابة:', errorText);
           
-          // معالجة خطأ 401: محاولة تجديد الرمز ثم إعادة الطلب مرة واحدة قبل اعتبار الجلسة منتهية
+          // معالجة خطأ 401: محاولة تجديد الرمز ثم إعادة الطلب مرة واحدة (نفس api.js: body refresh_token، حفظ access_token)
           if (response.status === 401) {
             if (!skipRefresh) {
-              const refreshToken = localStorage.getItem('tchat_refresh_token');
+              const refreshToken = localStorage.getItem('refresh_token') || localStorage.getItem('tchat_refresh_token');
               if (refreshToken && refreshToken !== 'null') {
                 try {
-                  const refreshResponse = await fetch('https://tchat-production.up.railway.app/api/v1/auth/refresh', {
+                  const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${refreshToken}` }
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh_token: refreshToken })
                   });
-                  if (refreshResponse.ok) {
-                    const refreshData = await refreshResponse.json();
-                    if (refreshData.success && refreshData.token) {
-                      localStorage.setItem('tchat_token', refreshData.token);
-                      console.log('✅ تم تجديد الرمز بعد 401، إعادة طلب تفاصيل الرسالة');
-                      return showMessageDetails(messageId, true);
-                    }
+                  const refreshData = await refreshResponse.json();
+                  if (refreshResponse.ok && refreshData.success && refreshData.access_token) {
+                    localStorage.setItem('access_token', refreshData.access_token);
+                    console.log('✅ تم تجديد الرمز بعد 401، إعادة طلب تفاصيل الرسالة');
+                    return showMessageDetails(messageId, true);
                   }
                 } catch (e) {
                   console.error('❌ فشل تجديد الرمز بعد 401:', e);
@@ -1300,8 +1301,10 @@
             }
             console.error('❌ انتهت صلاحية الرمز المميز');
             alert('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى');
-            localStorage.removeItem('tchat_token');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
             localStorage.removeItem('tchat_logged_in');
+            localStorage.removeItem('tchat_token');
             localStorage.removeItem('tchat_refresh_token');
             window.location.href = './login.html';
             return;

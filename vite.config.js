@@ -1,6 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import { resolve } from 'path'
-import { mkdirSync, readFileSync, writeFileSync } from 'fs'
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 
 const apiJsPath = resolve(__dirname, 'api.js')
 
@@ -77,6 +77,23 @@ export default defineConfig(({ mode }) => {
           console.log('✓ api.js written with API_BASE_URL:', apiBaseUrl);
         } catch (err) {
           console.error('Error writing api.js:', err);
+        }
+      }
+    },
+    // نسخ components (مثل header.js) إلى dist حتى تعمل الصفحات بعد النشر
+    {
+      name: 'copy-components',
+      closeBundle() {
+        try {
+          const componentsDir = resolve(__dirname, 'dist/components');
+          mkdirSync(componentsDir, { recursive: true });
+          copyFileSync(
+            resolve(__dirname, 'components/header.js'),
+            resolve(componentsDir, 'header.js')
+          );
+          console.log('✓ components/header.js copied to dist');
+        } catch (err) {
+          console.error('Error copying components:', err);
         }
       }
     }

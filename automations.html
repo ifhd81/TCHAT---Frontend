@@ -79,13 +79,13 @@
       </div>
     </section>
 
-    <!-- Automations List -->
+    <!-- Automations List with Visual Workflow -->
     <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
       <div class="border-b border-border p-6">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <i data-lucide="workflow" class="h-5 w-5 text-muted-foreground"></i>
-            <h2 class="text-heading-md font-semibold">قائمة الأتمتات</h2>
+            <h2 class="text-heading-md font-semibold">الحملات المؤتمتة مع الإحصائيات</h2>
           </div>
           <button onclick="refreshAutomations()" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
             <i data-lucide="refresh-cw" class="h-4 w-4"></i>
@@ -94,7 +94,7 @@
       </div>
 
       <div class="p-6">
-        <div id="automations-list" class="space-y-4">
+        <div id="automations-list" class="space-y-6">
           <!-- سيتم تحميل الأتمتات هنا -->
         </div>
       </div>
@@ -343,7 +343,9 @@
     let allTemplates = [];
     let automations = [];
     let abandonedCartSettings = {
+      id: 0,
       templateName: 'cart_1',
+      templateLanguage: 'ar',
       delayMinutes: 0,
       isActive: true,
       preventDuplicate: true,
@@ -355,10 +357,12 @@
       // تهيئة الهيدر
       renderHeader('header-container', { activePage: 'automations' });
       lucide.createIcons();
-      await loadTemplates();
-      await loadAutomations();
-      await loadAbandonedCartSettings();
-      updateStats();
+      await Promise.all([
+        loadTemplates(),
+        loadAutomations(),
+        loadAbandonedCartSettings(),
+        loadStats()
+      ]);
     });
 
     // تحميل القوالب من API
@@ -372,6 +376,23 @@
       } catch (error) {
         console.error('خطأ في تحميل القوالب:', error);
         showToast('فشل تحميل القوالب', 'error');
+      }
+    }
+
+    // تحميل الإحصائيات من API
+    async function loadStats() {
+      try {
+        const response = await apiRequest('/automations/stats');
+        if (response && response.success && response.data) {
+          const stats = response.data;
+          document.getElementById('active-automations-count').textContent = stats.active_automations || 0;
+          document.getElementById('total-sent-count').textContent = stats.total_sent || 0;
+          document.getElementById('total-carts-count').textContent = stats.total_carts || 0;
+          const conversionRate = stats.conversion_rate || 0;
+          document.getElementById('conversion-rate').textContent = conversionRate.toFixed(1) + '%';
+        }
+      } catch (error) {
+        console.error('خطأ في تحميل الإحصائيات:', error);
       }
     }
 
@@ -434,27 +455,51 @@
       preview.classList.remove('hidden');
     }
 
-    // تحميل الأتمتات
+    // تحميل الأتمتات من API مع الإحصائيات التفصيلية
     async function loadAutomations() {
       try {
-        // حالياً نعرض الأتمتة الافتراضية للسلة المتروكة
-        renderAutomations();
+        const response = await apiRequest('/automations/with-stats');
+        if (response && response.success && response.data) {
+          automationsWithStats = response.data;
+        }
+        renderAutomationsWithStats();
       } catch (error) {
         console.error('خطأ في تحميل الأتمتات:', error);
+        // محاولة التحميل بدون إحصائيات
+        try {
+          const fallback = await apiRequest('/automations');
+          if (fallback && fallback.success && fallback.data) {
+            automations = fallback.data;
+            renderAutomations();
+          }
+        } catch (e) {
+          renderAutomations();
+        }
       }
     }
 
-    // تحميل إعدادات السلة المتروكة
+    let automationsWithStats = [];
+
+    // تحميل إعدادات السلة المتروكة من API
     async function loadAbandonedCartSettings() {
       try {
-        // تحميل الإعدادات من localStorage أو API
-        const saved = localStorage.getItem('abandoned_cart_settings');
-        if (saved) {
-          abandonedCartSettings = JSON.parse(saved);
+        const response = await apiRequest('/automations/trigger/abandoned_cart');
+        if (response && response.success && response.data) {
+          const data = response.data;
+          abandonedCartSettings = {
+            id: data.id,
+            templateName: data.template_name,
+            templateLanguage: data.template_language || 'ar',
+            delayMinutes: data.delay_minutes || 0,
+            isActive: data.is_active,
+            preventDuplicate: data.prevent_duplicate,
+            skipPurchased: data.skip_purchased
+          };
         }
         updateCurrentSettingsDisplay();
       } catch (error) {
-        console.error('خطأ في تحميل الإعدادات:', error);
+        console.error('خطأ في تحميل إعدادات السلة المتروكة:', error);
+        updateCurrentSettingsDisplay(); // عرض الافتراضي
       }
     }
 
@@ -490,7 +535,7 @@
       return `بعد ${minutes / 1440} يوم`;
     }
 
-    // عرض الأتمتات
+    // عرض الأتمتات (النسخة القديمة)
     function renderAutomations() {
       const container = document.getElementById('automations-list');
       
@@ -533,10 +578,201 @@
       lucide.createIcons();
     }
 
-    // تحديث الإحصائيات
-    function updateStats() {
-      document.getElementById('active-automations-count').textContent = abandonedCartSettings.isActive ? '1' : '0';
-      // يمكن تحديث باقي الإحصائيات من API لاحقاً
+    // الحصول على أيقونة المُشغّل
+    function getTriggerIcon(triggerType) {
+      const icons = {
+        'abandoned_cart': 'shopping-cart',
+        'new_order': 'package',
+        'order_shipped': 'truck',
+        'order_delivered': 'check-circle',
+        'new_customer': 'user-plus',
+        'browse_abandonment': 'eye',
+        'review_request': 'star'
+      };
+      return icons[triggerType] || 'zap';
+    }
+
+    // الحصول على لون المُشغّل
+    function getTriggerColor(triggerType) {
+      const colors = {
+        'abandoned_cart': 'warning',
+        'new_order': 'primary',
+        'order_shipped': 'accent',
+        'order_delivered': 'success',
+        'new_customer': 'primary',
+        'browse_abandonment': 'warning',
+        'review_request': 'accent'
+      };
+      return colors[triggerType] || 'primary';
+    }
+
+    // الحصول على اسم المُشغّل بالعربي
+    function getTriggerName(triggerType) {
+      const names = {
+        'abandoned_cart': 'السلة المتروكة',
+        'new_order': 'طلب جديد',
+        'order_shipped': 'شحن الطلب',
+        'order_delivered': 'توصيل الطلب',
+        'new_customer': 'عميل جديد',
+        'browse_abandonment': 'ترك تصفح المتجر',
+        'review_request': 'طلب تقييم'
+      };
+      return names[triggerType] || triggerType;
+    }
+
+    // عرض الأتمتات مع الإحصائيات التفصيلية (العرض المرئي)
+    function renderAutomationsWithStats() {
+      const container = document.getElementById('automations-list');
+      
+      if (!automationsWithStats || automationsWithStats.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 text-muted-foreground">
+            <i data-lucide="workflow" class="h-12 w-12 mx-auto mb-4 opacity-50"></i>
+            <p>لا توجد حملات مؤتمتة حالياً</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = automationsWithStats.map(automation => {
+        const triggerIcon = getTriggerIcon(automation.trigger_type);
+        const triggerColor = getTriggerColor(automation.trigger_type);
+        const triggerName = getTriggerName(automation.trigger_type);
+        
+        // الخطوة الأولى
+        const step1 = automation.steps && automation.steps[0] ? automation.steps[0] : {
+          sent: 0, delivered: 0, read: 0, replied: 0, clicked: 0, failed: 0, waiting: 0, skipped: 0
+        };
+
+        return `
+          <div class="rounded-xl border border-border bg-card overflow-hidden">
+            
+            <!-- المُشغّل (Trigger) -->
+            <div class="bg-muted/30 border-b border-border p-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-${triggerColor}/10">
+                    <i data-lucide="${triggerIcon}" class="h-5 w-5 text-${triggerColor}"></i>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-body-xs text-muted-foreground">المُشغّل</span>
+                      <i data-lucide="star" class="h-3 w-3 text-muted-foreground"></i>
+                    </div>
+                    <h3 class="text-body-md font-semibold">${triggerName}</h3>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${automation.is_active ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}">
+                    ${automation.is_active ? 'فعّال' : 'متوقف'}
+                  </span>
+                  <button onclick="showEditAbandonedCartModal()" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
+                    <i data-lucide="settings" class="h-4 w-4"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="mt-3 flex items-center gap-2 text-body-sm text-muted-foreground">
+                <span>عملاء بدأوا في هذه الحملة</span>
+                <span class="inline-flex items-center justify-center rounded-md bg-primary/10 text-primary px-2 py-0.5 text-body-sm font-bold number">${automation.total_started || 0}</span>
+              </div>
+            </div>
+
+            <!-- خط الربط -->
+            <div class="flex justify-center py-2">
+              <div class="w-0.5 h-6 bg-primary"></div>
+            </div>
+
+            <!-- الخطوة 1: إرسال رسالة قالب -->
+            <div class="mx-4 mb-4 rounded-lg border-2 border-warning bg-warning/5 overflow-hidden">
+              <div class="bg-warning text-warning-foreground px-4 py-3 flex items-center gap-2">
+                <i data-lucide="send" class="h-4 w-4"></i>
+                <span class="font-semibold">إرسال رسالة قالب</span>
+              </div>
+              
+              <div class="p-4 space-y-4">
+                <!-- وقت الانتظار والقالب -->
+                <div class="flex items-center justify-between text-body-sm">
+                  <div class="flex items-center gap-2 text-muted-foreground">
+                    <i data-lucide="clock" class="h-4 w-4"></i>
+                    <span>انتظر ${getTimingText(step1.delay_minutes || abandonedCartSettings.delayMinutes)}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-muted-foreground">ثم أرسل</span>
+                    <span class="inline-flex items-center rounded-md border border-input bg-background px-2 py-1 text-body-sm font-medium">
+                      <i data-lucide="file-text" class="h-3 w-3 ml-1"></i>
+                      ${step1.template_name || abandonedCartSettings.templateName}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- إحصائيات الانتظار -->
+                <div class="flex items-center gap-4 text-body-sm">
+                  <div class="flex items-center gap-2">
+                    <span class="text-muted-foreground">بالانتظار</span>
+                    <span class="inline-flex items-center justify-center rounded-md bg-muted px-2 py-0.5 text-body-sm font-bold number">${step1.waiting || 0}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-muted-foreground">تخطّوا المرحلة</span>
+                    <span class="inline-flex items-center justify-center rounded-md bg-muted px-2 py-0.5 text-body-sm font-bold number">${step1.skipped || 0}</span>
+                  </div>
+                </div>
+
+                <!-- إحصائيات الخطوة التفصيلية -->
+                <div class="pt-4 border-t border-border">
+                  <h4 class="text-body-sm font-semibold text-muted-foreground mb-3">إحصائيات الخطوة منذ البدء</h4>
+                  <div class="grid grid-cols-3 md:grid-cols-6 gap-3">
+                    <div class="text-center">
+                      <div class="inline-flex items-center justify-center rounded-lg bg-blue-100 text-blue-800 px-3 py-1.5 text-body-md font-bold number">${step1.sent || 0}</div>
+                      <div class="text-body-xs text-muted-foreground mt-1">أُرسلت</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="inline-flex items-center justify-center rounded-lg bg-green-100 text-green-800 px-3 py-1.5 text-body-md font-bold number">${step1.delivered || 0}</div>
+                      <div class="text-body-xs text-muted-foreground mt-1">وصلت</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="inline-flex items-center justify-center rounded-lg bg-purple-100 text-purple-800 px-3 py-1.5 text-body-md font-bold number">${step1.read || 0}</div>
+                      <div class="text-body-xs text-muted-foreground mt-1">قُرئت</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="inline-flex items-center justify-center rounded-lg bg-indigo-100 text-indigo-800 px-3 py-1.5 text-body-md font-bold number">${step1.replied || 0}</div>
+                      <div class="text-body-xs text-muted-foreground mt-1">رُد عليها</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="inline-flex items-center justify-center rounded-lg bg-pink-100 text-pink-800 px-3 py-1.5 text-body-md font-bold number">${step1.clicked || 0}</div>
+                      <div class="text-body-xs text-muted-foreground mt-1">نُقر عليه</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="inline-flex items-center justify-center rounded-lg bg-red-100 text-red-800 px-3 py-1.5 text-body-md font-bold number">${step1.failed || 0}</div>
+                      <div class="text-body-xs text-muted-foreground mt-1">ارتدت</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- خط الربط -->
+            <div class="flex justify-center py-2">
+              <div class="w-0.5 h-6 bg-success"></div>
+            </div>
+
+            <!-- النهاية: أكمل -->
+            <div class="mx-4 mb-4 rounded-lg border-2 border-success bg-success/5 overflow-hidden">
+              <div class="bg-success text-success-foreground px-4 py-3 flex items-center gap-2">
+                <i data-lucide="check" class="h-4 w-4"></i>
+                <span class="font-semibold">أكمل</span>
+              </div>
+              <div class="p-4 text-center">
+                <div class="inline-flex items-center justify-center rounded-lg bg-success/10 text-success px-4 py-2 text-heading-md font-bold number">${automation.total_completed || 0}</div>
+                <div class="text-body-sm text-muted-foreground mt-2">عملاء قد أكملوا هذه الحملة</div>
+              </div>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
     }
 
     // عرض نافذة تعديل السلة المتروكة
@@ -574,36 +810,71 @@
         return;
       }
 
-      abandonedCartSettings = {
-        ...abandonedCartSettings,
-        templateName,
-        delayMinutes,
-        preventDuplicate,
-        skipPurchased
+      // تحديد لغة القالب من القالب المختار
+      const templateSelect = document.getElementById('template-select');
+      const selectedOption = templateSelect.options[templateSelect.selectedIndex];
+      let templateLanguage = 'ar';
+      if (selectedOption.dataset.template) {
+        const template = JSON.parse(selectedOption.dataset.template);
+        templateLanguage = template.language || 'ar';
+      }
+
+      const payload = {
+        template_name: templateName,
+        template_language: templateLanguage,
+        delay_minutes: delayMinutes,
+        is_active: abandonedCartSettings.isActive,
+        prevent_duplicate: preventDuplicate,
+        skip_purchased: skipPurchased
       };
 
-      // حفظ في localStorage
-      localStorage.setItem('abandoned_cart_settings', JSON.stringify(abandonedCartSettings));
+      try {
+        // حفظ في API
+        const response = await apiRequest(`/automations/${abandonedCartSettings.id}`, 'PUT', payload);
+        
+        if (response && response.success) {
+          abandonedCartSettings = {
+            ...abandonedCartSettings,
+            templateName,
+            templateLanguage,
+            delayMinutes,
+            preventDuplicate,
+            skipPurchased
+          };
 
-      // TODO: حفظ في API
-      // await apiRequest('/automations/abandoned-cart', 'PUT', abandonedCartSettings);
-
-      hideEditAbandonedCartModal();
-      updateCurrentSettingsDisplay();
-      renderAutomations();
-      showToast('تم حفظ الإعدادات بنجاح', 'success');
+          hideEditAbandonedCartModal();
+          updateCurrentSettingsDisplay();
+          renderAutomations();
+          showToast('تم حفظ الإعدادات بنجاح', 'success');
+        } else {
+          showToast(response?.message || 'فشل في حفظ الإعدادات', 'error');
+        }
+      } catch (error) {
+        console.error('خطأ في حفظ الإعدادات:', error);
+        showToast('فشل في حفظ الإعدادات', 'error');
+      }
     }
 
     // تبديل حالة السلة المتروكة
-    function toggleAbandonedCartStatus() {
-      abandonedCartSettings.isActive = !abandonedCartSettings.isActive;
-      localStorage.setItem('abandoned_cart_settings', JSON.stringify(abandonedCartSettings));
-      updateCurrentSettingsDisplay();
-      renderAutomations();
-      updateStats();
-      
-      const message = abandonedCartSettings.isActive ? 'تم تفعيل الأتمتة' : 'تم إيقاف الأتمتة';
-      showToast(message, 'success');
+    async function toggleAbandonedCartStatus() {
+      try {
+        const response = await apiRequest(`/automations/${abandonedCartSettings.id}/toggle`, 'POST');
+        
+        if (response && response.success) {
+          abandonedCartSettings.isActive = response.is_active;
+          updateCurrentSettingsDisplay();
+          renderAutomations();
+          loadStats();
+          
+          const message = abandonedCartSettings.isActive ? 'تم تفعيل الأتمتة' : 'تم إيقاف الأتمتة';
+          showToast(message, 'success');
+        } else {
+          showToast(response?.message || 'فشل في تغيير الحالة', 'error');
+        }
+      } catch (error) {
+        console.error('خطأ في تغيير الحالة:', error);
+        showToast('فشل في تغيير الحالة', 'error');
+      }
     }
 
     // عرض نافذة إنشاء أتمتة جديدة
@@ -611,6 +882,11 @@
       const modal = document.getElementById('create-automation-modal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+      // إعادة تعيين الحقول
+      document.getElementById('automation-name').value = '';
+      document.getElementById('trigger-select').value = '';
+      document.getElementById('new-automation-template').value = '';
+      document.getElementById('new-automation-timing').value = '0';
       lucide.createIcons();
     }
 
@@ -623,24 +899,56 @@
 
     // إنشاء أتمتة جديدة
     async function createAutomation() {
-      const name = document.getElementById('automation-name').value;
+      const name = document.getElementById('automation-name').value.trim();
       const trigger = document.getElementById('trigger-select').value;
       const template = document.getElementById('new-automation-template').value;
-      const timing = document.getElementById('new-automation-timing').value;
+      const timing = parseInt(document.getElementById('new-automation-timing').value) || 0;
 
       if (!name || !trigger || !template) {
         showToast('يرجى ملء جميع الحقول المطلوبة', 'error');
         return;
       }
 
-      // TODO: حفظ الأتمتة في API
-      showToast('قريباً - إنشاء الأتمتات المخصصة', 'info');
-      hideCreateAutomationModal();
+      // تحديد لغة القالب
+      const templateSelect = document.getElementById('new-automation-template');
+      const selectedOption = templateSelect.options[templateSelect.selectedIndex];
+      let templateLanguage = 'ar';
+      if (selectedOption.dataset.template) {
+        const templateData = JSON.parse(selectedOption.dataset.template);
+        templateLanguage = templateData.language || 'ar';
+      }
+
+      const payload = {
+        name: name,
+        trigger_type: trigger,
+        template_name: template,
+        template_language: templateLanguage,
+        delay_minutes: timing,
+        is_active: true,
+        prevent_duplicate: true,
+        skip_purchased: true
+      };
+
+      try {
+        const response = await apiRequest('/automations', 'POST', payload);
+        
+        if (response && response.success) {
+          hideCreateAutomationModal();
+          await loadAutomations();
+          await loadStats();
+          showToast('تم إنشاء الأتمتة بنجاح', 'success');
+        } else {
+          showToast(response?.message || 'فشل في إنشاء الأتمتة', 'error');
+        }
+      } catch (error) {
+        console.error('خطأ في إنشاء الأتمتة:', error);
+        showToast('فشل في إنشاء الأتمتة', 'error');
+      }
     }
 
     // تحديث الأتمتات
-    function refreshAutomations() {
-      loadAutomations();
+    async function refreshAutomations() {
+      await Promise.all([loadAutomations(), loadAbandonedCartSettings(), loadStats()]);
       showToast('تم تحديث القائمة', 'success');
     }
 

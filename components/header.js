@@ -4,7 +4,7 @@
 /**
  * إنشاء مكون الهيدر
  * @param {Object} options - خيارات الهيدر
- * @param {string} options.activePage - الصفحة النشطة حالياً (customers, templates, campaigns, chats, webhooks)
+ * @param {string} options.activePage - الصفحة النشطة حالياً (customers, templates, campaigns, chats, automations, webhooks)
  * @returns {string} - HTML الهيدر
  */
 function createHeader(options = {}) {
@@ -71,6 +71,15 @@ function createHeader(options = {}) {
               <div id="unread-indicator" class="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive hidden"></div>
             </div>
             <span>الدردشات</span>
+          </a>
+
+          <!-- المؤتمتة -->
+          <a
+            href="./automations.html"
+            class="${getLinkClasses('automations')}"
+          >
+            <i data-lucide="workflow" class="h-4 w-4"></i>
+            <span>المؤتمتة</span>
           </a>
 
           <!-- سجل الويب هوك -->
@@ -147,6 +156,15 @@ function createHeader(options = {}) {
               <div id="unread-indicator-mobile" class="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive hidden"></div>
             </div>
             <span>الدردشات</span>
+          </a>
+
+          <!-- المؤتمتة -->
+          <a
+            href="./automations.html"
+            class="${getMobileLinkClasses('automations')}"
+          >
+            <i data-lucide="workflow" class="h-5 w-5"></i>
+            <span>المؤتمتة</span>
           </a>
 
           <!-- سجل الويب هوك -->
@@ -302,6 +320,7 @@ function getActivePageFromURL() {
     'templates': 'templates',
     'campaigns': 'campaigns',
     'chats': 'chats',
+    'automations': 'automations',
     'webhooks': 'webhooks',
     'dashboard': 'dashboard',
     'index': 'dashboard'

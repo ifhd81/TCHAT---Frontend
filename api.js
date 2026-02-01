@@ -1,9 +1,5 @@
-// إعدادات API — يُستبدل عند البناء من VITE_API_URL (.env أو متغيرات البيئة)
-// إن لم يُستبدل (تطوير محلي) يُستخدم الرابط الافتراضي
-let API_BASE_URL = '__VITE_API_URL__';
-if (API_BASE_URL === '__VITE_API_URL__') {
-  API_BASE_URL = 'http://localhost:3000/api/v1';
-}
+// إعدادات API — يُستبدل تلقائياً بقيمة VITE_API_URL من .env
+const API_BASE_URL = '__VITE_API_URL__';
 
 // أيقونة مستخدم SVG (Lucide user) — تظهر دائماً دون الاعتماد على createIcons
 function userIconSvg(className) {

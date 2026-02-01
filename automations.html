@@ -466,8 +466,10 @@
       const preview = document.getElementById('template-preview');
       const previewContent = document.getElementById('template-preview-content');
       
+      if (!select || !preview || !previewContent) return;
+      
       const selectedOption = select.options[select.selectedIndex];
-      if (!selectedOption.value || !selectedOption.dataset.template) {
+      if (!selectedOption || !selectedOption.value || !selectedOption.dataset.template) {
         preview.classList.add('hidden');
         return;
       }
@@ -755,7 +757,6 @@
           };
 
           hideEditAbandonedCartModal();
-          updateCurrentSettingsDisplay();
           renderAutomations();
           showToast('تم حفظ الإعدادات بنجاح', 'success');
         } else {
@@ -774,7 +775,6 @@
         
         if (response && response.success) {
           abandonedCartSettings.isActive = response.is_active;
-          updateCurrentSettingsDisplay();
           renderAutomations();
           loadStats();
           

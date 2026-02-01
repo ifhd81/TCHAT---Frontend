@@ -519,9 +519,9 @@
             templateName: data.template_name,
             templateLanguage: data.template_language || 'ar',
             delayMinutes: data.delay_minutes || 0,
-            isActive: data.is_active,
-            preventDuplicate: data.prevent_duplicate,
-            skipPurchased: data.skip_purchased,
+            isActive: data.is_active !== false,
+            preventDuplicate: data.prevent_duplicate !== false,
+            skipPurchased: data.skip_purchased !== false,
             totalSent: data.total_sent || 0,
             totalConverted: data.total_converted || 0
           };
@@ -607,10 +607,30 @@
       updateModalData();
       
       // تحديد القيم الحالية
-      document.getElementById('template-select').value = abandonedCartSettings.templateName;
-      document.getElementById('timing-select').value = abandonedCartSettings.delayMinutes;
-      document.getElementById('prevent-duplicate').checked = abandonedCartSettings.preventDuplicate;
-      document.getElementById('skip-purchased').checked = abandonedCartSettings.skipPurchased;
+      const templateSelect = document.getElementById('template-select');
+      const timingSelect = document.getElementById('timing-select');
+      
+      // تحديد القالب - إذا كانت القيمة غير موجودة في القائمة، أضفها مؤقتاً
+      if (templateSelect) {
+        templateSelect.value = abandonedCartSettings.templateName;
+        // إذا لم يتم تحديد القيمة (القالب غير موجود في القائمة)
+        if (templateSelect.value !== abandonedCartSettings.templateName && abandonedCartSettings.templateName) {
+          const option = document.createElement('option');
+          option.value = abandonedCartSettings.templateName;
+          option.textContent = abandonedCartSettings.templateName;
+          option.selected = true;
+          templateSelect.insertBefore(option, templateSelect.firstChild.nextSibling);
+        }
+      }
+      
+      if (timingSelect) {
+        timingSelect.value = abandonedCartSettings.delayMinutes || 0;
+      }
+      
+      const preventDuplicate = document.getElementById('prevent-duplicate');
+      const skipPurchased = document.getElementById('skip-purchased');
+      if (preventDuplicate) preventDuplicate.checked = abandonedCartSettings.preventDuplicate !== false;
+      if (skipPurchased) skipPurchased.checked = abandonedCartSettings.skipPurchased !== false;
       
       showTemplatePreview();
       lucide.createIcons();
@@ -711,7 +731,7 @@
     // حفظ إعدادات السلة المتروكة
     async function saveAbandonedCartSettings() {
       const templateName = document.getElementById('template-select').value;
-      const delayMinutes = parseInt(document.getElementById('timing-select').value);
+      const delayMinutes = parseInt(document.getElementById('timing-select').value) || 0;
       const preventDuplicate = document.getElementById('prevent-duplicate').checked;
       const skipPurchased = document.getElementById('skip-purchased').checked;
 
@@ -724,7 +744,7 @@
       const templateSelect = document.getElementById('template-select');
       const selectedOption = templateSelect.options[templateSelect.selectedIndex];
       let templateLanguage = 'ar';
-      if (selectedOption.dataset.template) {
+      if (selectedOption && selectedOption.dataset.template) {
         const template = JSON.parse(selectedOption.dataset.template);
         templateLanguage = template.language || 'ar';
       }
@@ -739,10 +759,10 @@
       };
 
       try {
-        // حفظ في API
         const response = await apiRequest(`/automations/${abandonedCartSettings.id}`, 'PUT', payload);
         
         if (response && response.success) {
+          // تحديث الإعدادات المحلية بعد نجاح الحفظ
           abandonedCartSettings = {
             ...abandonedCartSettings,
             templateName,
@@ -751,7 +771,7 @@
             preventDuplicate,
             skipPurchased
           };
-
+          
           hideEditAbandonedCartModal();
           renderAutomations();
           showToast('تم حفظ الإعدادات بنجاح', 'success');
@@ -760,7 +780,7 @@
         }
       } catch (error) {
         console.error('خطأ في حفظ الإعدادات:', error);
-        showToast('فشل في حفظ الإعدادات', 'error');
+        showToast('فشل في حفظ الإعدادات - تأكد من تشغيل الخادم', 'error');
       }
     }
 

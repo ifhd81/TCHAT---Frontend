@@ -749,17 +749,40 @@
         templateLanguage = template.language || 'ar';
       }
 
-      const payload = {
-        template_name: templateName,
-        template_language: templateLanguage,
-        delay_minutes: delayMinutes,
-        is_active: abandonedCartSettings.isActive,
-        prevent_duplicate: preventDuplicate,
-        skip_purchased: skipPurchased
-      };
-
       try {
-        const response = await apiRequest(`/automations/${abandonedCartSettings.id}`, 'PUT', payload);
+        let response;
+        
+        // إذا لم يكن هناك ID صحيح، ننشئ أتمتة جديدة
+        if (!abandonedCartSettings.id || abandonedCartSettings.id === 0) {
+          const createPayload = {
+            name: 'تذكير السلة المتروكة',
+            trigger_type: 'abandoned_cart',
+            template_name: templateName,
+            template_language: templateLanguage,
+            delay_minutes: delayMinutes,
+            is_active: true,
+            prevent_duplicate: preventDuplicate,
+            skip_purchased: skipPurchased
+          };
+          
+          response = await apiRequest('/automations', 'POST', createPayload);
+          
+          if (response && response.success && response.data) {
+            abandonedCartSettings.id = response.data.id;
+          }
+        } else {
+          // تحديث الأتمتة الموجودة
+          const updatePayload = {
+            template_name: templateName,
+            template_language: templateLanguage,
+            delay_minutes: delayMinutes,
+            is_active: abandonedCartSettings.isActive,
+            prevent_duplicate: preventDuplicate,
+            skip_purchased: skipPurchased
+          };
+          
+          response = await apiRequest(`/automations/${abandonedCartSettings.id}`, 'PUT', updatePayload);
+        }
         
         if (response && response.success) {
           // تحديث الإعدادات المحلية بعد نجاح الحفظ
@@ -780,7 +803,7 @@
         }
       } catch (error) {
         console.error('خطأ في حفظ الإعدادات:', error);
-        showToast('فشل في حفظ الإعدادات - تأكد من تشغيل الخادم', 'error');
+        showToast('فشل في حفظ الإعدادات - تأكد من نشر الباك إند', 'error');
       }
     }
 

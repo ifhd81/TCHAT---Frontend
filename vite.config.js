@@ -36,6 +36,7 @@ export default defineConfig(({ mode }) => {
         campaigns: resolve(__dirname, 'campaigns.html'),
         templates: resolve(__dirname, 'templates.html'),
         webhooks: resolve(__dirname, 'webhooks.html'),
+        automations: resolve(__dirname, 'automations.html'),
       },
       output: {
         manualChunks: undefined

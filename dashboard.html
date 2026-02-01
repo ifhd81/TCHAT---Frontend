@@ -7,68 +7,14 @@
     <link rel="stylesheet" href="./style.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="./api.js"></script>
+    <script src="./components/header.js"></script>
   </head>
   <body class="rtl min-h-screen bg-background" style="font-family: 'LamaSans', sans-serif;">
     
     <div class="min-h-screen">
       
-      <!-- Header -->
-      <header class="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div class="container mx-auto flex h-16 items-center px-4">
-          <div class="flex items-center space-x-2 space-x-reverse">
-            <span class="text-heading-md font-bold">TCHAT</span>
-          </div>
-
-          <div class="flex-1 flex justify-center space-x-3 space-x-reverse">
-            <button
-              id="customers-button"
-              type="button"
-              class="inline-flex items-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <i data-lucide="users" class="h-4 w-4"></i>
-              <span>العملاء</span>
-            </button>
-            <a
-              href="./templates.html"
-              class="inline-flex items-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
-              <span>القوالب</span>
-            </a>
-            <a
-              href="./campaigns.html"
-              class="inline-flex items-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <i data-lucide="megaphone" class="h-4 w-4"></i>
-              <span>الحملات</span>
-            </a>
-          <a
-            href="./chats.html"
-            class="inline-flex items-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative"
-          >
-            <div class="relative">
-              <i data-lucide="message-circle" class="h-4 w-4"></i>
-              <div id="unread-indicator" class="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive hidden"></div>
-            </div>
-            <span>الدردشات</span>
-          </a>
-          <a
-            href="./webhooks.html"
-            class="inline-flex items-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <i data-lucide="webhook" class="h-4 w-4"></i>
-            <span>سجل الويب هوك</span>
-          </a>
-        </div>
-
-          <div class="flex items-center space-x-4 space-x-reverse">
-            <button onclick="logout()" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
-              <i data-lucide="log-out" class="ml-2 h-4 w-4"></i>
-              <span class="text-body-md">تسجيل الخروج</span>
-            </button>
-          </div>
-        </div>
-      </header>
+      <!-- Header Container -->
+      <div id="header-container"></div>
 
       <!-- Main Content -->
       <main class="container mx-auto px-4 py-6">
@@ -620,21 +566,13 @@
         }
       }
 
-      // إعداد زر العملاء
-      function setupCustomersDrawer() {
-        const customersButton = document.getElementById('customers-button');
-        if (customersButton) {
-          customersButton.addEventListener('click', function() {
-            window.location.href = './customers.html';
-          });
-        }
-      }
-
-      // تهيئة أيقونات Lucide
+      // تهيئة أيقونات Lucide والهيدر
       document.addEventListener('DOMContentLoaded', function() {
+        // تهيئة مكون الهيدر
+        renderHeader('header-container', { activePage: 'dashboard' });
+        
         lucide.createIcons();
         loadDashboardData();
-        setupCustomersDrawer();
         
         // فحص المحادثات غير المقروءة كل دقيقة
         setInterval(checkUnreadConversations, 60000);

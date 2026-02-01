@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TCHAT - الحملات المؤتمتة</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="./api.js"></script>
+  <script src="./components/header.js"></script>
+</head>
+<body class="rtl min-h-screen bg-background" style="font-family: 'LamaSans', sans-serif;">
+  
+  <div class="min-h-screen">
+    
+    <!-- Header Container -->
+    <div id="header-container"></div>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-8">
+    
+    <!-- Page Header -->
+    <section class="mb-8 flex items-center justify-between">
+      <div>
+        <h1 class="text-heading-lg font-bold text-foreground">الحملات المؤتمتة</h1>
+        <p class="text-body-sm text-muted-foreground">إعداد الرسائل التلقائية بناءً على أحداث معينة</p>
+      </div>
+      <button onclick="showCreateAutomationModal()" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90">
+        <i data-lucide="plus" class="h-4 w-4"></i>
+        <span>أتمتة جديدة</span>
+      </button>
+    </section>
+
+    <!-- Stats Cards -->
+    <section class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-xl border bg-card p-6 shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <i data-lucide="zap" class="h-5 w-5 text-primary"></i>
+          </div>
+          <div>
+            <p class="text-body-sm text-muted-foreground">الأتمتات النشطة</p>
+            <p class="text-heading-lg font-bold number" id="active-automations-count">0</p>
+          </div>
+        </div>
+      </div>
+      <div class="rounded-xl border bg-card p-6 shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
+            <i data-lucide="send" class="h-5 w-5 text-success"></i>
+          </div>
+          <div>
+            <p class="text-body-sm text-muted-foreground">الرسائل المرسلة</p>
+            <p class="text-heading-lg font-bold number" id="total-sent-count">0</p>
+          </div>
+        </div>
+      </div>
+      <div class="rounded-xl border bg-card p-6 shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
+            <i data-lucide="shopping-cart" class="h-5 w-5 text-warning"></i>
+          </div>
+          <div>
+            <p class="text-body-sm text-muted-foreground">السلات المستهدفة</p>
+            <p class="text-heading-lg font-bold number" id="total-carts-count">0</p>
+          </div>
+        </div>
+      </div>
+      <div class="rounded-xl border bg-card p-6 shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+            <i data-lucide="percent" class="h-5 w-5 text-accent-foreground"></i>
+          </div>
+          <div>
+            <p class="text-body-sm text-muted-foreground">نسبة التحويل</p>
+            <p class="text-heading-lg font-bold number" id="conversion-rate">0%</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Automations List -->
+    <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
+      <div class="border-b border-border p-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <i data-lucide="workflow" class="h-5 w-5 text-muted-foreground"></i>
+            <h2 class="text-heading-md font-semibold">قائمة الأتمتات</h2>
+          </div>
+          <button onclick="refreshAutomations()" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
+            <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <div id="automations-list" class="space-y-4">
+          <!-- سيتم تحميل الأتمتات هنا -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Current Configuration Section -->
+    <div class="mt-8 rounded-xl border bg-card text-card-foreground shadow-sm">
+      <div class="border-b border-border p-6">
+        <div class="flex items-center gap-3">
+          <i data-lucide="settings" class="h-5 w-5 text-muted-foreground"></i>
+          <h2 class="text-heading-md font-semibold">الإعداد الحالي للسلة المتروكة</h2>
+        </div>
+      </div>
+      <div class="p-6">
+        <div class="rounded-lg border border-border bg-muted/30 p-6">
+          <div class="flex items-start gap-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-warning/10">
+              <i data-lucide="shopping-cart" class="h-6 w-6 text-warning"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-heading-sm font-semibold text-foreground">تذكير السلة المتروكة</h3>
+              <p class="mt-1 text-body-sm text-muted-foreground">يتم إرسال رسالة تلقائية عند ترك العميل لسلة التسوق</p>
+              
+              <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div class="rounded-md border border-border bg-background p-4">
+                  <div class="flex items-center gap-2 text-body-sm text-muted-foreground">
+                    <i data-lucide="file-text" class="h-4 w-4"></i>
+                    <span>القالب المستخدم</span>
+                  </div>
+                  <p class="mt-1 text-body-md font-semibold text-foreground" id="current-template-name">cart_1</p>
+                </div>
+                <div class="rounded-md border border-border bg-background p-4">
+                  <div class="flex items-center gap-2 text-body-sm text-muted-foreground">
+                    <i data-lucide="clock" class="h-4 w-4"></i>
+                    <span>وقت الإرسال</span>
+                  </div>
+                  <p class="mt-1 text-body-md font-semibold text-foreground" id="current-send-time">فوري</p>
+                </div>
+                <div class="rounded-md border border-border bg-background p-4">
+                  <div class="flex items-center gap-2 text-body-sm text-muted-foreground">
+                    <i data-lucide="toggle-right" class="h-4 w-4"></i>
+                    <span>الحالة</span>
+                  </div>
+                  <p class="mt-1 text-body-md font-semibold text-success" id="current-status">مفعّل</p>
+                </div>
+              </div>
+
+              <div class="mt-4 flex items-center gap-3">
+                <button onclick="showEditAbandonedCartModal()" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-medium text-primary-foreground shadow-sm transition hover:bg-primary/90">
+                  <i data-lucide="edit" class="h-4 w-4"></i>
+                  <span>تعديل الإعدادات</span>
+                </button>
+                <button onclick="toggleAbandonedCartStatus()" id="toggle-status-btn" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-button-md font-medium text-foreground shadow-sm transition hover:bg-accent">
+                  <i data-lucide="pause" class="h-4 w-4"></i>
+                  <span>إيقاف مؤقت</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  </div>
+
+  <!-- Modal: Edit Abandoned Cart Settings -->
+  <div id="edit-abandoned-cart-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+      <div class="rounded-xl border bg-card shadow-lg">
+        
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-border p-6">
+          <div>
+            <h2 class="text-heading-lg font-bold">إعدادات السلة المتروكة</h2>
+            <p class="text-body-sm text-muted-foreground mt-1">تخصيص القالب ووقت الإرسال</p>
+          </div>
+          <button onclick="hideEditAbandonedCartModal()" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
+            <i data-lucide="x" class="h-5 w-5"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 space-y-6">
+          
+          <!-- Template Selection -->
+          <div class="space-y-3">
+            <label class="text-body-md font-semibold text-foreground">القالب المستخدم</label>
+            <p class="text-body-sm text-muted-foreground">اختر قالب واتساب لإرساله عند ترك السلة</p>
+            <select id="template-select" class="w-full rounded-md border border-input bg-background px-4 py-3 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <option value="">جاري تحميل القوالب...</option>
+            </select>
+            
+            <!-- Template Preview -->
+            <div id="template-preview" class="hidden mt-4 rounded-lg border border-border bg-muted/30 p-4">
+              <div class="flex items-center gap-2 mb-3">
+                <i data-lucide="eye" class="h-4 w-4 text-muted-foreground"></i>
+                <span class="text-body-sm font-medium text-muted-foreground">معاينة القالب</span>
+              </div>
+              <div id="template-preview-content" class="text-body-md text-foreground whitespace-pre-wrap"></div>
+            </div>
+          </div>
+
+          <!-- Timing Selection -->
+          <div class="space-y-3">
+            <label class="text-body-md font-semibold text-foreground">وقت الإرسال</label>
+            <p class="text-body-sm text-muted-foreground">متى يتم إرسال الرسالة بعد ترك السلة؟</p>
+            <select id="timing-select" class="w-full rounded-md border border-input bg-background px-4 py-3 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <option value="0">فوري (عند استلام الإشعار)</option>
+              <option value="5">بعد 5 دقائق</option>
+              <option value="15">بعد 15 دقيقة</option>
+              <option value="30">بعد 30 دقيقة</option>
+              <option value="60">بعد ساعة</option>
+              <option value="120">بعد ساعتين</option>
+              <option value="180">بعد 3 ساعات</option>
+              <option value="360">بعد 6 ساعات</option>
+              <option value="720">بعد 12 ساعة</option>
+              <option value="1440">بعد 24 ساعة</option>
+            </select>
+          </div>
+
+          <!-- Additional Options -->
+          <div class="space-y-4 rounded-lg border border-border p-4">
+            <h3 class="text-body-md font-semibold text-foreground">خيارات إضافية</h3>
+            
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" id="prevent-duplicate" checked class="h-5 w-5 rounded border-input text-primary focus:ring-primary">
+              <div>
+                <span class="text-body-md text-foreground">منع الإرسال المكرر</span>
+                <p class="text-body-sm text-muted-foreground">عدم إرسال أكثر من رسالة للعميل خلال 24 ساعة</p>
+              </div>
+            </label>
+
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" id="skip-purchased" checked class="h-5 w-5 rounded border-input text-primary focus:ring-primary">
+              <div>
+                <span class="text-body-md text-foreground">تخطي السلات المشتراة</span>
+                <p class="text-body-sm text-muted-foreground">عدم إرسال رسالة إذا أكمل العميل الشراء</p>
+              </div>
+            </label>
+          </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex items-center justify-end gap-3 border-t border-border p-6">
+          <button onclick="hideEditAbandonedCartModal()" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-button-md font-medium text-foreground shadow-sm transition hover:bg-accent">
+            إلغاء
+          </button>
+          <button onclick="saveAbandonedCartSettings()" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90">
+            <i data-lucide="save" class="h-4 w-4"></i>
+            <span>حفظ الإعدادات</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Create New Automation -->
+  <div id="create-automation-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+      <div class="rounded-xl border bg-card shadow-lg">
+        
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-border p-6">
+          <div>
+            <h2 class="text-heading-lg font-bold">إنشاء أتمتة جديدة</h2>
+            <p class="text-body-sm text-muted-foreground mt-1">إعداد رسالة تلقائية بناءً على حدث معين</p>
+          </div>
+          <button onclick="hideCreateAutomationModal()" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
+            <i data-lucide="x" class="h-5 w-5"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 space-y-6">
+          
+          <!-- Automation Name -->
+          <div class="space-y-3">
+            <label class="text-body-md font-semibold text-foreground">اسم الأتمتة</label>
+            <input type="text" id="automation-name" placeholder="مثال: تذكير السلة المتروكة" class="w-full rounded-md border border-input bg-background px-4 py-3 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          </div>
+
+          <!-- Trigger Selection -->
+          <div class="space-y-3">
+            <label class="text-body-md font-semibold text-foreground">الحدث المُشغّل</label>
+            <p class="text-body-sm text-muted-foreground">اختر الحدث الذي سيُشغّل هذه الأتمتة</p>
+            <select id="trigger-select" class="w-full rounded-md border border-input bg-background px-4 py-3 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <option value="">اختر الحدث...</option>
+              <option value="abandoned_cart">سلة متروكة</option>
+              <option value="new_order">طلب جديد</option>
+              <option value="order_shipped">شحن الطلب</option>
+              <option value="order_delivered">توصيل الطلب</option>
+              <option value="new_customer">عميل جديد</option>
+            </select>
+          </div>
+
+          <!-- Template Selection -->
+          <div class="space-y-3">
+            <label class="text-body-md font-semibold text-foreground">القالب المستخدم</label>
+            <select id="new-automation-template" class="w-full rounded-md border border-input bg-background px-4 py-3 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <option value="">جاري تحميل القوالب...</option>
+            </select>
+          </div>
+
+          <!-- Timing Selection -->
+          <div class="space-y-3">
+            <label class="text-body-md font-semibold text-foreground">وقت الإرسال</label>
+            <select id="new-automation-timing" class="w-full rounded-md border border-input bg-background px-4 py-3 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <option value="0">فوري</option>
+              <option value="5">بعد 5 دقائق</option>
+              <option value="15">بعد 15 دقيقة</option>
+              <option value="30">بعد 30 دقيقة</option>
+              <option value="60">بعد ساعة</option>
+              <option value="120">بعد ساعتين</option>
+              <option value="1440">بعد 24 ساعة</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex items-center justify-end gap-3 border-t border-border p-6">
+          <button onclick="hideCreateAutomationModal()" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-button-md font-medium text-foreground shadow-sm transition hover:bg-accent">
+            إلغاء
+          </button>
+          <button onclick="createAutomation()" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90">
+            <i data-lucide="plus" class="h-4 w-4"></i>
+            <span>إنشاء الأتمتة</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // التحقق من تسجيل الدخول
+    if (!localStorage.getItem('tchat_logged_in')) {
+      window.location.href = './login.html';
+    }
+
+    // المتغيرات العامة
+    let allTemplates = [];
+    let automations = [];
+    let abandonedCartSettings = {
+      templateName: 'cart_1',
+      delayMinutes: 0,
+      isActive: true,
+      preventDuplicate: true,
+      skipPurchased: true
+    };
+
+    // تهيئة الصفحة
+    document.addEventListener('DOMContentLoaded', async () => {
+      // تهيئة الهيدر
+      renderHeader('header-container', { activePage: 'automations' });
+      lucide.createIcons();
+      await loadTemplates();
+      await loadAutomations();
+      await loadAbandonedCartSettings();
+      updateStats();
+    });
+
+    // تحميل القوالب من API
+    async function loadTemplates() {
+      try {
+        const response = await apiRequest('/meta/templates?limit=100');
+        if (response && response.data) {
+          allTemplates = response.data.filter(t => t.status === 'APPROVED');
+          populateTemplateSelects();
+        }
+      } catch (error) {
+        console.error('خطأ في تحميل القوالب:', error);
+        showToast('فشل تحميل القوالب', 'error');
+      }
+    }
+
+    // ملء قوائم القوالب
+    function populateTemplateSelects() {
+      const selects = ['template-select', 'new-automation-template'];
+      
+      selects.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        
+        select.innerHTML = '<option value="">اختر قالب...</option>';
+        
+        allTemplates.forEach(template => {
+          const langText = template.language === 'ar' ? 'العربية' : 'الإنجليزية';
+          const option = document.createElement('option');
+          option.value = template.name;
+          option.textContent = `${template.name} (${langText})`;
+          option.dataset.template = JSON.stringify(template);
+          select.appendChild(option);
+        });
+      });
+
+      // إضافة حدث لعرض معاينة القالب
+      const templateSelect = document.getElementById('template-select');
+      if (templateSelect) {
+        templateSelect.addEventListener('change', showTemplatePreview);
+      }
+    }
+
+    // عرض معاينة القالب
+    function showTemplatePreview() {
+      const select = document.getElementById('template-select');
+      const preview = document.getElementById('template-preview');
+      const previewContent = document.getElementById('template-preview-content');
+      
+      const selectedOption = select.options[select.selectedIndex];
+      if (!selectedOption.value || !selectedOption.dataset.template) {
+        preview.classList.add('hidden');
+        return;
+      }
+
+      const template = JSON.parse(selectedOption.dataset.template);
+      const components = template.components || [];
+      
+      let previewText = '';
+      components.forEach(comp => {
+        if (comp.type === 'HEADER' && comp.text) {
+          previewText += `📌 ${comp.text}\n\n`;
+        }
+        if (comp.type === 'BODY' && comp.text) {
+          previewText += comp.text + '\n\n';
+        }
+        if (comp.type === 'FOOTER' && comp.text) {
+          previewText += `—\n${comp.text}`;
+        }
+      });
+
+      previewContent.textContent = previewText || 'لا توجد معاينة متاحة';
+      preview.classList.remove('hidden');
+    }
+
+    // تحميل الأتمتات
+    async function loadAutomations() {
+      try {
+        // حالياً نعرض الأتمتة الافتراضية للسلة المتروكة
+        renderAutomations();
+      } catch (error) {
+        console.error('خطأ في تحميل الأتمتات:', error);
+      }
+    }
+
+    // تحميل إعدادات السلة المتروكة
+    async function loadAbandonedCartSettings() {
+      try {
+        // تحميل الإعدادات من localStorage أو API
+        const saved = localStorage.getItem('abandoned_cart_settings');
+        if (saved) {
+          abandonedCartSettings = JSON.parse(saved);
+        }
+        updateCurrentSettingsDisplay();
+      } catch (error) {
+        console.error('خطأ في تحميل الإعدادات:', error);
+      }
+    }
+
+    // تحديث عرض الإعدادات الحالية
+    function updateCurrentSettingsDisplay() {
+      document.getElementById('current-template-name').textContent = abandonedCartSettings.templateName;
+      
+      const timingText = getTimingText(abandonedCartSettings.delayMinutes);
+      document.getElementById('current-send-time').textContent = timingText;
+      
+      const statusEl = document.getElementById('current-status');
+      const toggleBtn = document.getElementById('toggle-status-btn');
+      
+      if (abandonedCartSettings.isActive) {
+        statusEl.textContent = 'مفعّل';
+        statusEl.className = 'mt-1 text-body-md font-semibold text-success';
+        toggleBtn.innerHTML = '<i data-lucide="pause" class="h-4 w-4"></i><span>إيقاف مؤقت</span>';
+      } else {
+        statusEl.textContent = 'متوقف';
+        statusEl.className = 'mt-1 text-body-md font-semibold text-destructive';
+        toggleBtn.innerHTML = '<i data-lucide="play" class="h-4 w-4"></i><span>تفعيل</span>';
+      }
+      
+      lucide.createIcons();
+    }
+
+    // الحصول على نص الوقت
+    function getTimingText(minutes) {
+      if (minutes === 0) return 'فوري';
+      if (minutes < 60) return `بعد ${minutes} دقيقة`;
+      if (minutes === 60) return 'بعد ساعة';
+      if (minutes < 1440) return `بعد ${minutes / 60} ساعات`;
+      return `بعد ${minutes / 1440} يوم`;
+    }
+
+    // عرض الأتمتات
+    function renderAutomations() {
+      const container = document.getElementById('automations-list');
+      
+      // أتمتة السلة المتروكة الافتراضية
+      const abandonedCartAutomation = `
+        <div class="rounded-lg border border-border bg-background p-4 transition hover:shadow-md">
+          <div class="flex items-start justify-between">
+            <div class="flex items-start gap-4">
+              <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-warning/10">
+                <i data-lucide="shopping-cart" class="h-6 w-6 text-warning"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-heading-sm font-semibold text-foreground">تذكير السلة المتروكة</h3>
+                  <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${abandonedCartSettings.isActive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}">
+                    ${abandonedCartSettings.isActive ? 'مفعّل' : 'متوقف'}
+                  </span>
+                </div>
+                <p class="mt-1 text-body-sm text-muted-foreground">إرسال رسالة تلقائية عند ترك العميل لسلة التسوق</p>
+                <div class="mt-2 flex items-center gap-4 text-body-xs text-muted-foreground">
+                  <span class="flex items-center gap-1">
+                    <i data-lucide="file-text" class="h-3 w-3"></i>
+                    ${abandonedCartSettings.templateName}
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <i data-lucide="clock" class="h-3 w-3"></i>
+                    ${getTimingText(abandonedCartSettings.delayMinutes)}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <button onclick="showEditAbandonedCartModal()" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
+              <i data-lucide="settings" class="h-4 w-4"></i>
+            </button>
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = abandonedCartAutomation;
+      lucide.createIcons();
+    }
+
+    // تحديث الإحصائيات
+    function updateStats() {
+      document.getElementById('active-automations-count').textContent = abandonedCartSettings.isActive ? '1' : '0';
+      // يمكن تحديث باقي الإحصائيات من API لاحقاً
+    }
+
+    // عرض نافذة تعديل السلة المتروكة
+    function showEditAbandonedCartModal() {
+      const modal = document.getElementById('edit-abandoned-cart-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      
+      // تحديد القيم الحالية
+      document.getElementById('template-select').value = abandonedCartSettings.templateName;
+      document.getElementById('timing-select').value = abandonedCartSettings.delayMinutes;
+      document.getElementById('prevent-duplicate').checked = abandonedCartSettings.preventDuplicate;
+      document.getElementById('skip-purchased').checked = abandonedCartSettings.skipPurchased;
+      
+      showTemplatePreview();
+      lucide.createIcons();
+    }
+
+    // إخفاء نافذة تعديل السلة المتروكة
+    function hideEditAbandonedCartModal() {
+      const modal = document.getElementById('edit-abandoned-cart-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // حفظ إعدادات السلة المتروكة
+    async function saveAbandonedCartSettings() {
+      const templateName = document.getElementById('template-select').value;
+      const delayMinutes = parseInt(document.getElementById('timing-select').value);
+      const preventDuplicate = document.getElementById('prevent-duplicate').checked;
+      const skipPurchased = document.getElementById('skip-purchased').checked;
+
+      if (!templateName) {
+        showToast('يرجى اختيار قالب', 'error');
+        return;
+      }
+
+      abandonedCartSettings = {
+        ...abandonedCartSettings,
+        templateName,
+        delayMinutes,
+        preventDuplicate,
+        skipPurchased
+      };
+
+      // حفظ في localStorage
+      localStorage.setItem('abandoned_cart_settings', JSON.stringify(abandonedCartSettings));
+
+      // TODO: حفظ في API
+      // await apiRequest('/automations/abandoned-cart', 'PUT', abandonedCartSettings);
+
+      hideEditAbandonedCartModal();
+      updateCurrentSettingsDisplay();
+      renderAutomations();
+      showToast('تم حفظ الإعدادات بنجاح', 'success');
+    }
+
+    // تبديل حالة السلة المتروكة
+    function toggleAbandonedCartStatus() {
+      abandonedCartSettings.isActive = !abandonedCartSettings.isActive;
+      localStorage.setItem('abandoned_cart_settings', JSON.stringify(abandonedCartSettings));
+      updateCurrentSettingsDisplay();
+      renderAutomations();
+      updateStats();
+      
+      const message = abandonedCartSettings.isActive ? 'تم تفعيل الأتمتة' : 'تم إيقاف الأتمتة';
+      showToast(message, 'success');
+    }
+
+    // عرض نافذة إنشاء أتمتة جديدة
+    function showCreateAutomationModal() {
+      const modal = document.getElementById('create-automation-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    // إخفاء نافذة إنشاء أتمتة جديدة
+    function hideCreateAutomationModal() {
+      const modal = document.getElementById('create-automation-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // إنشاء أتمتة جديدة
+    async function createAutomation() {
+      const name = document.getElementById('automation-name').value;
+      const trigger = document.getElementById('trigger-select').value;
+      const template = document.getElementById('new-automation-template').value;
+      const timing = document.getElementById('new-automation-timing').value;
+
+      if (!name || !trigger || !template) {
+        showToast('يرجى ملء جميع الحقول المطلوبة', 'error');
+        return;
+      }
+
+      // TODO: حفظ الأتمتة في API
+      showToast('قريباً - إنشاء الأتمتات المخصصة', 'info');
+      hideCreateAutomationModal();
+    }
+
+    // تحديث الأتمتات
+    function refreshAutomations() {
+      loadAutomations();
+      showToast('تم تحديث القائمة', 'success');
+    }
+
+    // عرض رسالة Toast
+    function showToast(message, type = 'info') {
+      // إنشاء عنصر Toast
+      const toast = document.createElement('div');
+      toast.className = `fixed bottom-4 left-4 z-50 rounded-lg px-4 py-3 shadow-lg transition-all duration-300 transform translate-y-full opacity-0`;
+      
+      if (type === 'success') {
+        toast.classList.add('bg-success', 'text-white');
+      } else if (type === 'error') {
+        toast.classList.add('bg-destructive', 'text-white');
+      } else {
+        toast.classList.add('bg-primary', 'text-white');
+      }
+      
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      // إظهار
+      setTimeout(() => {
+        toast.classList.remove('translate-y-full', 'opacity-0');
+      }, 10);
+      
+      // إخفاء بعد 3 ثواني
+      setTimeout(() => {
+        toast.classList.add('translate-y-full', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

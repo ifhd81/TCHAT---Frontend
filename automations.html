@@ -161,29 +161,29 @@
                 <div class="border-t border-border pt-4">
                   <p class="text-body-sm text-muted-foreground mb-3">إحصائيات الخطوة منذ البدء</p>
                   <div class="grid grid-cols-6 gap-3">
-                    <div class="text-center">
-                      <div class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-primary/10 text-primary font-bold number" id="stat-sent">0</div>
-                      <p class="text-body-xs text-muted-foreground mt-1">أُرسلت</p>
+                    <div class="flex flex-col items-center">
+                      <div class="flex items-center justify-center h-16 w-16 rounded-full bg-red-100 text-red-500 text-heading-md font-bold"><span id="stat-sent">0</span></div>
+                      <p class="text-body-xs text-muted-foreground mt-2">أُرسلت</p>
                     </div>
-                    <div class="text-center">
-                      <div class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-success/10 text-success font-bold number" id="stat-delivered">0</div>
-                      <p class="text-body-xs text-muted-foreground mt-1">وصلت</p>
+                    <div class="flex flex-col items-center">
+                      <div class="flex items-center justify-center h-16 w-16 rounded-full bg-pink-100 text-pink-500 text-heading-md font-bold"><span id="stat-delivered">0</span></div>
+                      <p class="text-body-xs text-muted-foreground mt-2">وصلت</p>
                     </div>
-                    <div class="text-center">
-                      <div class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-violet-100 text-violet-600 font-bold number" id="stat-read">0</div>
-                      <p class="text-body-xs text-muted-foreground mt-1">قُرئت</p>
+                    <div class="flex flex-col items-center">
+                      <div class="flex items-center justify-center h-16 w-16 rounded-full bg-cyan-100 text-cyan-500 text-heading-md font-bold"><span id="stat-read">0</span></div>
+                      <p class="text-body-xs text-muted-foreground mt-2">قُرئت</p>
                     </div>
-                    <div class="text-center">
-                      <div class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-cyan-100 text-cyan-600 font-bold number" id="stat-replied">0</div>
-                      <p class="text-body-xs text-muted-foreground mt-1">رد عليها</p>
+                    <div class="flex flex-col items-center">
+                      <div class="flex items-center justify-center h-16 w-16 rounded-full bg-violet-100 text-violet-500 text-heading-md font-bold"><span id="stat-replied">0</span></div>
+                      <p class="text-body-xs text-muted-foreground mt-2">رد عليها</p>
                     </div>
-                    <div class="text-center">
-                      <div class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-pink-100 text-pink-600 font-bold number" id="stat-clicked">0</div>
-                      <p class="text-body-xs text-muted-foreground mt-1">نقر عليه</p>
+                    <div class="flex flex-col items-center">
+                      <div class="flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-500 text-heading-md font-bold"><span id="stat-clicked">0</span></div>
+                      <p class="text-body-xs text-muted-foreground mt-2">نقر عليه</p>
                     </div>
-                    <div class="text-center">
-                      <div class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-destructive/10 text-destructive font-bold number" id="stat-failed">0</div>
-                      <p class="text-body-xs text-muted-foreground mt-1">ارتدت</p>
+                    <div class="flex flex-col items-center">
+                      <div class="flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 text-indigo-500 text-heading-md font-bold"><span id="stat-failed">0</span></div>
+                      <p class="text-body-xs text-muted-foreground mt-2">ارتدت</p>
                     </div>
                   </div>
                 </div>
@@ -196,8 +196,8 @@
                 <i data-lucide="check" class="h-5 w-5 text-white"></i>
                 <span class="text-white font-semibold">أكمل</span>
               </div>
-              <div class="p-6 text-center">
-                <div class="inline-flex items-center justify-center h-14 w-14 rounded-full bg-success/10 text-success text-heading-lg font-bold number" id="stat-converted">0</div>
+              <div class="p-6 flex flex-col items-center">
+                <div class="flex items-center justify-center h-16 w-16 rounded-full bg-success/10 text-success text-heading-lg font-bold"><span id="stat-converted">0</span></div>
                 <p class="text-body-sm text-muted-foreground mt-2">عملاء قد أكملوا هذه الحملة</p>
               </div>
             </div>
@@ -546,52 +546,48 @@
       
       // أتمتة السلة المتروكة
       const abandonedCartAutomation = `
-        <div class="rounded-xl border border-border bg-background p-6 transition hover:shadow-md cursor-pointer" onclick="showEditAbandonedCartModal()">
-          <div class="flex items-start justify-between">
-            <div class="flex items-start gap-4">
-              <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-warning/10">
-                <i data-lucide="shopping-cart" class="h-7 w-7 text-warning"></i>
+        <div class="rounded-xl border border-border bg-background p-4 md:p-6 transition hover:shadow-md cursor-pointer" onclick="showEditAbandonedCartModal()">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3 md:gap-4 flex-1 min-w-0">
+              <div class="flex h-12 w-12 md:h-14 md:w-14 shrink-0 items-center justify-center rounded-xl bg-warning/10">
+                <i data-lucide="shopping-cart" class="h-6 w-6 md:h-7 md:w-7 text-warning"></i>
               </div>
-              <div>
-                <div class="flex items-center gap-3">
-                  <h3 class="text-heading-md font-semibold text-foreground">تذكير السلة المتروكة</h3>
-                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${abandonedCartSettings.isActive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}">
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h3 class="text-body-md md:text-heading-md font-semibold text-foreground">تذكير السلة المتروكة</h3>
+                  <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${abandonedCartSettings.isActive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}">
                     ${abandonedCartSettings.isActive ? 'مفعّل' : 'متوقف'}
                   </span>
                 </div>
-                <p class="mt-1 text-body-sm text-muted-foreground">إرسال رسالة تلقائية عند ترك العميل لسلة التسوق</p>
+                <p class="mt-1 text-body-xs md:text-body-sm text-muted-foreground hidden sm:block">إرسال رسالة تلقائية عند ترك العميل لسلة التسوق</p>
                 
                 <!-- Stats Summary -->
-                <div class="mt-4 flex items-center gap-6">
+                <div class="mt-3 md:mt-4 grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-3 md:gap-4">
                   <div class="flex items-center gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                      <span class="text-body-sm font-bold text-primary number">${abandonedCartSettings.totalSent || 0}</span>
+                    <div class="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full bg-primary/10">
+                      <span class="text-body-xs md:text-body-sm font-bold text-primary number">${abandonedCartSettings.totalSent || 0}</span>
                     </div>
                     <span class="text-body-xs text-muted-foreground">أُرسلت</span>
                   </div>
                   <div class="flex items-center gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-success/10">
-                      <span class="text-body-sm font-bold text-success number">${abandonedCartSettings.totalConverted || 0}</span>
+                    <div class="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full bg-success/10">
+                      <span class="text-body-xs md:text-body-sm font-bold text-success number">${abandonedCartSettings.totalConverted || 0}</span>
                     </div>
                     <span class="text-body-xs text-muted-foreground">أكملوا</span>
                   </div>
-                  <div class="text-body-xs text-muted-foreground">
-                    <span class="flex items-center gap-1">
-                      <i data-lucide="file-text" class="h-3 w-3"></i>
-                      ${abandonedCartSettings.templateName}
-                    </span>
+                  <div class="flex items-center gap-1 text-body-xs text-muted-foreground">
+                    <i data-lucide="file-text" class="h-3 w-3 shrink-0"></i>
+                    <span class="truncate">${abandonedCartSettings.templateName}</span>
                   </div>
-                  <div class="text-body-xs text-muted-foreground">
-                    <span class="flex items-center gap-1">
-                      <i data-lucide="clock" class="h-3 w-3"></i>
-                      ${getTimingText(abandonedCartSettings.delayMinutes)}
-                    </span>
+                  <div class="flex items-center gap-1 text-body-xs text-muted-foreground">
+                    <i data-lucide="clock" class="h-3 w-3 shrink-0"></i>
+                    <span>${getTimingText(abandonedCartSettings.delayMinutes)}</span>
                   </div>
                 </div>
               </div>
             </div>
-            <button class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground hover:bg-accent">
-              <i data-lucide="settings" class="h-5 w-5"></i>
+            <button class="hidden sm:inline-flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground hover:bg-accent shrink-0">
+              <i data-lucide="settings" class="h-4 w-4 md:h-5 md:w-5"></i>
             </button>
           </div>
         </div>

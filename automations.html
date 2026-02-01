@@ -100,78 +100,28 @@
       </div>
     </div>
 
-    <!-- Current Configuration Section -->
-    <div class="mt-8 rounded-xl border bg-card text-card-foreground shadow-sm">
-      <div class="border-b border-border p-6">
-        <div class="flex items-center gap-3">
-          <i data-lucide="settings" class="h-5 w-5 text-muted-foreground"></i>
-          <h2 class="text-heading-md font-semibold">الإعداد الحالي للسلة المتروكة</h2>
-        </div>
-      </div>
-      <div class="p-6">
-        <div class="rounded-lg border border-border bg-muted/30 p-6">
-          <div class="flex items-start gap-4">
-            <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-warning/10">
-              <i data-lucide="shopping-cart" class="h-6 w-6 text-warning"></i>
-            </div>
-            <div class="flex-1">
-              <h3 class="text-heading-sm font-semibold text-foreground">تذكير السلة المتروكة</h3>
-              <p class="mt-1 text-body-sm text-muted-foreground">يتم إرسال رسالة تلقائية عند ترك العميل لسلة التسوق</p>
-              
-              <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <div class="rounded-md border border-border bg-background p-4">
-                  <div class="flex items-center gap-2 text-body-sm text-muted-foreground">
-                    <i data-lucide="file-text" class="h-4 w-4"></i>
-                    <span>القالب المستخدم</span>
-                  </div>
-                  <p class="mt-1 text-body-md font-semibold text-foreground" id="current-template-name">cart_1</p>
-                </div>
-                <div class="rounded-md border border-border bg-background p-4">
-                  <div class="flex items-center gap-2 text-body-sm text-muted-foreground">
-                    <i data-lucide="clock" class="h-4 w-4"></i>
-                    <span>وقت الإرسال</span>
-                  </div>
-                  <p class="mt-1 text-body-md font-semibold text-foreground" id="current-send-time">فوري</p>
-                </div>
-                <div class="rounded-md border border-border bg-background p-4">
-                  <div class="flex items-center gap-2 text-body-sm text-muted-foreground">
-                    <i data-lucide="toggle-right" class="h-4 w-4"></i>
-                    <span>الحالة</span>
-                  </div>
-                  <p class="mt-1 text-body-md font-semibold text-success" id="current-status">مفعّل</p>
-                </div>
-              </div>
-
-              <div class="mt-4 flex items-center gap-3">
-                <button onclick="showEditAbandonedCartModal()" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-medium text-primary-foreground shadow-sm transition hover:bg-primary/90">
-                  <i data-lucide="edit" class="h-4 w-4"></i>
-                  <span>تعديل الإعدادات</span>
-                </button>
-                <button onclick="toggleAbandonedCartStatus()" id="toggle-status-btn" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-button-md font-medium text-foreground shadow-sm transition hover:bg-accent">
-                  <i data-lucide="pause" class="h-4 w-4"></i>
-                  <span>إيقاف مؤقت</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </main>
 
   </div>
 
   <!-- Modal: Edit Abandoned Cart Settings -->
   <div id="edit-abandoned-cart-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
-    <div class="w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+    <div class="w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
       <div class="rounded-xl border bg-card shadow-lg">
         
         <!-- Modal Header -->
         <div class="flex items-center justify-between border-b border-border p-6">
-          <div>
-            <h2 class="text-heading-lg font-bold">إعدادات السلة المتروكة</h2>
-            <p class="text-body-sm text-muted-foreground mt-1">تخصيص القالب ووقت الإرسال</p>
+          <div class="flex items-center gap-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-warning/10">
+              <i data-lucide="shopping-cart" class="h-6 w-6 text-warning"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-3">
+                <h2 class="text-heading-lg font-bold">السلة المتروكة</h2>
+                <span id="modal-status-badge" class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-success/10 text-success">مفعّل</span>
+              </div>
+              <p class="text-body-sm text-muted-foreground mt-1">عملاء بدأوا في هذه الحملة: <span id="modal-total-customers" class="font-semibold number">0</span></p>
+            </div>
           </div>
           <button onclick="hideEditAbandonedCartModal()" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
             <i data-lucide="x" class="h-5 w-5"></i>
@@ -180,75 +130,162 @@
 
         <!-- Modal Body -->
         <div class="p-6 space-y-6">
-          
-          <!-- Template Selection -->
-          <div class="space-y-3">
-            <label class="text-body-md font-semibold text-foreground">القالب المستخدم</label>
-            <p class="text-body-sm text-muted-foreground">اختر قالب واتساب لإرساله عند ترك السلة</p>
-            <select id="template-select" class="w-full rounded-md border border-input bg-background px-4 py-3 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <option value="">جاري تحميل القوالب...</option>
-            </select>
-            
-            <!-- Template Preview -->
-            <div id="template-preview" class="hidden mt-4 rounded-lg border border-border bg-muted/30 p-4">
-              <div class="flex items-center gap-2 mb-3">
-                <i data-lucide="eye" class="h-4 w-4 text-muted-foreground"></i>
-                <span class="text-body-sm font-medium text-muted-foreground">معاينة القالب</span>
+
+          <!-- Analytics Section -->
+          <div class="space-y-4">
+            <!-- Send Template Step -->
+            <div class="rounded-xl border-2 border-warning bg-warning/5 overflow-hidden">
+              <div class="bg-warning px-4 py-3 flex items-center gap-2">
+                <i data-lucide="send" class="h-5 w-5 text-white"></i>
+                <span class="text-white font-semibold">إرسال رسالة قالب</span>
               </div>
-              <div id="template-preview-content" class="text-body-md text-foreground whitespace-pre-wrap"></div>
+              <div class="p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-body-sm">
+                      <i data-lucide="file-text" class="h-3 w-3"></i>
+                      <span id="modal-template-name">cart_1</span>
+                    </span>
+                    <span class="text-body-sm text-muted-foreground">تم أرسل</span>
+                  </div>
+                  <div class="flex items-center gap-4 text-body-sm text-muted-foreground">
+                    <span class="flex items-center gap-1">
+                      <i data-lucide="clock" class="h-4 w-4"></i>
+                      انتظر <span id="modal-delay-text">فوري</span>
+                    </span>
+                    <span>بالانتظار <span id="modal-pending-count" class="font-semibold number">0</span></span>
+                    <span>تخطوا المرحلة <span id="modal-skipped-count" class="font-semibold number">0</span></span>
+                  </div>
+                </div>
+                
+                <div class="border-t border-border pt-4">
+                  <p class="text-body-sm text-muted-foreground mb-3">إحصائيات الخطوة منذ البدء</p>
+                  <div class="grid grid-cols-6 gap-3">
+                    <div class="text-center">
+                      <div class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-primary/10 text-primary font-bold number" id="stat-sent">0</div>
+                      <p class="text-body-xs text-muted-foreground mt-1">أُرسلت</p>
+                    </div>
+                    <div class="text-center">
+                      <div class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-success/10 text-success font-bold number" id="stat-delivered">0</div>
+                      <p class="text-body-xs text-muted-foreground mt-1">وصلت</p>
+                    </div>
+                    <div class="text-center">
+                      <div class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-violet-100 text-violet-600 font-bold number" id="stat-read">0</div>
+                      <p class="text-body-xs text-muted-foreground mt-1">قُرئت</p>
+                    </div>
+                    <div class="text-center">
+                      <div class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-cyan-100 text-cyan-600 font-bold number" id="stat-replied">0</div>
+                      <p class="text-body-xs text-muted-foreground mt-1">رد عليها</p>
+                    </div>
+                    <div class="text-center">
+                      <div class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-pink-100 text-pink-600 font-bold number" id="stat-clicked">0</div>
+                      <p class="text-body-xs text-muted-foreground mt-1">نقر عليه</p>
+                    </div>
+                    <div class="text-center">
+                      <div class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-destructive/10 text-destructive font-bold number" id="stat-failed">0</div>
+                      <p class="text-body-xs text-muted-foreground mt-1">ارتدت</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Completion Step -->
+            <div class="rounded-xl border-2 border-success bg-success/5 overflow-hidden">
+              <div class="bg-success px-4 py-3 flex items-center gap-2">
+                <i data-lucide="check" class="h-5 w-5 text-white"></i>
+                <span class="text-white font-semibold">أكمل</span>
+              </div>
+              <div class="p-6 text-center">
+                <div class="inline-flex items-center justify-center h-14 w-14 rounded-full bg-success/10 text-success text-heading-lg font-bold number" id="stat-converted">0</div>
+                <p class="text-body-sm text-muted-foreground mt-2">عملاء قد أكملوا هذه الحملة</p>
+              </div>
             </div>
           </div>
 
-          <!-- Timing Selection -->
-          <div class="space-y-3">
-            <label class="text-body-md font-semibold text-foreground">وقت الإرسال</label>
-            <p class="text-body-sm text-muted-foreground">متى يتم إرسال الرسالة بعد ترك السلة؟</p>
-            <select id="timing-select" class="w-full rounded-md border border-input bg-background px-4 py-3 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <option value="0">فوري (عند استلام الإشعار)</option>
-              <option value="5">بعد 5 دقائق</option>
-              <option value="15">بعد 15 دقيقة</option>
-              <option value="30">بعد 30 دقيقة</option>
-              <option value="60">بعد ساعة</option>
-              <option value="120">بعد ساعتين</option>
-              <option value="180">بعد 3 ساعات</option>
-              <option value="360">بعد 6 ساعات</option>
-              <option value="720">بعد 12 ساعة</option>
-              <option value="1440">بعد 24 ساعة</option>
-            </select>
-          </div>
+          <!-- Divider -->
+          <div class="border-t border-border"></div>
 
-          <!-- Additional Options -->
-          <div class="space-y-4 rounded-lg border border-border p-4">
-            <h3 class="text-body-md font-semibold text-foreground">خيارات إضافية</h3>
-            
-            <label class="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" id="prevent-duplicate" checked class="h-5 w-5 rounded border-input text-primary focus:ring-primary">
-              <div>
-                <span class="text-body-md text-foreground">منع الإرسال المكرر</span>
-                <p class="text-body-sm text-muted-foreground">عدم إرسال أكثر من رسالة للعميل خلال 24 ساعة</p>
-              </div>
-            </label>
+          <!-- Settings Section -->
+          <div class="space-y-4">
+            <h3 class="text-heading-sm font-semibold flex items-center gap-2">
+              <i data-lucide="settings" class="h-5 w-5 text-muted-foreground"></i>
+              إعدادات الأتمتة
+            </h3>
 
-            <label class="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" id="skip-purchased" checked class="h-5 w-5 rounded border-input text-primary focus:ring-primary">
-              <div>
-                <span class="text-body-md text-foreground">تخطي السلات المشتراة</span>
-                <p class="text-body-sm text-muted-foreground">عدم إرسال رسالة إذا أكمل العميل الشراء</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Template Selection -->
+              <div class="space-y-2">
+                <label class="text-body-sm font-medium text-foreground">القالب المستخدم</label>
+                <select id="template-select" class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <option value="">جاري تحميل القوالب...</option>
+                </select>
               </div>
-            </label>
+
+              <!-- Timing Selection -->
+              <div class="space-y-2">
+                <label class="text-body-sm font-medium text-foreground">وقت الإرسال</label>
+                <select id="timing-select" class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <option value="0">فوري (عند استلام الإشعار)</option>
+                  <option value="5">بعد 5 دقائق</option>
+                  <option value="15">بعد 15 دقيقة</option>
+                  <option value="30">بعد 30 دقيقة</option>
+                  <option value="60">بعد ساعة</option>
+                  <option value="120">بعد ساعتين</option>
+                  <option value="180">بعد 3 ساعات</option>
+                  <option value="360">بعد 6 ساعات</option>
+                  <option value="720">بعد 12 ساعة</option>
+                  <option value="1440">بعد 24 ساعة</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Template Preview -->
+            <div id="template-preview" class="hidden rounded-lg border border-border bg-muted/30 p-4">
+              <div class="flex items-center gap-2 mb-2">
+                <i data-lucide="eye" class="h-4 w-4 text-muted-foreground"></i>
+                <span class="text-body-sm font-medium text-muted-foreground">معاينة القالب</span>
+              </div>
+              <div id="template-preview-content" class="text-body-sm text-foreground whitespace-pre-wrap"></div>
+            </div>
+
+            <!-- Additional Options -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label class="flex items-center gap-3 cursor-pointer rounded-lg border border-border p-3 hover:bg-muted/30 transition">
+                <input type="checkbox" id="prevent-duplicate" checked class="h-4 w-4 rounded border-input text-primary focus:ring-primary">
+                <div>
+                  <span class="text-body-sm font-medium text-foreground">منع الإرسال المكرر</span>
+                  <p class="text-body-xs text-muted-foreground">خلال 24 ساعة</p>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3 cursor-pointer rounded-lg border border-border p-3 hover:bg-muted/30 transition">
+                <input type="checkbox" id="skip-purchased" checked class="h-4 w-4 rounded border-input text-primary focus:ring-primary">
+                <div>
+                  <span class="text-body-sm font-medium text-foreground">تخطي السلات المشتراة</span>
+                  <p class="text-body-xs text-muted-foreground">إذا أكمل الشراء</p>
+                </div>
+              </label>
+            </div>
           </div>
 
         </div>
 
         <!-- Modal Footer -->
-        <div class="flex items-center justify-end gap-3 border-t border-border p-6">
-          <button onclick="hideEditAbandonedCartModal()" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-button-md font-medium text-foreground shadow-sm transition hover:bg-accent">
-            إلغاء
+        <div class="flex items-center justify-between border-t border-border p-6">
+          <button onclick="toggleAbandonedCartStatusFromModal()" id="modal-toggle-btn" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-button-md font-medium text-foreground shadow-sm transition hover:bg-accent">
+            <i data-lucide="pause" class="h-4 w-4"></i>
+            <span>إيقاف مؤقت</span>
           </button>
-          <button onclick="saveAbandonedCartSettings()" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90">
-            <i data-lucide="save" class="h-4 w-4"></i>
-            <span>حفظ الإعدادات</span>
-          </button>
+          <div class="flex items-center gap-3">
+            <button onclick="hideEditAbandonedCartModal()" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-button-md font-medium text-foreground shadow-sm transition hover:bg-accent">
+              إلغاء
+            </button>
+            <button onclick="saveAbandonedCartSettings()" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90">
+              <i data-lucide="save" class="h-4 w-4"></i>
+              <span>حفظ الإعدادات</span>
+            </button>
+          </div>
         </div>
 
       </div>
@@ -455,30 +492,19 @@
       preview.classList.remove('hidden');
     }
 
-    // تحميل الأتمتات من API مع الإحصائيات التفصيلية
+    // تحميل الأتمتات من API
     async function loadAutomations() {
       try {
-        const response = await apiRequest('/automations/with-stats');
+        const response = await apiRequest('/automations');
         if (response && response.success && response.data) {
-          automationsWithStats = response.data;
+          automations = response.data;
         }
-        renderAutomationsWithStats();
+        renderAutomations();
       } catch (error) {
         console.error('خطأ في تحميل الأتمتات:', error);
-        // محاولة التحميل بدون إحصائيات
-        try {
-          const fallback = await apiRequest('/automations');
-          if (fallback && fallback.success && fallback.data) {
-            automations = fallback.data;
-            renderAutomations();
-          }
-        } catch (e) {
-          renderAutomations();
-        }
+        renderAutomations();
       }
     }
-
-    let automationsWithStats = [];
 
     // تحميل إعدادات السلة المتروكة من API
     async function loadAbandonedCartSettings() {
@@ -493,37 +519,14 @@
             delayMinutes: data.delay_minutes || 0,
             isActive: data.is_active,
             preventDuplicate: data.prevent_duplicate,
-            skipPurchased: data.skip_purchased
+            skipPurchased: data.skip_purchased,
+            totalSent: data.total_sent || 0,
+            totalConverted: data.total_converted || 0
           };
         }
-        updateCurrentSettingsDisplay();
       } catch (error) {
         console.error('خطأ في تحميل إعدادات السلة المتروكة:', error);
-        updateCurrentSettingsDisplay(); // عرض الافتراضي
       }
-    }
-
-    // تحديث عرض الإعدادات الحالية
-    function updateCurrentSettingsDisplay() {
-      document.getElementById('current-template-name').textContent = abandonedCartSettings.templateName;
-      
-      const timingText = getTimingText(abandonedCartSettings.delayMinutes);
-      document.getElementById('current-send-time').textContent = timingText;
-      
-      const statusEl = document.getElementById('current-status');
-      const toggleBtn = document.getElementById('toggle-status-btn');
-      
-      if (abandonedCartSettings.isActive) {
-        statusEl.textContent = 'مفعّل';
-        statusEl.className = 'mt-1 text-body-md font-semibold text-success';
-        toggleBtn.innerHTML = '<i data-lucide="pause" class="h-4 w-4"></i><span>إيقاف مؤقت</span>';
-      } else {
-        statusEl.textContent = 'متوقف';
-        statusEl.className = 'mt-1 text-body-md font-semibold text-destructive';
-        toggleBtn.innerHTML = '<i data-lucide="play" class="h-4 w-4"></i><span>تفعيل</span>';
-      }
-      
-      lucide.createIcons();
     }
 
     // الحصول على نص الوقت
@@ -535,40 +538,58 @@
       return `بعد ${minutes / 1440} يوم`;
     }
 
-    // عرض الأتمتات (النسخة القديمة)
+    // عرض الأتمتات
     function renderAutomations() {
       const container = document.getElementById('automations-list');
       
-      // أتمتة السلة المتروكة الافتراضية
+      // أتمتة السلة المتروكة
       const abandonedCartAutomation = `
-        <div class="rounded-lg border border-border bg-background p-4 transition hover:shadow-md">
+        <div class="rounded-xl border border-border bg-background p-6 transition hover:shadow-md cursor-pointer" onclick="showEditAbandonedCartModal()">
           <div class="flex items-start justify-between">
             <div class="flex items-start gap-4">
-              <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-warning/10">
-                <i data-lucide="shopping-cart" class="h-6 w-6 text-warning"></i>
+              <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-warning/10">
+                <i data-lucide="shopping-cart" class="h-7 w-7 text-warning"></i>
               </div>
               <div>
-                <div class="flex items-center gap-2">
-                  <h3 class="text-heading-sm font-semibold text-foreground">تذكير السلة المتروكة</h3>
-                  <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${abandonedCartSettings.isActive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}">
+                <div class="flex items-center gap-3">
+                  <h3 class="text-heading-md font-semibold text-foreground">تذكير السلة المتروكة</h3>
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${abandonedCartSettings.isActive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}">
                     ${abandonedCartSettings.isActive ? 'مفعّل' : 'متوقف'}
                   </span>
                 </div>
                 <p class="mt-1 text-body-sm text-muted-foreground">إرسال رسالة تلقائية عند ترك العميل لسلة التسوق</p>
-                <div class="mt-2 flex items-center gap-4 text-body-xs text-muted-foreground">
-                  <span class="flex items-center gap-1">
-                    <i data-lucide="file-text" class="h-3 w-3"></i>
-                    ${abandonedCartSettings.templateName}
-                  </span>
-                  <span class="flex items-center gap-1">
-                    <i data-lucide="clock" class="h-3 w-3"></i>
-                    ${getTimingText(abandonedCartSettings.delayMinutes)}
-                  </span>
+                
+                <!-- Stats Summary -->
+                <div class="mt-4 flex items-center gap-6">
+                  <div class="flex items-center gap-2">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                      <span class="text-body-sm font-bold text-primary number">${abandonedCartSettings.totalSent || 0}</span>
+                    </div>
+                    <span class="text-body-xs text-muted-foreground">أُرسلت</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-success/10">
+                      <span class="text-body-sm font-bold text-success number">${abandonedCartSettings.totalConverted || 0}</span>
+                    </div>
+                    <span class="text-body-xs text-muted-foreground">أكملوا</span>
+                  </div>
+                  <div class="text-body-xs text-muted-foreground">
+                    <span class="flex items-center gap-1">
+                      <i data-lucide="file-text" class="h-3 w-3"></i>
+                      ${abandonedCartSettings.templateName}
+                    </span>
+                  </div>
+                  <div class="text-body-xs text-muted-foreground">
+                    <span class="flex items-center gap-1">
+                      <i data-lucide="clock" class="h-3 w-3"></i>
+                      ${getTimingText(abandonedCartSettings.delayMinutes)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-            <button onclick="showEditAbandonedCartModal()" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
-              <i data-lucide="settings" class="h-4 w-4"></i>
+            <button class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground hover:bg-accent">
+              <i data-lucide="settings" class="h-5 w-5"></i>
             </button>
           </div>
         </div>
@@ -576,6 +597,75 @@
 
       container.innerHTML = abandonedCartAutomation;
       lucide.createIcons();
+    }
+
+    // عرض نافذة تعديل السلة المتروكة مع الإحصائيات
+    function showEditAbandonedCartModal() {
+      const modal = document.getElementById('edit-abandoned-cart-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      
+      // تحديث البيانات في النافذة
+      updateModalData();
+      
+      // تحديد القيم الحالية
+      document.getElementById('template-select').value = abandonedCartSettings.templateName;
+      document.getElementById('timing-select').value = abandonedCartSettings.delayMinutes;
+      document.getElementById('prevent-duplicate').checked = abandonedCartSettings.preventDuplicate;
+      document.getElementById('skip-purchased').checked = abandonedCartSettings.skipPurchased;
+      
+      showTemplatePreview();
+      lucide.createIcons();
+    }
+
+    // تحديث بيانات النافذة
+    function updateModalData() {
+      // تحديث الشارة والحالة
+      const statusBadge = document.getElementById('modal-status-badge');
+      const toggleBtn = document.getElementById('modal-toggle-btn');
+      
+      if (abandonedCartSettings.isActive) {
+        statusBadge.className = 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-success/10 text-success';
+        statusBadge.textContent = 'مفعّل';
+        toggleBtn.innerHTML = '<i data-lucide="pause" class="h-4 w-4"></i><span>إيقاف مؤقت</span>';
+      } else {
+        statusBadge.className = 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-destructive/10 text-destructive';
+        statusBadge.textContent = 'متوقف';
+        toggleBtn.innerHTML = '<i data-lucide="play" class="h-4 w-4"></i><span>تفعيل</span>';
+      }
+      
+      // تحديث اسم القالب ووقت الإرسال
+      document.getElementById('modal-template-name').textContent = abandonedCartSettings.templateName;
+      document.getElementById('modal-delay-text').textContent = getTimingText(abandonedCartSettings.delayMinutes);
+      
+      // تحديث الإحصائيات
+      document.getElementById('modal-total-customers').textContent = abandonedCartSettings.totalSent || 0;
+      document.getElementById('stat-sent').textContent = abandonedCartSettings.totalSent || 0;
+      document.getElementById('stat-converted').textContent = abandonedCartSettings.totalConverted || 0;
+      
+      // الإحصائيات الأخرى (ستكون من API لاحقاً)
+      document.getElementById('stat-delivered').textContent = 0;
+      document.getElementById('stat-read').textContent = 0;
+      document.getElementById('stat-replied').textContent = 0;
+      document.getElementById('stat-clicked').textContent = 0;
+      document.getElementById('stat-failed').textContent = 0;
+      document.getElementById('modal-pending-count').textContent = 0;
+      document.getElementById('modal-skipped-count').textContent = 0;
+      
+      lucide.createIcons();
+    }
+
+    // إخفاء نافذة تعديل السلة المتروكة
+    function hideEditAbandonedCartModal() {
+      const modal = document.getElementById('edit-abandoned-cart-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // تبديل حالة الأتمتة من داخل النافذة
+    async function toggleAbandonedCartStatusFromModal() {
+      await toggleAbandonedCartStatus();
+      updateModalData();
     }
 
     // الحصول على أيقونة المُشغّل
@@ -618,184 +708,6 @@
         'review_request': 'طلب تقييم'
       };
       return names[triggerType] || triggerType;
-    }
-
-    // عرض الأتمتات مع الإحصائيات التفصيلية (العرض المرئي)
-    function renderAutomationsWithStats() {
-      const container = document.getElementById('automations-list');
-      
-      if (!automationsWithStats || automationsWithStats.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-8 text-muted-foreground">
-            <i data-lucide="workflow" class="h-12 w-12 mx-auto mb-4 opacity-50"></i>
-            <p>لا توجد حملات مؤتمتة حالياً</p>
-          </div>
-        `;
-        lucide.createIcons();
-        return;
-      }
-
-      container.innerHTML = automationsWithStats.map(automation => {
-        const triggerIcon = getTriggerIcon(automation.trigger_type);
-        const triggerColor = getTriggerColor(automation.trigger_type);
-        const triggerName = getTriggerName(automation.trigger_type);
-        
-        // الخطوة الأولى
-        const step1 = automation.steps && automation.steps[0] ? automation.steps[0] : {
-          sent: 0, delivered: 0, read: 0, replied: 0, clicked: 0, failed: 0, waiting: 0, skipped: 0
-        };
-
-        return `
-          <div class="rounded-xl border border-border bg-card overflow-hidden">
-            
-            <!-- المُشغّل (Trigger) -->
-            <div class="bg-muted/30 border-b border-border p-4">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-${triggerColor}/10">
-                    <i data-lucide="${triggerIcon}" class="h-5 w-5 text-${triggerColor}"></i>
-                  </div>
-                  <div>
-                    <div class="flex items-center gap-2">
-                      <span class="text-body-xs text-muted-foreground">المُشغّل</span>
-                      <i data-lucide="star" class="h-3 w-3 text-muted-foreground"></i>
-                    </div>
-                    <h3 class="text-body-md font-semibold">${triggerName}</h3>
-                  </div>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${automation.is_active ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}">
-                    ${automation.is_active ? 'فعّال' : 'متوقف'}
-                  </span>
-                  <button onclick="showEditAbandonedCartModal()" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
-                    <i data-lucide="settings" class="h-4 w-4"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="mt-3 flex items-center gap-2 text-body-sm text-muted-foreground">
-                <span>عملاء بدأوا في هذه الحملة</span>
-                <span class="inline-flex items-center justify-center rounded-md bg-primary/10 text-primary px-2 py-0.5 text-body-sm font-bold number">${automation.total_started || 0}</span>
-              </div>
-            </div>
-
-            <!-- خط الربط -->
-            <div class="flex justify-center py-2">
-              <div class="w-0.5 h-6 bg-primary"></div>
-            </div>
-
-            <!-- الخطوة 1: إرسال رسالة قالب -->
-            <div class="mx-4 mb-4 rounded-lg border-2 border-warning bg-warning/5 overflow-hidden">
-              <div class="bg-warning text-warning-foreground px-4 py-3 flex items-center gap-2">
-                <i data-lucide="send" class="h-4 w-4"></i>
-                <span class="font-semibold">إرسال رسالة قالب</span>
-              </div>
-              
-              <div class="p-4 space-y-4">
-                <!-- وقت الانتظار والقالب -->
-                <div class="flex items-center justify-between text-body-sm">
-                  <div class="flex items-center gap-2 text-muted-foreground">
-                    <i data-lucide="clock" class="h-4 w-4"></i>
-                    <span>انتظر ${getTimingText(step1.delay_minutes || abandonedCartSettings.delayMinutes)}</span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-muted-foreground">ثم أرسل</span>
-                    <span class="inline-flex items-center rounded-md border border-input bg-background px-2 py-1 text-body-sm font-medium">
-                      <i data-lucide="file-text" class="h-3 w-3 ml-1"></i>
-                      ${step1.template_name || abandonedCartSettings.templateName}
-                    </span>
-                  </div>
-                </div>
-
-                <!-- إحصائيات الانتظار -->
-                <div class="flex items-center gap-4 text-body-sm">
-                  <div class="flex items-center gap-2">
-                    <span class="text-muted-foreground">بالانتظار</span>
-                    <span class="inline-flex items-center justify-center rounded-md bg-muted px-2 py-0.5 text-body-sm font-bold number">${step1.waiting || 0}</span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-muted-foreground">تخطّوا المرحلة</span>
-                    <span class="inline-flex items-center justify-center rounded-md bg-muted px-2 py-0.5 text-body-sm font-bold number">${step1.skipped || 0}</span>
-                  </div>
-                </div>
-
-                <!-- إحصائيات الخطوة التفصيلية -->
-                <div class="pt-4 border-t border-border">
-                  <h4 class="text-body-sm font-semibold text-muted-foreground mb-3">إحصائيات الخطوة منذ البدء</h4>
-                  <div class="grid grid-cols-3 md:grid-cols-6 gap-3">
-                    <div class="text-center">
-                      <div class="inline-flex items-center justify-center rounded-lg bg-blue-100 text-blue-800 px-3 py-1.5 text-body-md font-bold number">${step1.sent || 0}</div>
-                      <div class="text-body-xs text-muted-foreground mt-1">أُرسلت</div>
-                    </div>
-                    <div class="text-center">
-                      <div class="inline-flex items-center justify-center rounded-lg bg-green-100 text-green-800 px-3 py-1.5 text-body-md font-bold number">${step1.delivered || 0}</div>
-                      <div class="text-body-xs text-muted-foreground mt-1">وصلت</div>
-                    </div>
-                    <div class="text-center">
-                      <div class="inline-flex items-center justify-center rounded-lg bg-purple-100 text-purple-800 px-3 py-1.5 text-body-md font-bold number">${step1.read || 0}</div>
-                      <div class="text-body-xs text-muted-foreground mt-1">قُرئت</div>
-                    </div>
-                    <div class="text-center">
-                      <div class="inline-flex items-center justify-center rounded-lg bg-indigo-100 text-indigo-800 px-3 py-1.5 text-body-md font-bold number">${step1.replied || 0}</div>
-                      <div class="text-body-xs text-muted-foreground mt-1">رُد عليها</div>
-                    </div>
-                    <div class="text-center">
-                      <div class="inline-flex items-center justify-center rounded-lg bg-pink-100 text-pink-800 px-3 py-1.5 text-body-md font-bold number">${step1.clicked || 0}</div>
-                      <div class="text-body-xs text-muted-foreground mt-1">نُقر عليه</div>
-                    </div>
-                    <div class="text-center">
-                      <div class="inline-flex items-center justify-center rounded-lg bg-red-100 text-red-800 px-3 py-1.5 text-body-md font-bold number">${step1.failed || 0}</div>
-                      <div class="text-body-xs text-muted-foreground mt-1">ارتدت</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- خط الربط -->
-            <div class="flex justify-center py-2">
-              <div class="w-0.5 h-6 bg-success"></div>
-            </div>
-
-            <!-- النهاية: أكمل -->
-            <div class="mx-4 mb-4 rounded-lg border-2 border-success bg-success/5 overflow-hidden">
-              <div class="bg-success text-success-foreground px-4 py-3 flex items-center gap-2">
-                <i data-lucide="check" class="h-4 w-4"></i>
-                <span class="font-semibold">أكمل</span>
-              </div>
-              <div class="p-4 text-center">
-                <div class="inline-flex items-center justify-center rounded-lg bg-success/10 text-success px-4 py-2 text-heading-md font-bold number">${automation.total_completed || 0}</div>
-                <div class="text-body-sm text-muted-foreground mt-2">عملاء قد أكملوا هذه الحملة</div>
-              </div>
-            </div>
-
-          </div>
-        `;
-      }).join('');
-
-      lucide.createIcons();
-    }
-
-    // عرض نافذة تعديل السلة المتروكة
-    function showEditAbandonedCartModal() {
-      const modal = document.getElementById('edit-abandoned-cart-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      
-      // تحديد القيم الحالية
-      document.getElementById('template-select').value = abandonedCartSettings.templateName;
-      document.getElementById('timing-select').value = abandonedCartSettings.delayMinutes;
-      document.getElementById('prevent-duplicate').checked = abandonedCartSettings.preventDuplicate;
-      document.getElementById('skip-purchased').checked = abandonedCartSettings.skipPurchased;
-      
-      showTemplatePreview();
-      lucide.createIcons();
-    }
-
-    // إخفاء نافذة تعديل السلة المتروكة
-    function hideEditAbandonedCartModal() {
-      const modal = document.getElementById('edit-abandoned-cart-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
     }
 
     // حفظ إعدادات السلة المتروكة

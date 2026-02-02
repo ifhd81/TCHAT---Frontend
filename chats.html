@@ -894,12 +894,9 @@
       lucide.createIcons();
       
       try {
-        const response = await fetch('https://tchat-production.up.railway.app/api/v1/whatsapp/send', {
+        // إرسال القالب باستخدام apiRequest
+        const result = await apiRequest('/whatsapp/send', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-          },
           body: JSON.stringify({
             to: conversation.phone_number,
             type: 'template',
@@ -907,8 +904,9 @@
             template_language: selectedTemplate.language || 'ar'
           })
         });
-
-        const result = await response.json();
+        
+        // تجاهل إذا انتهت الجلسة (تم التوجيه تلقائياً)
+        if (result.error === 'Session expired') return;
         
         if (result.success) {
           // إغلاق المعاينة
@@ -1002,21 +1000,18 @@
       sendButton.innerHTML = '<i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i>';
       
       try {
-        // إرسال الرسالة عبر WhatsApp API
-        const response = await fetch('https://tchat-production.up.railway.app/api/v1/whatsapp/send', {
+        // إرسال الرسالة عبر WhatsApp API باستخدام apiRequest
+        const result = await apiRequest('/whatsapp/send', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-          },
           body: JSON.stringify({
             to: conversation.phone_number,
             message: messageText,
             type: 'text'
           })
         });
-
-        const result = await response.json();
+        
+        // تجاهل إذا انتهت الجلسة (تم التوجيه تلقائياً)
+        if (result.error === 'Session expired') return;
         
         if (result.success) {
           // إضافة الرسالة محلياً في الواجهة

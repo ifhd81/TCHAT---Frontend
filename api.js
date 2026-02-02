@@ -25,21 +25,42 @@ async function refreshAccessToken() {
       body: JSON.stringify({ refresh_token: refreshToken })
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      if (data.success && data.access_token) {
-        localStorage.setItem('access_token', data.access_token);
-        console.log('✅ تم تجديد access token بنجاح');
-        return data.access_token;
-      }
+    const data = await response.json();
+    
+    if (response.ok && data.success && data.access_token) {
+      localStorage.setItem('access_token', data.access_token);
+      console.log('✅ تم تجديد access token بنجاح');
+      return data.access_token;
     }
     
-    console.error('فشل تجديد access token');
+    // معالجة خطأ التوقيع غير الصالح - توجيه مباشر لتسجيل الدخول
+    if (data.error && (data.error.includes('signature') || data.error.includes('invalid'))) {
+      console.warn('⚠️ التوقيع غير صالح - يجب إعادة تسجيل الدخول');
+      return null;
+    }
+    
+    console.error('فشل تجديد access token:', data.message || data.error);
     return null;
   } catch (error) {
     console.error('خطأ في تجديد access token:', error);
     return null;
   }
+}
+
+// توجيه المستخدم لتسجيل الدخول مع رسالة واضحة
+function redirectToLogin(reason) {
+  console.log('🔒 إعادة التوجيه لتسجيل الدخول:', reason);
+  
+  // مسح جميع بيانات الجلسة
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+  localStorage.removeItem('tchat_logged_in');
+  localStorage.removeItem('tchat_user');
+  localStorage.removeItem('tchat_token');
+  
+  // التوجيه مع رسالة في URL
+  const message = reason === 'expired' ? 'انتهت صلاحية الجلسة' : 'يرجى تسجيل الدخول';
+  window.location.href = `./login.html?message=${encodeURIComponent(message)}`;
 }
 
 // دالة مساعدة لإرسال طلبات API
@@ -68,18 +89,27 @@ async function apiRequest(endpoint, options = {}) {
         // إعادة المحاولة مع الـ token الجديد
         defaultOptions.headers.Authorization = `Bearer ${newToken}`;
         const retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, defaultOptions);
+        
+        // إذا فشل مرة أخرى، توجيه لتسجيل الدخول
+        if (retryResponse.status === 401) {
+          redirectToLogin('expired');
+          throw new Error('Session expired');
+        }
+        
         return await retryResponse.json();
       } else {
-        // فشل التجديد - إعادة توجيه لصفحة تسجيل الدخول
-        console.error('❌ فشل تجديد Token - إعادة التوجيه لتسجيل الدخول');
-        localStorage.clear();
-        window.location.href = './login.html';
-        throw new Error('Session expired - please login again');
+        // فشل التجديد - إعادة توجيه لصفحة تسجيل الدخول بهدوء
+        redirectToLogin('expired');
+        throw new Error('Session expired');
       }
     }
     
     return await response.json();
   } catch (error) {
+    // تجاهل أخطاء الجلسة المنتهية (تم معالجتها)
+    if (error.message === 'Session expired') {
+      return { success: false, error: 'Session expired' };
+    }
     console.error(`خطأ في API ${endpoint}:`, error);
     throw error;
   }

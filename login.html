@@ -182,6 +182,29 @@
       document.addEventListener('DOMContentLoaded', function() {
         lucide.createIcons();
         toggleLoginButton();
+        
+        // عرض رسالة إذا كانت الجلسة منتهية
+        const urlParams = new URLSearchParams(window.location.search);
+        const message = urlParams.get('message');
+        if (message) {
+          // إنشاء عنصر الرسالة
+          const alertDiv = document.createElement('div');
+          alertDiv.className = 'mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-body-sm text-amber-800';
+          alertDiv.innerHTML = `
+            <div class="flex items-center gap-2">
+              <i data-lucide="alert-circle" class="h-4 w-4"></i>
+              <span>${decodeURIComponent(message)}</span>
+            </div>
+          `;
+          
+          // إضافة الرسالة قبل النموذج
+          const form = document.getElementById('login-form');
+          form.parentNode.insertBefore(alertDiv, form);
+          lucide.createIcons();
+          
+          // مسح الـ URL من الرسالة
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
       });
     </script>
   </body>

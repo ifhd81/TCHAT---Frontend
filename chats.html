@@ -1127,11 +1127,25 @@
           // عرض محتوى القالب بشكل منسق
           let templateContent = content;
           let templateName = '';
+          let templateType = 'template'; // template, campaign, abandoned_cart
           
-          // استخراج اسم القالب إذا كان بالتنسيق القديم
+          // استخراج اسم القالب من مختلف التنسيقات
           if (content.startsWith('📄 قالب:')) {
             templateName = content.replace('📄 قالب:', '').trim();
-            // محاولة جلب المحتوى الفعلي من القوالب المحملة
+            templateType = 'template';
+          } else if (content.startsWith('🛒 تذكير بسلة متروكة:')) {
+            templateName = content.replace('🛒 تذكير بسلة متروكة:', '').trim();
+            templateType = 'abandoned_cart';
+          } else if (content.startsWith('📢 حملة تسويقية:')) {
+            templateName = content.replace('📢 حملة تسويقية:', '').trim();
+            templateType = 'campaign';
+          } else if (content.startsWith('📨 قالب:')) {
+            templateName = content.replace('📨 قالب:', '').trim();
+            templateType = 'template';
+          }
+          
+          // محاولة جلب المحتوى الفعلي من القوالب المحملة
+          if (templateName && availableTemplates && availableTemplates.length > 0) {
             const cachedTemplate = availableTemplates.find(t => t.name === templateName);
             if (cachedTemplate && cachedTemplate.components) {
               let bodyContent = '';
@@ -1158,14 +1172,31 @@
             .replace(/_([^_]+)_/g, '<em>$1</em>')            // Italic
             .replace(/\n/g, '<br>');                         // Line breaks
           
-          // إذا كان المحتوى لا يزال اسم القالب فقط، اعرضه بشكل خاص
-          if (formattedContent.startsWith('📄 قالب:') || !formattedContent) {
-            const displayName = templateName || formattedContent.replace('📄 قالب:', '').trim() || 'قالب';
+          // إذا كان المحتوى لا يزال بالتنسيق القديم، اعرضه بشكل خاص
+          const isOldFormat = formattedContent.startsWith('📄 قالب:') || 
+                              formattedContent.startsWith('🛒 تذكير بسلة متروكة:') ||
+                              formattedContent.startsWith('📢 حملة تسويقية:') ||
+                              formattedContent.startsWith('📨 قالب:') ||
+                              !formattedContent;
+          
+          if (isOldFormat) {
+            const displayName = templateName || 'قالب';
+            let typeIcon = 'file-text';
+            let typeLabel = 'رسالة قالب';
+            
+            if (templateType === 'abandoned_cart') {
+              typeIcon = 'shopping-cart';
+              typeLabel = 'تذكير سلة متروكة';
+            } else if (templateType === 'campaign') {
+              typeIcon = 'megaphone';
+              typeLabel = 'حملة تسويقية';
+            }
+            
             return `
               <div class="space-y-2">
                 <div class="flex items-center gap-2 text-body-sm opacity-75">
-                  <i data-lucide="file-text" class="h-4 w-4"></i>
-                  <span>رسالة قالب</span>
+                  <i data-lucide="${typeIcon}" class="h-4 w-4"></i>
+                  <span>${typeLabel}</span>
                 </div>
                 <p class="text-body-md font-medium">${displayName}</p>
               </div>

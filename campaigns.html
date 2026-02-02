@@ -411,6 +411,16 @@
             </p>
           </div>
 
+          <!-- اسم العميل (للقوالب التي تحتوي متغيرات) -->
+          <div class="space-y-2">
+            <label class="text-body-sm font-medium flex items-center gap-2">
+              <i data-lucide="user" class="h-4 w-4 text-muted-foreground"></i>
+              <span>اسم العميل <span class="text-muted-foreground">(اختياري)</span></span>
+            </label>
+            <input type="text" id="test-customer-name" placeholder="مثال: أحمد محمد" class="flex h-11 w-full rounded-md border border-input bg-background px-4 py-2 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+            <p class="text-body-xs text-muted-foreground">سيتم استبدال {{1}} في القالب بهذا الاسم</p>
+          </div>
+
           <!-- لغة القالب -->
           <div class="space-y-2">
             <label class="text-body-sm font-medium flex items-center gap-2">
@@ -2446,6 +2456,7 @@
       const phoneNumber = document.getElementById('test-phone-number').value.trim();
       const templateName = document.getElementById('test-template').value;
       const templateLang = document.getElementById('test-template-language').value;
+      const customerName = document.getElementById('test-customer-name').value.trim();
       
       // التحقق من البيانات
       if (!phoneNumber) {
@@ -2517,7 +2528,8 @@
             type: 'template',
             template_name: templateName,
             template_language: finalLang,
-            template_content: templateContent
+            template_content: templateContent,
+            customer_name: customerName || '' // إرسال اسم العميل لاستبدال {{1}}
           })
         });
         

@@ -932,7 +932,12 @@
       const templateContent = getTemplateDisplayContent(selectedTemplate);
       
       try {
-        // إرسال القالب باستخدام apiRequest مع محتوى القالب
+        // الحصول على اسم العميل من المحادثة
+        const customerName = conversation.customer_name && conversation.customer_name !== '.' 
+          ? conversation.customer_name 
+          : '';
+        
+        // إرسال القالب باستخدام apiRequest مع محتوى القالب واسم العميل
         const result = await apiRequest('/whatsapp/send', {
           method: 'POST',
           body: JSON.stringify({
@@ -940,7 +945,8 @@
             type: 'template',
             template_name: selectedTemplate.name,
             template_language: selectedTemplate.language || 'ar',
-            template_content: templateContent
+            template_content: templateContent,
+            customer_name: customerName // إرسال اسم العميل لاستبدال {{1}}
           })
         });
         

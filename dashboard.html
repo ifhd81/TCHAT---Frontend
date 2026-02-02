@@ -238,6 +238,13 @@
           'TIER_4': { label: 'المستوى 4', badge: 'bg-destructive/10 text-destructive' },
         };
 
+        const config = throughputMap[normalized] || { label: level, badge: 'bg-accent text-accent-foreground' };
+        return {
+          label: config.label,
+          badge: `<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${config.badge}">${config.label}</span>`
+        };
+      }
+
       // تنسيق حد الرسائل messaging_limit_tier
       function formatMessagingLimit(tier) {
         if (!tier) {
@@ -255,13 +262,6 @@
         
         const config = tierMap[tier] || { label: tier, color: 'bg-muted text-muted-foreground' };
         return `<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${config.color}">${config.label}</span>`;
-      }
-
-        const config = throughputMap[normalized] || { label: level, badge: 'bg-accent text-accent-foreground' };
-        return {
-          label: config.label,
-          badge: `<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${config.badge}">${config.label}</span>`
-        };
       }
 
       // تحقق من تسجيل الدخول

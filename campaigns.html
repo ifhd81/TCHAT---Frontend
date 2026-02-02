@@ -24,6 +24,10 @@
         <p class="text-body-sm text-muted-foreground">إنشاء وإدارة حملات واتساب للعملاء</p>
       </div>
       <div class="flex items-center gap-3">
+        <button onclick="showTestSendModal()" class="inline-flex items-center gap-2 rounded-md border border-primary bg-primary/10 px-4 py-2 text-button-md font-medium text-primary shadow-sm transition hover:bg-primary/20">
+          <i data-lucide="send" class="h-4 w-4"></i>
+          <span>إرسال تجريبي</span>
+        </button>
         <button onclick="deleteAllCampaigns()" class="inline-flex items-center gap-2 rounded-md border border-destructive bg-destructive/10 px-4 py-2 text-button-md font-medium text-destructive shadow-sm transition hover:bg-destructive/20">
           <i data-lucide="trash-2" class="h-4 w-4"></i>
           <span>حذف الكل</span>
@@ -352,6 +356,92 @@
               <span>إنشاء الحملة</span>
             </button>
           </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Send Modal -->
+  <div id="test-send-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+      <div class="rounded-xl border bg-card shadow-lg">
+        
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-border p-6">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+              <i data-lucide="send" class="h-5 w-5 text-primary"></i>
+            </div>
+            <div>
+              <h2 class="text-heading-md font-bold">إرسال تجريبي</h2>
+              <p class="text-body-sm text-muted-foreground">اختبر القالب قبل إرساله للعملاء</p>
+            </div>
+          </div>
+          <button onclick="hideTestSendModal()" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
+            <i data-lucide="x" class="h-4 w-4"></i>
+          </button>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="p-6 space-y-5">
+          
+          <!-- رقم الهاتف -->
+          <div class="space-y-2">
+            <label class="text-body-sm font-medium flex items-center gap-2">
+              <i data-lucide="phone" class="h-4 w-4 text-muted-foreground"></i>
+              <span>رقم الهاتف</span>
+            </label>
+            <input type="text" id="test-phone-number" placeholder="مثال: 966501234567" class="flex h-11 w-full rounded-md border border-input bg-background px-4 py-2 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-mono" dir="ltr" />
+            <p class="text-body-xs text-muted-foreground">أدخل الرقم بصيغة دولية بدون + أو 00</p>
+          </div>
+
+          <!-- اختيار القالب -->
+          <div class="space-y-2">
+            <label class="text-body-sm font-medium flex items-center gap-2">
+              <i data-lucide="layout-template" class="h-4 w-4 text-muted-foreground"></i>
+              <span>القالب</span>
+            </label>
+            <select id="test-template" class="flex h-11 w-full rounded-md border border-input bg-background px-4 py-2 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <option value="">جاري تحميل القوالب...</option>
+            </select>
+            <p class="text-body-xs text-warning flex items-center gap-1">
+              <i data-lucide="alert-triangle" class="h-3 w-3"></i>
+              <span>ملاحظة: القوالب التي تحتاج متغيرات ({{1}}، {{2}}...) قد لا تعمل في الاختبار</span>
+            </p>
+          </div>
+
+          <!-- لغة القالب -->
+          <div class="space-y-2">
+            <label class="text-body-sm font-medium flex items-center gap-2">
+              <i data-lucide="globe" class="h-4 w-4 text-muted-foreground"></i>
+              <span>لغة القالب</span>
+            </label>
+            <select id="test-template-language" class="flex h-11 w-full rounded-md border border-input bg-background px-4 py-2 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <option value="ar">العربية</option>
+              <option value="en">الإنجليزية</option>
+              <option value="en_US">English (US)</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- نتيجة الإرسال -->
+        <div id="test-send-result" class="hidden mx-6 mb-6">
+          <div id="test-send-result-content" class="rounded-lg border p-4">
+            <!-- سيتم ملؤها ديناميكياً -->
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex items-center justify-between border-t border-border p-6">
+          <button onclick="hideTestSendModal()" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
+            <span>إغلاق</span>
+          </button>
+          <button onclick="sendTestMessage()" id="test-send-btn" class="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50">
+            <i data-lucide="send" class="h-4 w-4"></i>
+            <span>إرسال الآن</span>
+          </button>
         </div>
 
       </div>
@@ -2234,8 +2324,451 @@
         if (modal && !modal.classList.contains('hidden')) {
           closeMessageDetails();
         }
+        const testModal = document.getElementById('test-send-modal');
+        if (testModal && !testModal.classList.contains('hidden')) {
+          hideTestSendModal();
+        }
       }
     });
+
+    // ==================== دوال الإرسال التجريبي ====================
+
+    let testSendTemplates = [];
+    let testMessageID = null;
+    let statusCheckInterval = null;
+
+    // عرض نافذة الإرسال التجريبي
+    async function showTestSendModal() {
+      const modal = document.getElementById('test-send-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      
+      // إخفاء نتائج سابقة
+      document.getElementById('test-send-result').classList.add('hidden');
+      document.getElementById('test-phone-number').value = '';
+      testMessageID = null;
+      
+      // تحميل القوالب
+      await loadTestTemplates();
+      lucide.createIcons();
+    }
+
+    // إخفاء نافذة الإرسال التجريبي
+    function hideTestSendModal() {
+      const modal = document.getElementById('test-send-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      
+      // إيقاف فحص الحالة
+      if (statusCheckInterval) {
+        clearInterval(statusCheckInterval);
+        statusCheckInterval = null;
+      }
+    }
+
+    // تحميل القوالب للإرسال التجريبي
+    async function loadTestTemplates() {
+      const templateSelect = document.getElementById('test-template');
+      templateSelect.innerHTML = '<option value="">جاري تحميل القوالب...</option>';
+      
+      try {
+        testSendTemplates = await loadMetaTemplates(100);
+        
+        const approvedTemplates = testSendTemplates.filter(t => t.status === 'APPROVED');
+        
+        // فرز القوالب: القوالب البسيطة (بدون متغيرات) أولاً
+        const sortedTemplates = approvedTemplates.sort((a, b) => {
+          const aHasVars = hasTemplateVariables(a);
+          const bHasVars = hasTemplateVariables(b);
+          if (aHasVars && !bHasVars) return 1;
+          if (!aHasVars && bHasVars) return -1;
+          return 0;
+        });
+        
+        if (sortedTemplates.length > 0) {
+          templateSelect.innerHTML = '<option value="">اختر القالب</option>' +
+            '<option value="hello_world" data-lang="en_US">🧪 hello_world (اختباري - إنجليزي)</option>' +
+            sortedTemplates.map(template => {
+              const langText = template.language === 'ar' ? 'عربي' : template.language === 'en' ? 'إنجليزي' : template.language;
+              const hasVars = hasTemplateVariables(template);
+              const varIcon = hasVars ? '⚠️ ' : '✓ ';
+              return `<option value="${template.name}" data-lang="${template.language}">${varIcon}${template.name} (${langText})</option>`;
+            }).join('');
+        } else {
+          templateSelect.innerHTML = '<option value="">اختر القالب</option>' +
+            '<option value="hello_world" data-lang="en_US">🧪 hello_world (اختباري - إنجليزي)</option>';
+        }
+      } catch (error) {
+        console.error('خطأ في تحميل القوالب:', error);
+        templateSelect.innerHTML = '<option value="">اختر القالب</option>' +
+          '<option value="hello_world" data-lang="en_US">🧪 hello_world (اختباري - إنجليزي)</option>';
+      }
+    }
+    
+    // فحص إذا كان القالب يحتاج متغيرات
+    function hasTemplateVariables(template) {
+      if (!template.components) return false;
+      
+      for (const component of template.components) {
+        if (component.text && component.text.includes('{{')) {
+          return true;
+        }
+        if (component.example && component.example.body_text) {
+          return true;
+        }
+      }
+      return false;
+    }
+    
+    // استخراج محتوى القالب للعرض
+    function getTemplateDisplayContent(template) {
+      if (!template || !template.components) return '';
+      
+      let content = '';
+      
+      for (const component of template.components) {
+        if (component.type === 'HEADER' && component.format === 'TEXT' && component.text) {
+          content += '*' + component.text + '*\n\n';
+        }
+        if (component.type === 'BODY' && component.text) {
+          content += component.text;
+        }
+        if (component.type === 'FOOTER' && component.text) {
+          content += '\n\n_' + component.text + '_';
+        }
+      }
+      
+      return content || (template ? template.name : '');
+    }
+
+    // إرسال رسالة تجريبية
+    async function sendTestMessage() {
+      const phoneNumber = document.getElementById('test-phone-number').value.trim();
+      const templateName = document.getElementById('test-template').value;
+      const templateLang = document.getElementById('test-template-language').value;
+      
+      // التحقق من البيانات
+      if (!phoneNumber) {
+        alert('يرجى إدخال رقم الهاتف');
+        return;
+      }
+      
+      // تنظيف الرقم
+      const cleanPhone = phoneNumber.replace(/[\s\-\+]/g, '');
+      if (!/^\d{10,15}$/.test(cleanPhone)) {
+        alert('رقم الهاتف غير صحيح. يجب أن يحتوي على 10-15 رقماً');
+        return;
+      }
+      
+      if (!templateName) {
+        alert('يرجى اختيار القالب');
+        return;
+      }
+      
+      const sendBtn = document.getElementById('test-send-btn');
+      const resultDiv = document.getElementById('test-send-result');
+      const resultContent = document.getElementById('test-send-result-content');
+      
+      // تعطيل الزر وعرض حالة الإرسال
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = '<i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i><span>جاري الإرسال...</span>';
+      lucide.createIcons();
+      
+      // عرض حالة الانتظار
+      resultDiv.classList.remove('hidden');
+      resultContent.className = 'rounded-lg border border-muted bg-muted/30 p-4';
+      resultContent.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-muted animate-pulse">
+            <i data-lucide="loader-2" class="h-5 w-5 text-muted-foreground animate-spin"></i>
+          </div>
+          <div>
+            <div class="text-body-md font-semibold">جاري إرسال الرسالة...</div>
+            <div class="text-body-sm text-muted-foreground">يرجى الانتظار</div>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+      
+      try {
+        // تحديد اللغة الصحيحة للقالب
+        let finalLang = templateLang;
+        
+        // قالب hello_world يحتاج en_US بالضبط
+        if (templateName === 'hello_world') {
+          finalLang = 'en_US';
+        }
+        
+        // البحث عن لغة القالب من البيانات المحملة
+        const selectedTemplate = testSendTemplates.find(t => t.name === templateName);
+        if (selectedTemplate && selectedTemplate.language) {
+          finalLang = selectedTemplate.language;
+        }
+        
+        // استخراج محتوى القالب للعرض
+        const templateContent = getTemplateDisplayContent(selectedTemplate);
+        
+        console.log('إرسال قالب:', templateName, 'بلغة:', finalLang);
+        
+        const result = await apiRequest('/whatsapp/send', {
+          method: 'POST',
+          body: JSON.stringify({
+            to: cleanPhone,
+            type: 'template',
+            template_name: templateName,
+            template_language: finalLang,
+            template_content: templateContent
+          })
+        });
+        
+        if (result.success) {
+          testMessageID = result.message_id;
+          
+          // عرض نجاح الإرسال
+          resultContent.className = 'rounded-lg border border-primary bg-primary/5 p-4';
+          resultContent.innerHTML = `
+            <div class="space-y-4">
+              <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20">
+                  <i data-lucide="check" class="h-5 w-5 text-primary"></i>
+                </div>
+                <div>
+                  <div class="text-body-md font-semibold text-primary">تم إرسال الرسالة بنجاح!</div>
+                  <div class="text-body-sm text-muted-foreground">القالب: ${templateName}</div>
+                </div>
+              </div>
+              
+              <div class="border-t border-border pt-4">
+                <div class="text-body-sm font-semibold mb-3">متابعة حالة الرسالة:</div>
+                <div id="message-status-tracker" class="space-y-2">
+                  <div class="flex items-center gap-3 p-2 rounded-lg bg-primary/10">
+                    <i data-lucide="send" class="h-4 w-4 text-primary"></i>
+                    <span class="text-body-sm">تم الإرسال</span>
+                    <i data-lucide="check" class="h-4 w-4 text-primary mr-auto"></i>
+                  </div>
+                  <div id="status-delivered" class="flex items-center gap-3 p-2 rounded-lg bg-muted/50">
+                    <i data-lucide="check-check" class="h-4 w-4 text-muted-foreground"></i>
+                    <span class="text-body-sm text-muted-foreground">تم التسليم</span>
+                    <i data-lucide="loader-2" class="h-4 w-4 text-muted-foreground animate-spin mr-auto"></i>
+                  </div>
+                  <div id="status-read" class="flex items-center gap-3 p-2 rounded-lg bg-muted/50">
+                    <i data-lucide="eye" class="h-4 w-4 text-muted-foreground"></i>
+                    <span class="text-body-sm text-muted-foreground">تمت القراءة</span>
+                    <span class="text-body-xs text-muted-foreground mr-auto">في الانتظار</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="text-body-xs text-muted-foreground">
+                <i data-lucide="info" class="h-3 w-3 inline"></i>
+                <span>معرف الرسالة: <code class="bg-muted px-1 rounded text-[10px]">${testMessageID}</code></span>
+              </div>
+            </div>
+          `;
+          lucide.createIcons();
+          
+          // بدء متابعة الحالة
+          startStatusTracking();
+          
+        } else {
+          // فشل الإرسال
+          let errorMsg = result.message || result.error || 'خطأ غير معروف';
+          let suggestion = '';
+          
+          // تحليل نوع الخطأ وتقديم اقتراحات
+          if (errorMsg.includes('parameter') || errorMsg.includes('Parameter')) {
+            suggestion = 'هذا القالب يحتاج متغيرات. جرب قالب hello_world أو قالب آخر بعلامة ✓';
+          } else if (errorMsg.includes('format')) {
+            suggestion = 'تأكد من اختيار القالب الصحيح واللغة المطابقة';
+          }
+          
+          resultContent.className = 'rounded-lg border border-destructive bg-destructive/5 p-4';
+          resultContent.innerHTML = `
+            <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/20">
+                  <i data-lucide="x" class="h-5 w-5 text-destructive"></i>
+                </div>
+                <div>
+                  <div class="text-body-md font-semibold text-destructive">فشل إرسال الرسالة</div>
+                  <div class="text-body-sm text-muted-foreground">${errorMsg}</div>
+                </div>
+              </div>
+              ${suggestion ? `
+                <div class="flex items-start gap-2 p-3 rounded-lg bg-warning/10 border border-warning/30">
+                  <i data-lucide="lightbulb" class="h-4 w-4 text-warning mt-0.5"></i>
+                  <div class="text-body-sm text-warning-foreground">${suggestion}</div>
+                </div>
+              ` : ''}
+            </div>
+          `;
+          lucide.createIcons();
+        }
+      } catch (error) {
+        console.error('خطأ في إرسال الرسالة التجريبية:', error);
+        resultContent.className = 'rounded-lg border border-destructive bg-destructive/5 p-4';
+        resultContent.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/20">
+              <i data-lucide="alert-triangle" class="h-5 w-5 text-destructive"></i>
+            </div>
+            <div>
+              <div class="text-body-md font-semibold text-destructive">خطأ في الاتصال</div>
+              <div class="text-body-sm text-muted-foreground">تعذر إرسال الرسالة. تحقق من الاتصال بالإنترنت.</div>
+            </div>
+          </div>
+        `;
+        lucide.createIcons();
+      } finally {
+        // إعادة تفعيل الزر
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i data-lucide="send" class="h-4 w-4"></i><span>إرسال الآن</span>';
+        lucide.createIcons();
+      }
+    }
+
+    // متابعة حالة الرسالة
+    function startStatusTracking() {
+      if (!testMessageID) return;
+      
+      let checkCount = 0;
+      const maxChecks = 30; // 30 محاولة (30 ثانية)
+      
+      statusCheckInterval = setInterval(async () => {
+        checkCount++;
+        
+        if (checkCount > maxChecks) {
+          clearInterval(statusCheckInterval);
+          statusCheckInterval = null;
+          
+          // تحديث حالة التتبع - انتهت المدة
+          const deliveredDiv = document.getElementById('status-delivered');
+          const readDiv = document.getElementById('status-read');
+          
+          if (deliveredDiv && !deliveredDiv.classList.contains('delivered-done')) {
+            deliveredDiv.innerHTML = `
+              <i data-lucide="check-check" class="h-4 w-4 text-muted-foreground"></i>
+              <span class="text-body-sm text-muted-foreground">تم التسليم</span>
+              <span class="text-body-xs text-muted-foreground mr-auto">انتهت المدة</span>
+            `;
+            lucide.createIcons();
+          }
+          
+          if (readDiv && !readDiv.classList.contains('read-done')) {
+            readDiv.innerHTML = `
+              <i data-lucide="eye" class="h-4 w-4 text-muted-foreground"></i>
+              <span class="text-body-sm text-muted-foreground">تمت القراءة</span>
+              <span class="text-body-xs text-muted-foreground mr-auto">انتهت المدة</span>
+            `;
+            lucide.createIcons();
+          }
+          
+          return;
+        }
+        
+        try {
+          const result = await apiRequest(`/messages/${testMessageID}`);
+          
+          if (result.success && result.data) {
+            updateStatusUI(result.data.status);
+          }
+        } catch (error) {
+          console.error('خطأ في فحص حالة الرسالة:', error);
+        }
+      }, 1000); // فحص كل ثانية
+    }
+
+    // تحديث واجهة حالة الرسالة
+    function updateStatusUI(status) {
+      const deliveredDiv = document.getElementById('status-delivered');
+      const readDiv = document.getElementById('status-read');
+      
+      if (!deliveredDiv || !readDiv) return;
+      
+      // تحديث حالة التسليم
+      if (status === 'delivered' || status === 'read') {
+        deliveredDiv.className = 'flex items-center gap-3 p-2 rounded-lg bg-success/10 delivered-done';
+        deliveredDiv.innerHTML = `
+          <i data-lucide="check-check" class="h-4 w-4 text-success"></i>
+          <span class="text-body-sm text-success font-medium">تم التسليم</span>
+          <i data-lucide="check" class="h-4 w-4 text-success mr-auto"></i>
+        `;
+        lucide.createIcons();
+      }
+      
+      // تحديث حالة القراءة
+      if (status === 'read') {
+        readDiv.className = 'flex items-center gap-3 p-2 rounded-lg bg-blue-500/10 read-done';
+        readDiv.innerHTML = `
+          <i data-lucide="eye" class="h-4 w-4 text-blue-500"></i>
+          <span class="text-body-sm text-blue-500 font-medium">تمت القراءة</span>
+          <i data-lucide="check" class="h-4 w-4 text-blue-500 mr-auto"></i>
+        `;
+        lucide.createIcons();
+        
+        // إيقاف التتبع بعد القراءة
+        if (statusCheckInterval) {
+          clearInterval(statusCheckInterval);
+          statusCheckInterval = null;
+        }
+      } else if (status === 'delivered') {
+        // تحديث حالة القراءة - في الانتظار
+        readDiv.innerHTML = `
+          <i data-lucide="eye" class="h-4 w-4 text-muted-foreground"></i>
+          <span class="text-body-sm text-muted-foreground">تمت القراءة</span>
+          <i data-lucide="loader-2" class="h-4 w-4 text-muted-foreground animate-spin mr-auto"></i>
+        `;
+        lucide.createIcons();
+      }
+      
+      // حالة الفشل
+      if (status === 'failed') {
+        deliveredDiv.className = 'flex items-center gap-3 p-2 rounded-lg bg-destructive/10';
+        deliveredDiv.innerHTML = `
+          <i data-lucide="x" class="h-4 w-4 text-destructive"></i>
+          <span class="text-body-sm text-destructive font-medium">فشل التسليم</span>
+        `;
+        
+        readDiv.className = 'flex items-center gap-3 p-2 rounded-lg bg-muted/30';
+        readDiv.innerHTML = `
+          <i data-lucide="eye-off" class="h-4 w-4 text-muted-foreground"></i>
+          <span class="text-body-sm text-muted-foreground">-</span>
+        `;
+        lucide.createIcons();
+        
+        // إيقاف التتبع
+        if (statusCheckInterval) {
+          clearInterval(statusCheckInterval);
+          statusCheckInterval = null;
+        }
+      }
+    }
+
+    // تحديث لغة القالب تلقائياً عند اختيار القالب
+    function setupTestTemplateListener() {
+      const templateSelect = document.getElementById('test-template');
+      if (templateSelect) {
+        templateSelect.addEventListener('change', function() {
+          const selectedOption = this.options[this.selectedIndex];
+          const lang = selectedOption?.getAttribute('data-lang');
+          
+          if (lang) {
+            const langSelect = document.getElementById('test-template-language');
+            // تحديد اللغة المناسبة
+            if (lang === 'ar') {
+              langSelect.value = 'ar';
+            } else if (lang === 'en_US') {
+              langSelect.value = 'en_US';
+            } else if (lang === 'en') {
+              langSelect.value = 'en';
+            }
+          }
+        });
+      }
+    }
+    
+    // تهيئة listener عند تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', setupTestTemplateListener);
   </script>
 </body>
 </html>

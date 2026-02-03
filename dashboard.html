@@ -178,6 +178,114 @@
     </main>
     </div>
 
+    <!-- Cart Details Modal -->
+    <div id="cart-details-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div class="relative w-full max-w-lg mx-4 bg-card rounded-lg shadow-xl border animate-in fade-in-0 zoom-in-95">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-6 border-b">
+          <h3 class="text-heading-md font-semibold">تفاصيل السلة المتروكة</h3>
+          <button onclick="closeCartModal()" class="rounded-md p-2 hover:bg-muted transition-colors">
+            <i data-lucide="x" class="h-4 w-4 text-muted-foreground"></i>
+          </button>
+        </div>
+        
+        <!-- Content -->
+        <div class="p-6 space-y-4">
+          <!-- Customer Info -->
+          <div class="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+            <div class="relative flex h-12 w-12 shrink-0 overflow-hidden rounded-full bg-primary">
+              <span id="modal-customer-avatar" class="flex h-full w-full items-center justify-center text-primary-foreground"></span>
+            </div>
+            <div>
+              <div class="font-semibold text-body-md" id="modal-customer-name">-</div>
+              <div class="font-mono text-body-sm text-muted-foreground number" id="modal-customer-mobile">-</div>
+            </div>
+          </div>
+
+          <!-- Cart Details Grid -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="p-4 bg-muted/30 rounded-lg">
+              <div class="text-body-sm text-muted-foreground mb-1">المبلغ</div>
+              <div class="flex items-baseline gap-1">
+                <span class="font-mono font-bold text-heading-sm number" id="modal-cart-amount">-</span>
+                <span class="text-body-sm text-muted-foreground">ر.س</span>
+              </div>
+            </div>
+            <div class="p-4 bg-muted/30 rounded-lg">
+              <div class="text-body-sm text-muted-foreground mb-1">التوقيت</div>
+              <div class="font-medium text-body-md" id="modal-cart-time">-</div>
+            </div>
+          </div>
+
+          <!-- Status Section -->
+          <div class="p-4 border rounded-lg">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-body-sm text-muted-foreground">حالة الإرسال</span>
+              <span id="modal-status-badge"></span>
+            </div>
+            
+            <!-- Error Details (shown only for failed status) -->
+            <div id="modal-error-section" class="hidden mt-3 pt-3 border-t border-destructive/20">
+              <div class="p-4 bg-destructive/10 rounded-lg">
+                <!-- Error Header -->
+                <div class="flex items-center gap-2 mb-4">
+                  <i data-lucide="alert-circle" class="h-5 w-5 text-destructive shrink-0"></i>
+                  <span class="font-semibold text-destructive text-body-md">تفاصيل الفشل</span>
+                </div>
+                
+                <!-- Error Table -->
+                <div class="overflow-hidden rounded-lg border border-destructive/20 bg-background">
+                  <table class="w-full text-sm">
+                    <thead>
+                      <tr class="border-b border-destructive/20 bg-destructive/5">
+                        <th class="px-4 py-2.5 text-right font-semibold text-destructive w-28">التفاصيل</th>
+                        <th class="px-4 py-2.5 text-right font-semibold text-destructive">القيمة</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="border-b border-destructive/10">
+                        <td class="px-4 py-3 text-muted-foreground">كود الخطأ</td>
+                        <td class="px-4 py-3 font-mono font-medium text-foreground" id="modal-error-code">-</td>
+                      </tr>
+                      <tr class="border-b border-destructive/10">
+                        <td class="px-4 py-3 text-muted-foreground">الرسالة</td>
+                        <td class="px-4 py-3 text-foreground text-body-sm leading-relaxed" dir="ltr" id="modal-error-message">-</td>
+                      </tr>
+                      <tr>
+                        <td class="px-4 py-3 text-muted-foreground">الترجمة</td>
+                        <td class="px-4 py-3 text-foreground text-body-sm leading-relaxed" id="modal-error-translation">-</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- WhatsApp ID (if available) -->
+            <div id="modal-whatsapp-section" class="hidden mt-3 pt-3 border-t">
+              <div class="flex items-center justify-between">
+                <span class="text-body-sm text-muted-foreground">معرف الرسالة</span>
+                <span class="font-mono text-body-xs text-muted-foreground" id="modal-whatsapp-id">-</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cart ID -->
+          <div class="flex items-center justify-between text-body-sm">
+            <span class="text-muted-foreground">معرف السلة</span>
+            <span class="font-mono text-muted-foreground" id="modal-cart-id">-</span>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex justify-end gap-2 p-6 border-t">
+          <button onclick="closeCartModal()" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4">
+            إغلاق
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script>
       const TABLE_STATES = {
         loading: (colspan, message = 'جاري التحميل...') => `
@@ -456,7 +564,7 @@
           return;
         }
         
-        tbody.innerHTML = carts.map(cart => {
+        tbody.innerHTML = carts.map((cart, index) => {
           // تنسيق التاريخ
           const createdDate = new Date(cart.created_at);
           const timeAgo = getTimeAgo(createdDate);
@@ -512,8 +620,11 @@
           // تنظيف رقم الجوال
           const cleanMobile = cart.customer_mobile ? cart.customer_mobile.replace(/[\s\+\-]/g, '') : 'غير محدد';
           
+          // حساب الـ index الفعلي في المصفوفة الكاملة
+          const actualIndex = (currentPage - 1) * itemsPerPage + index;
+          
           return `
-            <tr class="border-b transition-colors hover:bg-muted/50">
+            <tr class="border-b transition-colors hover:bg-muted/50 cursor-pointer" onclick="openCartModal(${actualIndex})">
               <td class="p-4 align-middle text-right">
                 <div class="flex items-center space-x-3 space-x-reverse">
                   <div class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
@@ -543,6 +654,172 @@
         // إعادة تهيئة الأيقونات
         lucide.createIcons();
       }
+
+      // فتح modal تفاصيل السلة
+      function openCartModal(cartIndex) {
+        const cart = allAbandonedCarts[cartIndex];
+        if (!cart) return;
+
+        const modal = document.getElementById('cart-details-modal');
+        
+        // تعبئة بيانات العميل
+        document.getElementById('modal-customer-avatar').innerHTML = userIconSvg('h-6 w-6');
+        document.getElementById('modal-customer-name').textContent = cart.customer_name || 'غير محدد';
+        document.getElementById('modal-customer-mobile').textContent = cart.customer_mobile ? cart.customer_mobile.replace(/[\s\+\-]/g, '') : 'غير محدد';
+        
+        // تعبئة بيانات السلة
+        document.getElementById('modal-cart-amount').textContent = cart.total_amount ? cart.total_amount.toLocaleString('en-US', {minimumFractionDigits: 2}) : '0';
+        document.getElementById('modal-cart-time').textContent = getTimeAgo(new Date(cart.created_at));
+        document.getElementById('modal-cart-id').textContent = cart.id || '-';
+
+        // تحديد حالة الإرسال
+        const messageStatus = cart.message_status || 'pending';
+        const statusConfig = {
+          'sent': { label: 'تم الإرسال', icon: 'send', class: 'bg-blue-100 text-blue-800 border-blue-200' },
+          'delivered': { label: 'وصلت', icon: 'check', class: 'bg-green-100 text-green-800 border-green-200' },
+          'read': { label: 'قرأها', icon: 'eye', class: 'bg-green-200 text-green-900 border-green-300' },
+          'replied': { label: 'رد عليها', icon: 'message-circle', class: 'bg-purple-100 text-purple-800 border-purple-200' },
+          'failed': { label: 'فشلت', icon: 'x-circle', class: 'bg-red-100 text-red-800 border-red-200' },
+          'ecosystem_limited': { label: 'محدودة', icon: 'alert-triangle', class: 'bg-orange-100 text-orange-800 border-orange-200' },
+          'user_opted_out': { label: 'أوقف الاستقبال', icon: 'user-x', class: 'bg-gray-100 text-gray-600 border-gray-200' },
+          'pending': { label: 'قيد الإرسال', icon: 'clock', class: 'bg-yellow-100 text-yellow-800 border-yellow-200' }
+        };
+        
+        const config = statusConfig[messageStatus] || statusConfig['pending'];
+        document.getElementById('modal-status-badge').innerHTML = `<span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${config.class}"><i data-lucide="${config.icon}" class="w-3 h-3"></i>${config.label}</span>`;
+
+        // عرض تفاصيل الخطأ إذا كانت الحالة فاشلة
+        const errorSection = document.getElementById('modal-error-section');
+        if (messageStatus === 'failed' || messageStatus === 'ecosystem_limited' || messageStatus === 'user_opted_out') {
+          errorSection.classList.remove('hidden');
+          
+          // استخراج بيانات الخطأ من السلة
+          const errorCode = cart.error_code || cart.failure_code || '-';
+          
+          // الرسالة الإنجليزية من ميتا
+          const errorMessage = cart.error_message || cart.meta_error_message || getDefaultErrorMessage(errorCode, messageStatus);
+          
+          // الترجمة العربية
+          const errorTranslation = cart.error_translation || getFailureReasonText(errorCode, messageStatus);
+          
+          // تعبئة الحقول
+          document.getElementById('modal-error-code').textContent = errorCode;
+          document.getElementById('modal-error-message').textContent = errorMessage;
+          document.getElementById('modal-error-translation').textContent = errorTranslation;
+        } else {
+          errorSection.classList.add('hidden');
+        }
+
+        // عرض معرف رسالة WhatsApp إذا كان متاحاً
+        const whatsappSection = document.getElementById('modal-whatsapp-section');
+        if (cart.whatsapp_message_id) {
+          whatsappSection.classList.remove('hidden');
+          document.getElementById('modal-whatsapp-id').textContent = cart.whatsapp_message_id;
+        } else {
+          whatsappSection.classList.add('hidden');
+        }
+
+        // عرض الـ modal
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        lucide.createIcons();
+      }
+
+      // إغلاق modal تفاصيل السلة
+      function closeCartModal() {
+        const modal = document.getElementById('cart-details-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      // دالة للحصول على الرسالة الإنجليزية الافتراضية
+      function getDefaultErrorMessage(errorCode, messageStatus) {
+        if (messageStatus === 'ecosystem_limited') {
+          return 'This message was not delivered to maintain healthy ecosystem engagement';
+        }
+        if (messageStatus === 'user_opted_out') {
+          return 'User has opted out of receiving marketing messages from this business';
+        }
+        
+        const errorMessages = {
+          '131026': 'Message undeliverable - recipient is not available on WhatsApp',
+          '131047': 'Re-engagement message rejected - recipient has not replied within 24 hours',
+          '131049': 'This message was not delivered to maintain healthy ecosystem engagement',
+          '131051': 'Unsupported message type for this recipient',
+          '131052': 'Too many messages sent to this phone number',
+          '131053': 'Media upload failed',
+          '130472': 'Conversation session expired (24 hours)',
+          '131031': 'Business account is temporarily locked',
+          '131042': 'Template is not approved or has been paused',
+          '131045': 'Template has been paused or deleted',
+          '132000': 'Template parameter count mismatch',
+          '132001': 'Template does not exist',
+          '132005': 'Template parameter values are invalid',
+          '132007': 'Template violates WhatsApp Business policy',
+          '132012': 'Template is paused',
+          '132015': 'Template is permanently disabled due to policy violation',
+          '132016': 'Template is temporarily paused for review',
+          '132068': 'Template flow is blocked',
+          '132069': 'Template flow is throttled',
+          '133004': 'Server is busy, please try again later',
+          '133010': 'Phone number is not registered on WhatsApp',
+          '135000': 'Generic WhatsApp API error'
+        };
+        
+        return errorMessages[errorCode] || 'Message delivery failed';
+      }
+
+      // دالة للحصول على الترجمة العربية للخطأ
+      function getFailureReasonText(errorCode, messageStatus) {
+        if (messageStatus === 'ecosystem_limited') {
+          return 'لم يتم تسليم هذه الرسالة للحفاظ على بيئة تفاعل صحية';
+        }
+        if (messageStatus === 'user_opted_out') {
+          return 'العميل قام بإيقاف استقبال الرسائل التسويقية من هذا الحساب';
+        }
+        
+        const errorTranslations = {
+          '131026': 'الرسالة غير قابلة للتسليم - المستلم غير متاح على واتساب',
+          '131047': 'رفض رسالة إعادة التفاعل - المستلم لم يرد خلال 24 ساعة',
+          '131049': 'لم يتم تسليم هذه الرسالة للحفاظ على بيئة تفاعل صحية',
+          '131051': 'نوع الرسالة غير مدعوم لهذا المستلم',
+          '131052': 'تم إرسال عدد كبير جداً من الرسائل لهذا الرقم',
+          '131053': 'فشل في رفع الوسائط',
+          '130472': 'انتهت صلاحية جلسة المحادثة (24 ساعة)',
+          '131031': 'حساب الأعمال مقفل مؤقتاً',
+          '131042': 'القالب غير معتمد أو تم إيقافه',
+          '131045': 'القالب متوقف أو محذوف',
+          '132000': 'عدد معاملات القالب غير متطابق',
+          '132001': 'القالب غير موجود',
+          '132005': 'قيم معاملات القالب غير صالحة',
+          '132007': 'القالب ينتهك سياسة واتساب للأعمال',
+          '132012': 'القالب متوقف',
+          '132015': 'القالب معطل نهائياً بسبب انتهاك السياسة',
+          '132016': 'القالب معلق مؤقتاً للمراجعة',
+          '132068': 'تدفق القالب محظور',
+          '132069': 'تدفق القالب مقيد',
+          '133004': 'الخادم مشغول، يرجى المحاولة لاحقاً',
+          '133010': 'رقم الهاتف غير مسجل في واتساب',
+          '135000': 'خطأ عام في واجهة واتساب'
+        };
+        
+        return errorTranslations[errorCode] || 'فشل في تسليم الرسالة';
+      }
+
+      // إغلاق الـ modal عند النقر خارجه
+      document.addEventListener('click', function(event) {
+        const modal = document.getElementById('cart-details-modal');
+        if (event.target === modal) {
+          closeCartModal();
+        }
+      });
+
+      // إغلاق الـ modal بمفتاح Escape
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+          closeCartModal();
+        }
+      });
 
       // حساب الوقت المنقضي
       function getTimeAgo(date) {

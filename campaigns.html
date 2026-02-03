@@ -405,20 +405,11 @@
             <select id="test-template" class="flex h-11 w-full rounded-md border border-input bg-background px-4 py-2 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <option value="">جاري تحميل القوالب...</option>
             </select>
-            <p class="text-body-xs text-warning flex items-center gap-1">
-              <i data-lucide="alert-triangle" class="h-3 w-3"></i>
-              <span>ملاحظة: القوالب التي تحتاج متغيرات ({{1}}، {{2}}...) قد لا تعمل في الاختبار</span>
-            </p>
           </div>
 
-          <!-- اسم العميل (للقوالب التي تحتوي متغيرات) -->
-          <div class="space-y-2">
-            <label class="text-body-sm font-medium flex items-center gap-2">
-              <i data-lucide="user" class="h-4 w-4 text-muted-foreground"></i>
-              <span>اسم العميل <span class="text-muted-foreground">(اختياري)</span></span>
-            </label>
-            <input type="text" id="test-customer-name" placeholder="مثال: أحمد محمد" class="flex h-11 w-full rounded-md border border-input bg-background px-4 py-2 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
-            <p class="text-body-xs text-muted-foreground">سيتم استبدال {{1}} في القالب بهذا الاسم</p>
+          <!-- حقول المتغيرات الديناميكية -->
+          <div id="template-variables-container" class="space-y-3">
+            <!-- سيتم ملؤها ديناميكياً بناءً على القالب المختار -->
           </div>
 
           <!-- لغة القالب -->
@@ -432,6 +423,20 @@
               <option value="en">الإنجليزية</option>
               <option value="en_US">English (US)</option>
             </select>
+          </div>
+
+          <!-- نتيجة التحليل الذكي -->
+          <div id="template-analysis-result" class="hidden p-3 rounded-lg border">
+            <!-- سيتم ملؤها ديناميكياً -->
+          </div>
+          
+          <!-- خيار التجاوز اليدوي -->
+          <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-muted">
+            <input type="checkbox" id="test-no-variables" class="h-4 w-4 rounded border-input" />
+            <label for="test-no-variables" class="text-body-sm cursor-pointer">
+              <span class="font-medium">تجاوز التحليل الذكي</span>
+              <span class="text-muted-foreground block text-body-xs">إرسال القالب بدون متغيرات (للحالات الخاصة)</span>
+            </label>
           </div>
 
         </div>
@@ -484,6 +489,52 @@
   </div>
 
   <script>
+    // ==================== نظام الإشعارات Toast ====================
+    function showToast(message, type = 'info') {
+      // إزالة أي toast موجود
+      const existingToast = document.querySelector('.toast-notification');
+      if (existingToast) existingToast.remove();
+      
+      // إنشاء عنصر Toast
+      const toast = document.createElement('div');
+      toast.className = 'toast-notification fixed bottom-4 left-4 z-[9999] rounded-lg px-4 py-3 shadow-lg transition-all duration-300 transform translate-y-full opacity-0 flex items-center gap-3 max-w-md';
+      
+      // تحديد اللون والأيقونة حسب النوع
+      let bgColor, icon;
+      switch(type) {
+        case 'success':
+          bgColor = 'bg-primary text-white';
+          icon = '<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+          break;
+        case 'error':
+          bgColor = 'bg-destructive text-white';
+          icon = '<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+          break;
+        case 'warning':
+          bgColor = 'bg-warning text-white';
+          icon = '<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
+          break;
+        default:
+          bgColor = 'bg-foreground text-background';
+          icon = '<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+      }
+      
+      toast.classList.add(...bgColor.split(' '));
+      toast.innerHTML = `${icon}<span class="text-body-sm">${message}</span>`;
+      document.body.appendChild(toast);
+      
+      // إظهار الـ Toast
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-full', 'opacity-0');
+      });
+      
+      // إخفاء الـ Toast بعد 4 ثواني
+      setTimeout(() => {
+        toast.classList.add('translate-y-full', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+    
     // فحص تسجيل الدخول
     const isLoggedIn = localStorage.getItem('tchat_logged_in');
     const token = localStorage.getItem('access_token') || localStorage.getItem('tchat_token');
@@ -813,7 +864,7 @@
       }
 
       if (!file.name.endsWith('.csv')) {
-        alert('يرجى رفع ملف CSV فقط');
+        showToast('يرجى رفع ملف CSV فقط', 'error');
         event.target.value = '';
         return;
       }
@@ -892,19 +943,20 @@
           }
 
           if (selectedRecipients.length === 0) {
-            alert('لم يتم العثور على أرقام صحيحة في الملف.\n\nالتنسيق المطلوب:\n- رقم الهاتف يجب أن يبدأ بـ 966 أو 05\n- مثال: 966501234567 أو 0501234567\n- يمكن إضافة الاسم في العمود الثاني');
+            showToast('لم يتم العثور على أرقام صحيحة في الملف', 'error');
           } else {
             updateRecipientsPreview();
             updateBatchPreview();
+            showToast(`تم تحميل ${selectedRecipients.length} مستقبل بنجاح`, 'success');
           }
         } catch (error) {
           console.error('خطأ في قراءة ملف CSV:', error);
-          alert('حدث خطأ في قراءة الملف. تأكد من أن الملف بصيغة CSV صحيحة.');
+          showToast('حدث خطأ في قراءة الملف. تأكد من صيغة CSV', 'error');
         }
       };
 
       reader.onerror = function() {
-        alert('فشل في قراءة الملف');
+        showToast('فشل في قراءة الملف', 'error');
       };
 
       reader.readAsText(file, 'UTF-8');
@@ -1032,7 +1084,7 @@
 
       // التحقق من البيانات
       if (!name || !templateName || selectedRecipients.length === 0) {
-        alert('يرجى ملء جميع الحقول المطلوبة واختيار المستقبلين');
+        showToast('يرجى ملء جميع الحقول المطلوبة واختيار المستقبلين', 'error');
         return;
       }
 
@@ -1046,7 +1098,7 @@
         
         // التحقق من اختيار رقم واتساب
         if (!whatsappPhoneNumberID) {
-          alert('يرجى اختيار رقم الواتساب للإرسال');
+          showToast('يرجى اختيار رقم الواتساب للإرسال', 'error');
           createBtn.disabled = false;
           createBtn.innerHTML = '<i data-lucide="send" class="h-4 w-4"></i><span>إنشاء الحملة</span>';
           lucide.createIcons();
@@ -1081,20 +1133,18 @@
           
           // إذا كانت هناك أرقام مستبعدة، أضف تفاصيل
           if (result.excluded_count && result.excluded_count > 0) {
-            message += `\n\n📊 الإحصائيات:\n`;
-            message += `• المستقبلين النهائيين: ${result.final_count}\n`;
-            message += `• تم استبعاد: ${result.excluded_count} (تم الإرسال لهم خلال 10 أيام)`;
+            message += ` (${result.final_count} مستقبل، ${result.excluded_count} مستبعد)`;
           }
           
-          alert(message);
+          showToast(message, 'success');
           hideCreateCampaignModal();
           refreshCampaigns();
         } else {
-          alert('فشل في إنشاء الحملة: ' + (result.message || result.error || 'خطأ غير معروف'));
+          showToast('فشل في إنشاء الحملة: ' + (result.message || result.error || 'خطأ غير معروف'), 'error');
         }
       } catch (error) {
         console.error('خطأ في إنشاء الحملة:', error);
-        alert('تعذر إنشاء الحملة. تحقق من الاتصال.');
+        showToast('تعذر إنشاء الحملة. تحقق من الاتصال', 'error');
       } finally {
         createBtn.disabled = false;
         createBtn.innerHTML = '<i data-lucide="send" class="h-4 w-4"></i><span>إنشاء الحملة</span>';
@@ -1565,14 +1615,14 @@
         const result = await response.json();
         
         if (result.success) {
-          alert('تم بدء الحملة بنجاح!');
+          showToast('تم بدء الحملة بنجاح!', 'success');
           refreshCampaigns();
         } else {
-          alert('فشل في بدء الحملة: ' + (result.message || 'خطأ غير معروف'));
+          showToast('فشل في بدء الحملة: ' + (result.message || 'خطأ غير معروف'), 'error');
         }
       } catch (error) {
         console.error('خطأ في بدء الحملة:', error);
-        alert('تعذر بدء الحملة. تحقق من الاتصال.');
+        showToast('تعذر بدء الحملة. تحقق من الاتصال', 'error');
       }
     }
 
@@ -1593,14 +1643,14 @@
         const result = await response.json();
         
         if (result.success) {
-          alert('تم بدء إعادة الإرسال بنجاح!');
+          showToast('تم بدء إعادة الإرسال بنجاح!', 'success');
           refreshCampaigns();
         } else {
-          alert('فشل في إعادة الإرسال: ' + (result.message || 'خطأ غير معروف'));
+          showToast('فشل في إعادة الإرسال: ' + (result.message || 'خطأ غير معروف'), 'error');
         }
       } catch (error) {
         console.error('خطأ في إعادة الإرسال:', error);
-        alert('تعذر إعادة الإرسال. تحقق من الاتصال.');
+        showToast('تعذر إعادة الإرسال. تحقق من الاتصال', 'error');
       }
     }
 
@@ -1615,7 +1665,7 @@
       const cleanPhone = phoneNumber.trim().replace(/[\s\-\+]/g, '');
       
       if (!/^966\d{9}$/.test(cleanPhone)) {
-        alert('رقم الهاتف غير صحيح. يجب أن يبدأ بـ 966 ويحتوي على 12 رقماً');
+        showToast('رقم الهاتف غير صحيح. يجب أن يبدأ بـ 966 ويحتوي على 12 رقماً', 'error');
         return;
       }
 
@@ -1640,14 +1690,14 @@
         const result = await response.json();
         
         if (result.success) {
-          alert('تم إضافة المستقبل بنجاح!');
+          showToast('تم إضافة المستقبل بنجاح!', 'success');
           viewCampaignDetails(campaignId); // إعادة تحميل التفاصيل
         } else {
-          alert('فشل في إضافة المستقبل: ' + (result.message || 'خطأ غير معروف'));
+          showToast('فشل في إضافة المستقبل: ' + (result.message || 'خطأ غير معروف'), 'error');
         }
       } catch (error) {
         console.error('خطأ في إضافة المستقبل:', error);
-        alert('تعذر إضافة المستقبل. تحقق من الاتصال.');
+        showToast('تعذر إضافة المستقبل. تحقق من الاتصال', 'error');
       }
     }
 
@@ -1664,15 +1714,15 @@
         const result = await response.json();
         
         if (result.success) {
-          alert('تم إعادة حساب الإحصائيات بدقة!');
+          showToast('تم إعادة حساب الإحصائيات بدقة!', 'success');
           // إعادة تحميل تفاصيل الحملة
           viewCampaignDetails(campaignId);
         } else {
-          alert('فشل في إعادة حساب الإحصائيات: ' + (result.message || 'خطأ غير معروف'));
+          showToast('فشل في إعادة حساب الإحصائيات: ' + (result.message || 'خطأ غير معروف'), 'error');
         }
       } catch (error) {
         console.error('خطأ في إعادة حساب الإحصائيات:', error);
-        alert('تعذر إعادة حساب الإحصائيات');
+        showToast('تعذر إعادة حساب الإحصائيات', 'error');
       }
     }
 
@@ -1695,14 +1745,14 @@
         const result = await response.json();
         
         if (result.success) {
-          alert('✅ تم حذف الحملة بنجاح!');
+          showToast('تم حذف الحملة بنجاح!', 'success');
           refreshCampaigns();
         } else {
-          alert('❌ فشل في حذف الحملة: ' + (result.error || result.message || 'خطأ غير معروف'));
+          showToast('فشل في حذف الحملة: ' + (result.error || result.message || 'خطأ غير معروف'), 'error');
         }
       } catch (error) {
         console.error('خطأ في حذف الحملة:', error);
-        alert('❌ تعذر حذف الحملة. تحقق من الاتصال.');
+        showToast('تعذر حذف الحملة. تحقق من الاتصال', 'error');
       }
     }
 
@@ -1717,7 +1767,7 @@
       const confirmText = prompt('للتأكيد النهائي، اكتب: DELETE_ALL_CAMPAIGNS');
       
       if (confirmText !== 'DELETE_ALL_CAMPAIGNS') {
-        alert('تم إلغاء العملية');
+        showToast('تم إلغاء العملية', 'info');
         return;
       }
 
@@ -1736,14 +1786,14 @@
         const result = await response.json();
         
         if (result.success) {
-          alert(`تم حذف ${result.deleted_count} حملة بنجاح!`);
+          showToast(`تم حذف ${result.deleted_count} حملة بنجاح!`, 'success');
           refreshCampaigns();
         } else {
-          alert('فشل في حذف الحملات: ' + (result.message || 'خطأ غير معروف'));
+          showToast('فشل في حذف الحملات: ' + (result.message || 'خطأ غير معروف'), 'error');
         }
       } catch (error) {
         console.error('خطأ في حذف الحملات:', error);
-        alert('تعذر حذف الحملات. تحقق من الاتصال.');
+        showToast('تعذر حذف الحملات. تحقق من الاتصال', 'error');
       }
     }
 
@@ -1760,14 +1810,14 @@
         const result = await response.json();
         
         if (result.success) {
-          alert(`تم فحص وتحديث ${result.updated_count} حملة`);
+          showToast(`تم فحص وتحديث ${result.updated_count} حملة`, 'success');
           refreshCampaigns();
         } else {
-          alert('فشل في تحديث الحالات: ' + (result.message || 'خطأ غير معروف'));
+          showToast('فشل في تحديث الحالات: ' + (result.message || 'خطأ غير معروف'), 'error');
         }
       } catch (error) {
         console.error('خطأ في تحديث الحالات:', error);
-        alert('تعذر تحديث الحالات. تحقق من الاتصال.');
+        showToast('تعذر تحديث الحالات. تحقق من الاتصال', 'error');
       }
     }
 
@@ -1821,7 +1871,7 @@
       }
       
       if (phoneNumbers.length === 0) {
-        alert('لا توجد أرقام للفحص. يرجى إضافة مستقبلين أولاً.');
+        showToast('لا توجد أرقام للفحص. يرجى إضافة مستقبلين أولاً', 'warning');
         return;
       }
       
@@ -1860,11 +1910,11 @@
           updateRecipientsPreview();
           
         } else {
-          alert('فشل في فحص الأرقام: ' + (result.error || 'خطأ غير معروف'));
+          showToast('فشل في فحص الأرقام: ' + (result.error || 'خطأ غير معروف'), 'error');
         }
       } catch (error) {
         console.error('خطأ في فحص الإرسال الذكي:', error);
-        alert('تعذر فحص الأرقام. تحقق من الاتصال.');
+        showToast('تعذر فحص الأرقام. تحقق من الاتصال', 'error');
       } finally {
         // إعادة تفعيل الزر
         checkBtn.disabled = false;
@@ -2017,7 +2067,7 @@
         // فحص معرف الرسالة
         if (!messageId || messageId === 'null' || messageId === 'undefined' || messageId === '') {
           console.error('❌ معرف الرسالة غير صالح:', messageId);
-          alert('معرف الرسالة غير صالح');
+          showToast('معرف الرسالة غير صالح', 'error');
           return;
         }
         
@@ -2033,7 +2083,7 @@
         
         if (!isLoggedIn || isLoggedIn === 'false') {
           console.error('❌ المستخدم غير مسجل دخوله');
-          alert('يجب تسجيل الدخول أولاً لعرض تفاصيل الرسالة');
+          showToast('يجب تسجيل الدخول أولاً', 'error');
           window.location.href = './login.html';
           return;
         }
@@ -2074,7 +2124,7 @@
             }
           }
           
-          alert('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى');
+          showToast('انتهت صلاحية الجلسة', 'error');
           localStorage.removeItem('tchat_token');
           localStorage.removeItem('tchat_logged_in');
           localStorage.removeItem('tchat_refresh_token');
@@ -2118,7 +2168,7 @@
               }
             }
             console.error('❌ انتهت صلاحية الرمز المميز');
-            alert('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى');
+            showToast('انتهت صلاحية الجلسة', 'error');
             localStorage.removeItem('tchat_token');
             localStorage.removeItem('tchat_logged_in');
             localStorage.removeItem('tchat_refresh_token');
@@ -2143,14 +2193,14 @@
         } else {
           console.error('❌ فشل في جلب تفاصيل الرسالة:', result);
           if (result.error === 'الرسالة غير موجودة') {
-            alert('الرسالة غير موجودة في قاعدة البيانات. قد تكون قديمة أو محذوفة.');
+            showToast('الرسالة غير موجودة أو محذوفة', 'error');
           } else {
             throw new Error(result.message || 'فشل في جلب تفاصيل الرسالة');
           }
         }
       } catch (error) {
         console.error('خطأ في جلب تفاصيل الرسالة:', error);
-        alert('تعذر جلب تفاصيل الرسالة: ' + error.message);
+        showToast('تعذر جلب تفاصيل الرسالة', 'error');
       }
     }
 
@@ -2426,19 +2476,229 @@
       }
     }
     
-    // فحص إذا كان القالب يحتاج متغيرات
+    // فحص إذا كان القالب يحتاج متغيرات (يستخدم النظام الذكي)
     function hasTemplateVariables(template) {
-      if (!template.components) return false;
+      if (!template || !template.components) return false;
+      
+      // استخدام التحليل الذكي
+      const analysis = analyzeTemplate(template);
+      return analysis.needsVariables;
+    }
+    
+    // ==================== نظام ذكي لاكتشاف متغيرات القالب ====================
+    
+    // استخراج عدد المتغيرات من نص القالب
+    function extractVariablesCount(text) {
+      if (!text) return 0;
+      const matches = text.match(/\{\{(\d+)\}\}/g);
+      if (!matches) return 0;
+      
+      // استخراج أكبر رقم متغير
+      let maxVar = 0;
+      for (const match of matches) {
+        const num = parseInt(match.replace(/[{}]/g, ''));
+        if (num > maxVar) maxVar = num;
+      }
+      return maxVar;
+    }
+    
+    // تحليل ذكي لمكونات القالب
+    function analyzeTemplate(template) {
+      const analysis = {
+        needsVariables: false,
+        header: { needed: false, type: null, count: 0 },
+        body: { needed: false, count: 0, examples: [] },
+        buttons: [],
+        confidence: 'high', // high, medium, low
+        reason: ''
+      };
+      
+      if (!template || !template.components) {
+        analysis.reason = 'القالب بسيط بدون مكونات';
+        return analysis;
+      }
       
       for (const component of template.components) {
-        if (component.text && component.text.includes('{{')) {
-          return true;
+        // تحليل الـ HEADER
+        if (component.type === 'HEADER') {
+          if (component.format === 'TEXT') {
+            const varsCount = extractVariablesCount(component.text);
+            if (varsCount > 0) {
+              analysis.header.needed = true;
+              analysis.header.type = 'text';
+              analysis.header.count = varsCount;
+              analysis.needsVariables = true;
+            }
+          } else if (['IMAGE', 'VIDEO', 'DOCUMENT'].includes(component.format)) {
+            // التحقق مما إذا كانت الوسائط متغيرة أم ثابتة
+            // إذا كان هناك example.header_handle أو header_url، فهي متغيرة
+            if (component.example) {
+              const hasHandle = component.example.header_handle && component.example.header_handle.length > 0;
+              const hasUrl = component.example.header_url && component.example.header_url.length > 0;
+              if (hasHandle || hasUrl) {
+                analysis.header.needed = true;
+                analysis.header.type = component.format.toLowerCase();
+                analysis.header.count = 1;
+                analysis.needsVariables = true;
+              }
+            }
+            // إذا لا يوجد example، فالوسائط ثابتة (مرفوعة مسبقاً)
+          }
         }
-        if (component.example && component.example.body_text) {
-          return true;
+        
+        // تحليل الـ BODY
+        if (component.type === 'BODY') {
+          // طريقة 1: البحث عن {{1}}, {{2}}, ... في النص
+          const varsCount = extractVariablesCount(component.text);
+          if (varsCount > 0) {
+            analysis.body.needed = true;
+            analysis.body.count = varsCount;
+            analysis.needsVariables = true;
+          }
+          
+          // طريقة 2: التحقق من وجود example.body_text
+          if (component.example && component.example.body_text) {
+            const exampleTexts = component.example.body_text;
+            if (Array.isArray(exampleTexts) && exampleTexts.length > 0) {
+              // عدد المتغيرات = عدد الأمثلة في المصفوفة الأولى
+              const firstExample = exampleTexts[0];
+              if (Array.isArray(firstExample)) {
+                analysis.body.needed = true;
+                analysis.body.count = Math.max(analysis.body.count, firstExample.length);
+                analysis.body.examples = firstExample;
+                analysis.needsVariables = true;
+              }
+            }
+          }
+        }
+        
+        // تحليل الـ BUTTONS
+        if (component.type === 'BUTTONS' && component.buttons) {
+          for (let i = 0; i < component.buttons.length; i++) {
+            const btn = component.buttons[i];
+            
+            if (btn.type === 'URL') {
+              // التحقق من وجود متغير في الـ URL
+              const hasVariable = btn.url && btn.url.match(/\{\{\d+\}\}/);
+              
+              // التحقق من وجود example
+              const hasExample = btn.example && btn.example.length > 0;
+              
+              if (hasVariable || hasExample) {
+                analysis.buttons.push({
+                  index: i,
+                  type: 'url',
+                  hasVariable: !!hasVariable,
+                  example: hasExample ? btn.example[0] : null
+                });
+                analysis.needsVariables = true;
+              }
+            }
+          }
         }
       }
-      return false;
+      
+      // تحديد مستوى الثقة
+      if (analysis.needsVariables) {
+        if (analysis.body.examples.length > 0 || analysis.header.count > 0) {
+          analysis.confidence = 'high';
+          analysis.reason = 'تم اكتشاف متغيرات واضحة في القالب';
+        } else if (analysis.buttons.length > 0) {
+          analysis.confidence = 'medium';
+          analysis.reason = 'القالب يحتوي على أزرار ديناميكية';
+        }
+      } else {
+        analysis.confidence = 'high';
+        analysis.reason = 'القالب بسيط بدون متغيرات';
+      }
+      
+      return analysis;
+    }
+    
+    // بناء مكونات القالب بناءً على التحليل الذكي
+    function buildSmartComponents(template, variableValues = {}) {
+      const analysis = analyzeTemplate(template);
+      const components = [];
+      
+      console.log('🧠 تحليل ذكي للقالب:', template?.name);
+      console.log('🧠 نتيجة التحليل:', JSON.stringify(analysis, null, 2));
+      console.log('🧠 قيم المتغيرات:', JSON.stringify(variableValues, null, 2));
+      
+      // إذا لم يحتاج القالب متغيرات، نرجع مصفوفة فارغة
+      if (!analysis.needsVariables) {
+        console.log('✅ القالب لا يحتاج متغيرات - إرسال بدون components');
+        return { components: [], analysis };
+      }
+      
+      // تحويل قيم المتغيرات إلى مصفوفة
+      const varArray = [];
+      for (let i = 1; i <= 10; i++) {
+        varArray.push(variableValues[i.toString()] || `قيمة ${i}`);
+      }
+      
+      // إضافة مكون الـ HEADER إذا كان مطلوباً
+      if (analysis.header.needed) {
+        const headerComponent = { type: 'header', parameters: [] };
+        
+        if (analysis.header.type === 'text') {
+          for (let i = 0; i < analysis.header.count; i++) {
+            headerComponent.parameters.push({
+              type: 'text',
+              text: varArray[i] || `قيمة ${i + 1}`
+            });
+          }
+        } else if (analysis.header.type === 'image') {
+          headerComponent.parameters.push({
+            type: 'image',
+            image: { link: 'https://placehold.co/800x400/png?text=Test+Image' }
+          });
+        } else if (analysis.header.type === 'video') {
+          headerComponent.parameters.push({
+            type: 'video',
+            video: { link: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4' }
+          });
+        } else if (analysis.header.type === 'document') {
+          headerComponent.parameters.push({
+            type: 'document',
+            document: { link: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', filename: 'test.pdf' }
+          });
+        }
+        
+        if (headerComponent.parameters.length > 0) {
+          components.push(headerComponent);
+        }
+      }
+      
+      // إضافة مكون الـ BODY إذا كان مطلوباً
+      if (analysis.body.needed && analysis.body.count > 0) {
+        const bodyComponent = { type: 'body', parameters: [] };
+        
+        for (let i = 0; i < analysis.body.count; i++) {
+          bodyComponent.parameters.push({
+            type: 'text',
+            text: varArray[i] || `قيمة ${i + 1}`
+          });
+        }
+        
+        components.push(bodyComponent);
+      }
+      
+      // إضافة مكونات الأزرار إذا كانت مطلوبة
+      for (const btn of analysis.buttons) {
+        components.push({
+          type: 'button',
+          sub_type: 'url',
+          index: btn.index,
+          parameters: [{
+            type: 'text',
+            text: btn.example || 'test'
+          }]
+        });
+      }
+      
+      console.log('📤 المكونات المبنية:', JSON.stringify(components, null, 2));
+      
+      return { components, analysis };
     }
     
     // استخراج محتوى القالب للعرض
@@ -2467,23 +2727,26 @@
       const phoneNumber = document.getElementById('test-phone-number').value.trim();
       const templateName = document.getElementById('test-template').value;
       const templateLang = document.getElementById('test-template-language').value;
-      const customerName = document.getElementById('test-customer-name').value.trim();
+      
+      // جمع قيم المتغيرات من الحقول الديناميكية
+      const varValues = getVariableValues();
+      const customerName = varValues['1'] || ''; // المتغير الأول هو اسم العميل
       
       // التحقق من البيانات
       if (!phoneNumber) {
-        alert('يرجى إدخال رقم الهاتف');
+        showToast('يرجى إدخال رقم الهاتف', 'error');
         return;
       }
       
       // تنظيف الرقم
       const cleanPhone = phoneNumber.replace(/[\s\-\+]/g, '');
       if (!/^\d{10,15}$/.test(cleanPhone)) {
-        alert('رقم الهاتف غير صحيح. يجب أن يحتوي على 10-15 رقماً');
+        showToast('رقم الهاتف غير صحيح. يجب أن يحتوي على 10-15 رقماً', 'error');
         return;
       }
       
       if (!templateName) {
-        alert('يرجى اختيار القالب');
+        showToast('يرجى اختيار القالب', 'error');
         return;
       }
       
@@ -2530,18 +2793,39 @@
         // استخراج محتوى القالب للعرض
         const templateContent = getTemplateDisplayContent(selectedTemplate);
         
-        console.log('إرسال قالب:', templateName, 'بلغة:', finalLang);
+        // استخدام النظام الذكي لتحليل القالب مع قيم المتغيرات المدخلة
+        const { components: smartComponents, analysis } = buildSmartComponents(selectedTemplate, varValues);
+        
+        // التحقق من خيار التجاوز اليدوي
+        const forceNoVariables = document.getElementById('test-no-variables').checked;
+        
+        console.log('🧠 إرسال قالب:', templateName, 'بلغة:', finalLang);
+        console.log('🧠 تحليل القالب:', analysis.reason);
+        console.log('🧠 يحتاج متغيرات:', analysis.needsVariables);
+        console.log('🧠 تجاوز يدوي (بدون متغيرات):', forceNoVariables);
+        
+        // بناء البيانات للإرسال
+        const requestBody = {
+          to: cleanPhone,
+          type: 'template',
+          template_name: templateName,
+          template_language: finalLang,
+          template_content: templateContent
+        };
+        
+        // إضافة المكونات بناءً على التحليل الذكي (إلا إذا تم التجاوز يدوياً)
+        if (!forceNoVariables && smartComponents && smartComponents.length > 0) {
+          requestBody.template_components = smartComponents;
+          console.log('📤 إرسال مع متغيرات:', smartComponents.length, 'مكون');
+        } else {
+          console.log('📤 إرسال بدون متغيرات');
+        }
+        
+        console.log('📤 بيانات الطلب النهائية:', JSON.stringify(requestBody, null, 2));
         
         const result = await apiRequest('/whatsapp/send', {
           method: 'POST',
-          body: JSON.stringify({
-            to: cleanPhone,
-            type: 'template',
-            template_name: templateName,
-            template_language: finalLang,
-            template_content: templateContent,
-            customer_name: customerName || '' // إرسال اسم العميل لاستبدال {{1}}
-          })
+          body: JSON.stringify(requestBody)
         });
         
         if (result.success) {
@@ -2599,10 +2883,14 @@
           let suggestion = '';
           
           // تحليل نوع الخطأ وتقديم اقتراحات
-          if (errorMsg.includes('parameter') || errorMsg.includes('Parameter')) {
-            suggestion = 'هذا القالب يحتاج متغيرات. جرب قالب hello_world أو قالب آخر بعلامة ✓';
+          if (errorMsg.includes('parameter') || errorMsg.includes('Parameter') || errorMsg.includes('132000')) {
+            suggestion = 'القالب يحتاج متغيرات بصيغة خاصة. جرب قالب hello_world أو تأكد من إعداد القالب في Meta بشكل صحيح.';
           } else if (errorMsg.includes('format')) {
             suggestion = 'تأكد من اختيار القالب الصحيح واللغة المطابقة';
+          } else if (errorMsg.includes('not found') || errorMsg.includes('غير موجود')) {
+            suggestion = 'تأكد من أن القالب معتمد في Meta Business وأن اللغة صحيحة';
+          } else if (errorMsg.includes('limit') || errorMsg.includes('حد')) {
+            suggestion = 'تم الوصول للحد الأقصى من الرسائل. حاول لاحقاً';
           }
           
           resultContent.className = 'rounded-lg border border-destructive bg-destructive/5 p-4';
@@ -2767,17 +3055,18 @@
       }
     }
 
-    // تحديث لغة القالب تلقائياً عند اختيار القالب
+    // تحديث لغة القالب وعرض التحليل الذكي عند اختيار القالب
     function setupTestTemplateListener() {
       const templateSelect = document.getElementById('test-template');
       if (templateSelect) {
         templateSelect.addEventListener('change', function() {
           const selectedOption = this.options[this.selectedIndex];
           const lang = selectedOption?.getAttribute('data-lang');
+          const templateName = this.value;
           
+          // تحديث اللغة
           if (lang) {
             const langSelect = document.getElementById('test-template-language');
-            // تحديد اللغة المناسبة
             if (lang === 'ar') {
               langSelect.value = 'ar';
             } else if (lang === 'en_US') {
@@ -2786,8 +3075,291 @@
               langSelect.value = 'en';
             }
           }
+          
+          // عرض نتيجة التحليل الذكي
+          updateTemplateAnalysis(templateName);
         });
       }
+    }
+    
+    // استخراج محتوى القالب للعرض المفصل
+    function getTemplatePreview(template) {
+      if (!template || !template.components) return null;
+      
+      const preview = {
+        header: null,
+        headerType: null,
+        body: null,
+        footer: null,
+        buttons: []
+      };
+      
+      for (const component of template.components) {
+        if (component.type === 'HEADER') {
+          preview.headerType = component.format;
+          if (component.format === 'TEXT') {
+            preview.header = component.text;
+          } else if (component.format === 'IMAGE') {
+            preview.header = '🖼️ صورة';
+          } else if (component.format === 'VIDEO') {
+            preview.header = '🎬 فيديو';
+          } else if (component.format === 'DOCUMENT') {
+            preview.header = '📄 ملف';
+          }
+        }
+        
+        if (component.type === 'BODY') {
+          preview.body = component.text;
+        }
+        
+        if (component.type === 'FOOTER') {
+          preview.footer = component.text;
+        }
+        
+        if (component.type === 'BUTTONS' && component.buttons) {
+          for (const btn of component.buttons) {
+            if (btn.type === 'URL') {
+              preview.buttons.push({ type: 'رابط', text: btn.text, url: btn.url });
+            } else if (btn.type === 'QUICK_REPLY') {
+              preview.buttons.push({ type: 'رد سريع', text: btn.text });
+            } else if (btn.type === 'PHONE_NUMBER') {
+              preview.buttons.push({ type: 'اتصال', text: btn.text });
+            }
+          }
+        }
+      }
+      
+      return preview;
+    }
+    
+    // متغير لتخزين القالب الحالي والتحليل
+    let currentTemplateAnalysis = null;
+    let currentTemplatePreview = null;
+    
+    // عرض نتيجة التحليل الذكي ومحتوى القالب
+    function updateTemplateAnalysis(templateName) {
+      const analysisDiv = document.getElementById('template-analysis-result');
+      const variablesContainer = document.getElementById('template-variables-container');
+      
+      if (!templateName) {
+        analysisDiv.classList.add('hidden');
+        variablesContainer.innerHTML = '';
+        return;
+      }
+      
+      if (templateName === 'hello_world') {
+        // hello_world قالب بسيط
+        currentTemplateAnalysis = { needsVariables: false };
+        currentTemplatePreview = { body: 'Hello World! 👋' };
+        variablesContainer.innerHTML = '';
+        renderTemplatePreview();
+        return;
+      }
+      
+      // البحث عن القالب في القائمة
+      const template = testSendTemplates.find(t => t.name === templateName);
+      if (!template) {
+        analysisDiv.classList.add('hidden');
+        variablesContainer.innerHTML = '';
+        return;
+      }
+      
+      // تحليل القالب
+      currentTemplateAnalysis = analyzeTemplate(template);
+      currentTemplatePreview = getTemplatePreview(template);
+      
+      // إنشاء حقول المتغيرات
+      renderVariableInputs();
+      
+      // عرض المعاينة
+      renderTemplatePreview();
+    }
+    
+    // إنشاء حقول إدخال المتغيرات
+    function renderVariableInputs() {
+      const container = document.getElementById('template-variables-container');
+      
+      if (!currentTemplateAnalysis || !currentTemplateAnalysis.needsVariables) {
+        container.innerHTML = '';
+        return;
+      }
+      
+      const totalVars = currentTemplateAnalysis.body.count || 0;
+      
+      if (totalVars === 0) {
+        container.innerHTML = '';
+        return;
+      }
+      
+      // أسماء افتراضية للمتغيرات
+      const varLabels = [
+        'اسم العميل',
+        'المتغير الثاني',
+        'المتغير الثالث',
+        'المتغير الرابع',
+        'المتغير الخامس',
+        'المتغير السادس'
+      ];
+      
+      const varPlaceholders = [
+        'مثال: أحمد',
+        'مثال: قيمة 2',
+        'مثال: قيمة 3',
+        'مثال: قيمة 4',
+        'مثال: قيمة 5',
+        'مثال: قيمة 6'
+      ];
+      
+      let html = '';
+      
+      for (let i = 0; i < totalVars; i++) {
+        const varNum = i + 1;
+        html += `
+          <div class="space-y-1">
+            <label class="text-body-sm font-medium flex items-center gap-2">
+              <span class="inline-flex items-center justify-center h-5 w-5 rounded bg-warning/20 text-warning text-xs font-mono">{{${varNum}}}</span>
+              <span>${varLabels[i] || `المتغير ${varNum}`}</span>
+            </label>
+            <input 
+              type="text" 
+              id="template-var-${varNum}" 
+              data-var-num="${varNum}"
+              placeholder="${varPlaceholders[i] || `قيمة المتغير ${varNum}`}" 
+              class="template-var-input flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" 
+              oninput="updatePreviewRealtime()"
+            />
+          </div>
+        `;
+      }
+      
+      container.innerHTML = html;
+    }
+    
+    // تحديث المعاينة في الوقت الفعلي
+    function updatePreviewRealtime() {
+      renderTemplatePreview();
+    }
+    
+    // الحصول على قيم المتغيرات المدخلة
+    function getVariableValues() {
+      const values = {};
+      const inputs = document.querySelectorAll('.template-var-input');
+      
+      inputs.forEach(input => {
+        const varNum = input.getAttribute('data-var-num');
+        values[varNum] = input.value || '';
+      });
+      
+      return values;
+    }
+    
+    // عرض معاينة القالب مع القيم الحالية
+    function renderTemplatePreview() {
+      const analysisDiv = document.getElementById('template-analysis-result');
+      
+      if (!currentTemplatePreview) {
+        analysisDiv.classList.add('hidden');
+        return;
+      }
+      
+      analysisDiv.classList.remove('hidden');
+      analysisDiv.className = 'p-3 rounded-lg border border-border bg-muted/30 space-y-3';
+      
+      const analysis = currentTemplateAnalysis;
+      const preview = currentTemplatePreview;
+      const varValues = getVariableValues();
+      
+      // حالة القالب
+      let statusHTML = '';
+      if (!analysis || !analysis.needsVariables) {
+        statusHTML = `
+          <div class="flex items-center gap-2">
+            <i data-lucide="check-circle" class="h-4 w-4 text-primary"></i>
+            <span class="text-body-sm font-medium text-primary">قالب بسيط - جاهز للإرسال</span>
+          </div>
+        `;
+      } else {
+        let details = [];
+        if (analysis.body.needed) {
+          details.push(`${analysis.body.count} متغير في النص`);
+        }
+        if (analysis.header.needed) {
+          details.push(`${analysis.header.type === 'text' ? 'متغير في العنوان' : analysis.header.type + ' متغير'}`);
+        }
+        if (analysis.buttons.length > 0) {
+          details.push(`${analysis.buttons.length} زر ديناميكي`);
+        }
+        
+        statusHTML = `
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="eye" class="h-4 w-4 text-muted-foreground"></i>
+            <span class="text-body-sm font-medium">معاينة الرسالة</span>
+          </div>
+        `;
+      }
+      
+      // معاينة المحتوى
+      let contentHTML = '<div class="bg-background rounded-lg p-3 border border-border space-y-2">';
+      
+      // Header
+      if (preview.header) {
+        if (preview.headerType === 'TEXT') {
+          let headerText = escapeHtml(preview.header);
+          headerText = replaceVariablesWithValues(headerText, varValues);
+          contentHTML += `<p class="text-body-sm font-bold">${headerText}</p>`;
+        } else {
+          contentHTML += `<p class="text-body-xs text-muted-foreground">${preview.header}</p>`;
+        }
+      }
+      
+      // Body
+      if (preview.body) {
+        let bodyText = escapeHtml(preview.body);
+        bodyText = replaceVariablesWithValues(bodyText, varValues);
+        contentHTML += `<p class="text-body-sm whitespace-pre-wrap">${bodyText}</p>`;
+      }
+      
+      // Footer
+      if (preview.footer) {
+        contentHTML += `<p class="text-body-xs text-muted-foreground border-t border-border pt-2 mt-2">${escapeHtml(preview.footer)}</p>`;
+      }
+      
+      // Buttons
+      if (preview.buttons && preview.buttons.length > 0) {
+        contentHTML += '<div class="flex flex-wrap gap-2 border-t border-border pt-2 mt-2">';
+        for (const btn of preview.buttons) {
+          contentHTML += `<span class="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-body-xs rounded-full">
+            <i data-lucide="${btn.type === 'رابط' ? 'external-link' : btn.type === 'اتصال' ? 'phone' : 'reply'}" class="h-3 w-3"></i>
+            ${escapeHtml(btn.text)}
+          </span>`;
+        }
+        contentHTML += '</div>';
+      }
+      
+      contentHTML += '</div>';
+      
+      analysisDiv.innerHTML = statusHTML + contentHTML;
+      lucide.createIcons();
+    }
+    
+    // استبدال المتغيرات بالقيم المدخلة
+    function replaceVariablesWithValues(text, values) {
+      return text.replace(/\{\{(\d+)\}\}/g, (match, num) => {
+        const value = values[num];
+        if (value && value.trim()) {
+          return `<span class="bg-primary/20 text-primary px-1 rounded">${escapeHtml(value)}</span>`;
+        } else {
+          return `<span class="bg-warning/20 text-warning px-1 rounded font-mono text-xs">{{${num}}}</span>`;
+        }
+      });
+    }
+    
+    // دالة مساعدة لتهريب HTML
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
     
     // تهيئة listener عند تحميل الصفحة

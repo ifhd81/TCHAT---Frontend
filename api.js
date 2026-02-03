@@ -340,11 +340,35 @@ async function loadAIChatbotSettings() {
     if (data.success && data.settings) {
       return data.settings;
     }
-    console.error('فشل في جلب إعدادات AI Chatbot:', data);
-    return null;
+    // إرجاع إعدادات افتراضية إذا فشل
+    console.warn('فشل في جلب إعدادات AI Chatbot - استخدام الافتراضية:', data);
+    return {
+      is_enabled: false,
+      ai_provider: 'anthropic',
+      ai_model: 'claude-sonnet-4-20250514',
+      store_context: '',
+      max_tokens: 500,
+      temperature: 0.7,
+      reply_to_all: false,
+      working_hours_start: '09:00',
+      working_hours_end: '23:00',
+      excluded_keywords: ''
+    };
   } catch (error) {
     console.error('خطأ في تحميل إعدادات AI Chatbot:', error);
-    return null;
+    // إرجاع إعدادات افتراضية
+    return {
+      is_enabled: false,
+      ai_provider: 'anthropic',
+      ai_model: 'claude-sonnet-4-20250514',
+      store_context: '',
+      max_tokens: 500,
+      temperature: 0.7,
+      reply_to_all: false,
+      working_hours_start: '09:00',
+      working_hours_end: '23:00',
+      excluded_keywords: ''
+    };
   }
 }
 

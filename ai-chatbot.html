@@ -238,6 +238,11 @@
   </div>
 
   <script>
+    // التحقق من تسجيل الدخول
+    if (!localStorage.getItem('tchat_logged_in')) {
+      window.location.href = './login.html';
+    }
+
     // متغيرات الحالة
     let isEnabled = false;
     let currentSettings = null;
@@ -247,8 +252,14 @@
       renderHeader('header-container', { activePage: 'ai-chatbot' });
       lucide.createIcons();
       
-      await loadSettings();
-      await loadLogs();
+      try {
+        await loadSettings();
+        await loadLogs();
+      } catch (error) {
+        console.error('خطأ في تحميل البيانات:', error);
+        // لا نرجع للـ login إذا فشل التحميل - فقط نعرض رسالة
+        showToast('تأكد من تشغيل الـ Migration في الـ Backend', 'warning');
+      }
     });
 
     // تحميل الإعدادات

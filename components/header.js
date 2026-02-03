@@ -90,6 +90,15 @@ function createHeader(options = {}) {
             <i data-lucide="webhook" class="h-4 w-4"></i>
             <span>سجل الويب هوك</span>
           </a>
+
+          <!-- AI Chatbot -->
+          <a
+            href="./ai-chatbot.html"
+            class="${getLinkClasses('ai-chatbot')}"
+          >
+            <i data-lucide="bot" class="h-4 w-4"></i>
+            <span>الشات بوت</span>
+          </a>
         </nav>
 
         <!-- زر الخروج وزر القائمة (على اليسار في RTL) -->
@@ -174,6 +183,15 @@ function createHeader(options = {}) {
           >
             <i data-lucide="webhook" class="h-5 w-5"></i>
             <span>سجل الويب هوك</span>
+          </a>
+
+          <!-- AI Chatbot -->
+          <a
+            href="./ai-chatbot.html"
+            class="${getMobileLinkClasses('ai-chatbot')}"
+          >
+            <i data-lucide="bot" class="h-5 w-5"></i>
+            <span>الشات بوت</span>
           </a>
 
           <!-- فاصل -->
@@ -322,6 +340,7 @@ function getActivePageFromURL() {
     'chats': 'chats',
     'automations': 'automations',
     'webhooks': 'webhooks',
+    'ai-chatbot': 'ai-chatbot',
     'dashboard': 'dashboard',
     'index': 'dashboard'
   };

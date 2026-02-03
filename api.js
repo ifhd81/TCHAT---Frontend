@@ -328,6 +328,103 @@ async function deleteAllWebhooks() {
   }
 }
 
+// =============================================================================
+// AI Chatbot API Functions
+// =============================================================================
+
+// جلب إعدادات AI Chatbot
+async function loadAIChatbotSettings() {
+  try {
+    const data = await apiRequest('/ai-chatbot/settings');
+    console.log('AI Chatbot Settings Response:', data);
+    if (data.success && data.settings) {
+      return data.settings;
+    }
+    console.error('فشل في جلب إعدادات AI Chatbot:', data);
+    return null;
+  } catch (error) {
+    console.error('خطأ في تحميل إعدادات AI Chatbot:', error);
+    return null;
+  }
+}
+
+// تحديث إعدادات AI Chatbot
+async function updateAIChatbotSettings(settings) {
+  try {
+    const data = await apiRequest('/ai-chatbot/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings)
+    });
+    console.log('Update AI Chatbot Settings Response:', data);
+    return data;
+  } catch (error) {
+    console.error('خطأ في تحديث إعدادات AI Chatbot:', error);
+    throw error;
+  }
+}
+
+// تفعيل/تعطيل AI Chatbot
+async function toggleAIChatbot(enabled) {
+  try {
+    const data = await apiRequest('/ai-chatbot/toggle', {
+      method: 'POST',
+      body: JSON.stringify({ enabled })
+    });
+    console.log('Toggle AI Chatbot Response:', data);
+    return data;
+  } catch (error) {
+    console.error('خطأ في تغيير حالة AI Chatbot:', error);
+    throw error;
+  }
+}
+
+// جلب سجلات الردود التلقائية
+async function loadAIChatbotLogs(limit = 50) {
+  try {
+    const data = await apiRequest(`/ai-chatbot/logs?limit=${limit}`);
+    console.log('AI Chatbot Logs Response:', data);
+    if (data.success && data.logs) {
+      return data.logs;
+    }
+    return [];
+  } catch (error) {
+    console.error('خطأ في تحميل سجلات AI Chatbot:', error);
+    return [];
+  }
+}
+
+// اختبار AI Chatbot
+async function testAIChatbot(message, customerName = '') {
+  try {
+    const data = await apiRequest('/ai-chatbot/test', {
+      method: 'POST',
+      body: JSON.stringify({ message, customer_name: customerName })
+    });
+    console.log('Test AI Chatbot Response:', data);
+    return data;
+  } catch (error) {
+    console.error('خطأ في اختبار AI Chatbot:', error);
+    throw error;
+  }
+}
+
+// جلب حالة AI Chatbot
+async function getAIChatbotStatus() {
+  try {
+    const data = await apiRequest('/ai-chatbot/status');
+    console.log('AI Chatbot Status Response:', data);
+    if (data.success) {
+      return data;
+    }
+    return null;
+  } catch (error) {
+    console.error('خطأ في جلب حالة AI Chatbot:', error);
+    return null;
+  }
+}
+
+// =============================================================================
+
 // تسجيل الخروج
 async function logout() {
   try {

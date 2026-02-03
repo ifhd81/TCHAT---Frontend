@@ -194,9 +194,9 @@
               <div class="space-y-2">
                 <label class="text-body-sm font-medium">مصدر البيانات</label>
                 <select id="recipients-source" onchange="handleRecipientsSourceChange()" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                  <option value="database">العملاء المسجلين</option>
-                  <option value="manual">إدخال يدوي</option>
-                  <option value="csv">رفع ملف CSV</option>
+                  <option value="database" data-count="0">العملاء المسجلين (جاري التحميل...)</option>
+                  <option value="manual" data-count="0">إدخال يدوي (0)</option>
+                  <option value="csv" data-count="0">رفع ملف CSV (0)</option>
                 </select>
               </div>
               <div class="space-y-2" id="csv-upload-section" style="display: none;">
@@ -763,7 +763,13 @@
       document.getElementById('whatsapp-phone-number').value = '';
       document.getElementById('recipients-source').value = 'database';
       document.getElementById('csv-file').value = '';
+      document.getElementById('manual-recipients').value = '';
       selectedRecipients = [];
+      
+      // إعادة تعيين أعداد المصادر
+      updateSourceCount('manual', 0);
+      updateSourceCount('csv', 0);
+      
       handleRecipientsSourceChange();
     }
 
@@ -793,14 +799,31 @@
       csvSection.style.display = 'none';
       manualSection.style.display = 'none';
       
+      // مسح المستقبلين عند تغيير المصدر
+      selectedRecipients = [];
+      
       if (source === 'csv') {
         csvSection.style.display = 'block';
+        // تحديث من عدد CSV المحفوظ
+        const csvCount = document.getElementById('csv-file').files.length > 0 ? 
+          parseInt(document.querySelector('option[value="csv"]').dataset.count || 0) : 0;
+        if (csvCount > 0) {
+          // إعادة قراءة الملف إذا كان موجوداً
+          const fileInput = document.getElementById('csv-file');
+          if (fileInput.files[0]) {
+            handleCSVUpload({ target: fileInput });
+          }
+        }
       } else if (source === 'manual') {
         manualSection.style.display = 'block';
         parseManualRecipients(); // تحديث العداد
       } else {
+        // database
         loadRecipientsPreview();
       }
+      
+      updateRecipientsPreview();
+      updateBatchPreview();
     }
 
     // تحليل المستقبلين من الإدخال اليدوي
@@ -817,37 +840,66 @@
 
       const lines = manualText.split('\n').filter(line => line.trim());
       selectedRecipients = [];
+      let invalidCount = 0;
 
       lines.forEach((line, index) => {
         const trimmedLine = line.trim();
         if (!trimmedLine) return;
 
-        // تنظيف الرقم من المسافات والرموز
-        const cleanLine = trimmedLine.replace(/[\s\-\+]/g, '');
+        let phone = '';
+        let name = '';
         
-        if (cleanLine.includes(',')) {
-          // تنسيق: رقم,اسم
-          const [phone, name] = cleanLine.split(',').map(part => part.trim());
-          if (phone && /^966\d{9}$/.test(phone)) {
-            selectedRecipients.push({
-              customer_id: 0,
-              phone_number: phone,
-              customer_name: name || `عميل ${phone.slice(-4)}`
-            });
-          }
+        // دعم الفواصل المختلفة
+        const separator = trimmedLine.includes(',') ? ',' : trimmedLine.includes(';') ? ';' : null;
+        
+        if (separator) {
+          // تنسيق: رقم,اسم أو رقم;اسم
+          const parts = trimmedLine.split(separator).map(part => part.trim());
+          phone = parts[0];
+          name = parts[1] || '';
         } else {
           // رقم فقط
-          if (/^966\d{9}$/.test(cleanLine)) {
-            selectedRecipients.push({
-              customer_id: 0,
-              phone_number: cleanLine,
-              customer_name: `عميل ${cleanLine.slice(-4)}`
-            });
-          }
+          phone = trimmedLine;
+        }
+        
+        // تنظيف الرقم من المسافات والرموز
+        phone = phone.replace(/[\s\-\+\(\)]/g, '');
+        
+        // تحويل الأرقام التي تبدأ بـ 05 أو 5
+        if (phone.startsWith('05') && phone.length === 10) {
+          phone = '966' + phone.substring(1);
+        } else if (phone.startsWith('5') && phone.length === 9) {
+          phone = '966' + phone;
+        } else if (phone.startsWith('00966')) {
+          phone = phone.substring(2);
+        } else if (phone.startsWith('+966')) {
+          phone = phone.substring(1);
+        }
+        
+        // التحقق من صحة الرقم
+        if (/^966\d{9}$/.test(phone)) {
+          selectedRecipients.push({
+            customer_id: 0,
+            phone_number: phone,
+            customer_name: name || `عميل ${phone.slice(-4)}`
+          });
+        } else if (phone) {
+          invalidCount++;
         }
       });
 
       countEl.textContent = selectedRecipients.length;
+      
+      // تحديث العدد في قائمة المصادر
+      updateSourceCount('manual', selectedRecipients.length);
+      
+      // عرض رسالة إذا كان هناك أرقام غير صالحة
+      if (invalidCount > 0 && selectedRecipients.length > 0) {
+        showToast(`تم تجاهل ${invalidCount} رقم غير صالح`, 'warning');
+      } else if (invalidCount > 0 && selectedRecipients.length === 0) {
+        showToast('لم يتم العثور على أرقام صالحة. تأكد من التنسيق: 966XXXXXXXXX أو 05XXXXXXXX', 'error');
+      }
+      
       updateRecipientsPreview();
       updateBatchPreview();
     }
@@ -942,6 +994,9 @@
             }
           }
 
+          // تحديث العدد في قائمة المصادر
+          updateSourceCount('csv', selectedRecipients.length);
+          
           if (selectedRecipients.length === 0) {
             showToast('لم يتم العثور على أرقام صحيحة في الملف', 'error');
           } else {
@@ -995,6 +1050,24 @@
       `;
     }
 
+    // تحديث عدد المستقبلين في قائمة المصادر
+    function updateSourceCount(source, count) {
+      const select = document.getElementById('recipients-source');
+      const option = select.querySelector(`option[value="${source}"]`);
+      if (option) {
+        const labels = {
+          'database': 'العملاء المسجلين',
+          'manual': 'إدخال يدوي',
+          'csv': 'رفع ملف CSV'
+        };
+        option.textContent = `${labels[source]} (${count})`;
+        option.dataset.count = count;
+      }
+    }
+
+    // متغير لتخزين عدد العملاء من قاعدة البيانات
+    let databaseCustomersCount = 0;
+
     // معاينة المستقبلين من قاعدة البيانات
     async function loadRecipientsPreview() {
       const previewEl = document.getElementById('recipients-preview');
@@ -1002,16 +1075,19 @@
       
       if (source === 'database') {
         try {
-          const customers = await loadCustomers(200);
+          const customers = await loadCustomers(500);
           selectedRecipients = customers.map(customer => ({
             customer_id: customer.id,
             phone_number: customer.mobile || customer.phone,
             customer_name: customer.name
           })).filter(r => r.phone_number);
 
+          databaseCustomersCount = selectedRecipients.length;
+          updateSourceCount('database', databaseCustomersCount);
           updateRecipientsPreview();
         } catch (error) {
           previewEl.innerHTML = '<div class="text-center text-destructive text-body-sm">تعذر تحميل العملاء</div>';
+          updateSourceCount('database', 0);
         }
       } else {
         previewEl.innerHTML = `
@@ -1073,6 +1149,113 @@
       updateBatchPreview();
     }
 
+    // معاينة الحملة قبل الإنشاء
+    function previewCampaign() {
+      const name = document.getElementById('campaign-name').value.trim();
+      const templateName = document.getElementById('campaign-template').value;
+      const whatsappPhoneNumberID = document.getElementById('whatsapp-phone-number').value;
+      const batchSize = parseInt(document.getElementById('batch-size').value);
+      const batchInterval = parseInt(document.getElementById('batch-interval').value);
+      const sendType = document.getElementById('send-type').value;
+      const isSmartSend = document.getElementById('enable-smart-send').checked;
+      
+      // التحقق من البيانات
+      if (!name) {
+        showToast('يرجى إدخال اسم الحملة أولاً', 'warning');
+        return;
+      }
+      
+      if (!templateName) {
+        showToast('يرجى اختيار القالب أولاً', 'warning');
+        return;
+      }
+      
+      if (selectedRecipients.length === 0) {
+        showToast('يرجى إضافة مستقبلين أولاً', 'warning');
+        return;
+      }
+      
+      // حساب عدد الدفعات والمدة
+      const totalBatches = sendType === 'all' ? 1 : Math.ceil(selectedRecipients.length / batchSize);
+      const totalDuration = sendType === 'all' ? 0 : (totalBatches - 1) * batchInterval;
+      
+      // البحث عن اسم القالب
+      const template = availableTemplates.find(t => t.name === templateName);
+      const templateDisplay = template ? template.name : templateName;
+      
+      // البحث عن رقم الواتساب
+      const phoneSelect = document.getElementById('whatsapp-phone-number');
+      const selectedPhone = phoneSelect.options[phoneSelect.selectedIndex]?.text || 'غير محدد';
+      
+      // عرض المعاينة
+      const previewHTML = `
+        <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm" id="campaign-preview-overlay" onclick="if(event.target === this) this.remove()">
+          <div class="w-full max-w-lg mx-4 bg-card rounded-xl border shadow-lg">
+            <div class="flex items-center justify-between border-b border-border p-4">
+              <h3 class="text-heading-md font-bold">معاينة الحملة</h3>
+              <button onclick="document.getElementById('campaign-preview-overlay').remove()" class="text-muted-foreground hover:text-foreground">
+                <i data-lucide="x" class="h-5 w-5"></i>
+              </button>
+            </div>
+            <div class="p-4 space-y-4">
+              <div class="grid gap-3">
+                <div class="flex justify-between items-center py-2 border-b border-border">
+                  <span class="text-muted-foreground">اسم الحملة</span>
+                  <span class="font-semibold">${name}</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-border">
+                  <span class="text-muted-foreground">القالب</span>
+                  <span class="font-semibold">${templateDisplay}</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-border">
+                  <span class="text-muted-foreground">رقم الواتساب</span>
+                  <span class="font-semibold text-left" dir="ltr">${selectedPhone}</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-border">
+                  <span class="text-muted-foreground">عدد المستقبلين</span>
+                  <span class="font-semibold number">${selectedRecipients.length}</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-border">
+                  <span class="text-muted-foreground">نوع الإرسال</span>
+                  <span class="font-semibold">${sendType === 'all' ? 'دفعة واحدة' : 'مجزأ'}</span>
+                </div>
+                ${sendType !== 'all' ? `
+                <div class="flex justify-between items-center py-2 border-b border-border">
+                  <span class="text-muted-foreground">حجم الدفعة</span>
+                  <span class="font-semibold number">${batchSize} مستقبل</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-border">
+                  <span class="text-muted-foreground">عدد الدفعات</span>
+                  <span class="font-semibold number">${totalBatches}</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-border">
+                  <span class="text-muted-foreground">المدة الإجمالية</span>
+                  <span class="font-semibold number">${totalDuration} ساعة</span>
+                </div>
+                ` : ''}
+                <div class="flex justify-between items-center py-2">
+                  <span class="text-muted-foreground">الإرسال الذكي</span>
+                  <span class="font-semibold ${isSmartSend ? 'text-primary' : 'text-muted-foreground'}">${isSmartSend ? 'مفعّل ✓' : 'غير مفعّل'}</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex justify-end gap-2 border-t border-border p-4">
+              <button onclick="document.getElementById('campaign-preview-overlay').remove()" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium transition hover:bg-accent">
+                إغلاق
+              </button>
+              <button onclick="document.getElementById('campaign-preview-overlay').remove(); createCampaign();" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90">
+                <i data-lucide="send" class="h-4 w-4"></i>
+                إنشاء الحملة
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.insertAdjacentHTML('beforeend', previewHTML);
+      lucide.createIcons();
+    }
+
     // إنشاء الحملة
     async function createCampaign() {
       const name = document.getElementById('campaign-name').value.trim();
@@ -1081,29 +1264,39 @@
       const batchSize = parseInt(document.getElementById('batch-size').value);
       const batchInterval = parseInt(document.getElementById('batch-interval').value);
       const sendType = document.getElementById('send-type').value;
+      const whatsappPhoneNumberID = document.getElementById('whatsapp-phone-number').value;
 
-      // التحقق من البيانات
-      if (!name || !templateName || selectedRecipients.length === 0) {
-        showToast('يرجى ملء جميع الحقول المطلوبة واختيار المستقبلين', 'error');
+      // التحقق من البيانات بشكل تفصيلي
+      if (!name) {
+        showToast('يرجى إدخال اسم الحملة', 'error');
+        document.getElementById('campaign-name').focus();
+        return;
+      }
+      
+      if (!templateName) {
+        showToast('يرجى اختيار القالب', 'error');
+        document.getElementById('campaign-template').focus();
+        return;
+      }
+      
+      if (!whatsappPhoneNumberID) {
+        showToast('يرجى اختيار رقم الواتساب للإرسال', 'error');
+        document.getElementById('whatsapp-phone-number').focus();
+        return;
+      }
+      
+      if (selectedRecipients.length === 0) {
+        showToast('يرجى إضافة مستقبلين للحملة', 'error');
         return;
       }
 
       const createBtn = document.getElementById('create-campaign-btn');
       createBtn.disabled = true;
       createBtn.innerHTML = '<i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i><span>جاري الإنشاء...</span>';
+      lucide.createIcons();
 
       try {
         const isSmartSend = document.getElementById('enable-smart-send').checked;
-        const whatsappPhoneNumberID = document.getElementById('whatsapp-phone-number').value;
-        
-        // التحقق من اختيار رقم واتساب
-        if (!whatsappPhoneNumberID) {
-          showToast('يرجى اختيار رقم الواتساب للإرسال', 'error');
-          createBtn.disabled = false;
-          createBtn.innerHTML = '<i data-lucide="send" class="h-4 w-4"></i><span>إنشاء الحملة</span>';
-          lucide.createIcons();
-          return;
-        }
         
         const campaignData = {
           name: name,

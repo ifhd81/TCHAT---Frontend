@@ -37,6 +37,7 @@ export default defineConfig(({ mode }) => {
         templates: resolve(__dirname, 'templates.html'),
         webhooks: resolve(__dirname, 'webhooks.html'),
         automations: resolve(__dirname, 'automations.html'),
+        'ai-chatbot': resolve(__dirname, 'ai-chatbot.html'),
       },
       output: {
         manualChunks: undefined

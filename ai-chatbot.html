@@ -88,6 +88,25 @@
             </select>
           </div>
 
+          <!-- Phone Numbers Selection -->
+          <div>
+            <label class="block text-body-sm font-medium mb-2">أرقام الواتساب المفعل عليها</label>
+            <div class="space-y-2">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="phone-mode" value="all" id="phone-all" onchange="togglePhoneInput()" class="h-4 w-4 text-primary focus:ring-primary" checked>
+                <span class="text-body-sm">جميع الأرقام المربوطة</span>
+              </label>
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="phone-mode" value="specific" id="phone-specific" onchange="togglePhoneInput()" class="h-4 w-4 text-primary focus:ring-primary">
+                <span class="text-body-sm">أرقام محددة</span>
+              </label>
+            </div>
+            <div id="phone-input-container" class="mt-3 hidden">
+              <input type="text" id="enabled-phones" placeholder="مثال: 966501234567, 966509876543" class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
+              <p class="text-caption text-muted-foreground mt-1">أدخل أرقام الهواتف مفصولة بفاصلة (بدون +)</p>
+            </div>
+          </div>
+
           <!-- Reply Mode -->
           <div>
             <label class="block text-body-sm font-medium mb-2">وضع الرد</label>
@@ -282,6 +301,16 @@
           document.getElementById('working-end').value = settings.working_hours_end || '23:00';
           document.getElementById('excluded-keywords').value = settings.excluded_keywords || '';
           
+          // أرقام الهواتف المفعل عليها
+          if (settings.enabled_phone_numbers && settings.enabled_phone_numbers.trim() !== '') {
+            document.getElementById('phone-specific').checked = true;
+            document.getElementById('enabled-phones').value = settings.enabled_phone_numbers;
+            document.getElementById('phone-input-container').classList.remove('hidden');
+          } else {
+            document.getElementById('phone-all').checked = true;
+            document.getElementById('phone-input-container').classList.add('hidden');
+          }
+          
           // وضع الرد
           if (settings.reply_to_all) {
             document.getElementById('reply-all').checked = true;
@@ -293,6 +322,19 @@
         }
       } catch (error) {
         console.error('خطأ في تحميل الإعدادات:', error);
+      }
+    }
+
+    // إظهار/إخفاء حقل الأرقام
+    function togglePhoneInput() {
+      const phoneAll = document.getElementById('phone-all').checked;
+      const container = document.getElementById('phone-input-container');
+      
+      if (phoneAll) {
+        container.classList.add('hidden');
+        document.getElementById('enabled-phones').value = '';
+      } else {
+        container.classList.remove('hidden');
       }
     }
 
@@ -383,6 +425,10 @@
     // حفظ الإعدادات
     async function saveSettings() {
       try {
+        // تحديد الأرقام المفعل عليها
+        const phoneAll = document.getElementById('phone-all').checked;
+        const enabledPhones = phoneAll ? '' : document.getElementById('enabled-phones').value.trim();
+        
         const settings = {
           is_enabled: isEnabled,
           ai_provider: document.getElementById('ai-provider').value,
@@ -393,7 +439,8 @@
           reply_to_all: document.getElementById('reply-all').checked,
           working_hours_start: document.getElementById('working-start').value,
           working_hours_end: document.getElementById('working-end').value,
-          excluded_keywords: document.getElementById('excluded-keywords').value
+          excluded_keywords: document.getElementById('excluded-keywords').value,
+          enabled_phone_numbers: enabledPhones
         };
         
         const result = await updateAIChatbotSettings(settings);

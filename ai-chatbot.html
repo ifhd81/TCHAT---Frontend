@@ -81,10 +81,9 @@
           <div>
             <label class="block text-body-sm font-medium mb-2">النموذج</label>
             <select id="ai-model" class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
-              <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
-              <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
-              <option value="gpt-4">GPT-4</option>
-              <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+              <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5 (موصى به)</option>
+              <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (أسرع وأرخص)</option>
+              <option value="claude-opus-4-5-20251101">Claude Opus 4.5 (الأذكى)</option>
             </select>
           </div>
 
@@ -360,7 +359,9 @@
         
         container.innerHTML = phones.map(phone => {
           const phoneNumber = phone.display_phone_number?.replace(/\D/g, '') || phone.id;
-          const displayNumber = phone.display_phone_number || phone.id;
+          // تنظيف وتنسيق رقم الهاتف - إزالة الفراغات والرموز
+          let displayNumber = phone.display_phone_number || phone.id;
+          displayNumber = '+' + displayNumber.replace(/[\s\+\-\(\)]/g, '');
           const verifiedName = phone.verified_name || '';
           const isChecked = enabledPhones.includes(phoneNumber) ? 'checked' : '';
           
@@ -395,15 +396,15 @@
       
       if (provider === 'anthropic') {
         modelSelect.innerHTML = `
-          <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
-          <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
-          <option value="claude-3-haiku-20240307">Claude 3 Haiku (أسرع)</option>
+          <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5 (موصى به)</option>
+          <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (أسرع وأرخص)</option>
+          <option value="claude-opus-4-5-20251101">Claude Opus 4.5 (الأذكى)</option>
         `;
       } else {
         modelSelect.innerHTML = `
-          <option value="gpt-4">GPT-4</option>
-          <option value="gpt-4-turbo">GPT-4 Turbo</option>
-          <option value="gpt-3.5-turbo">GPT-3.5 Turbo (أرخص)</option>
+          <option value="gpt-5.2">GPT-5.2 (الأحدث)</option>
+          <option value="gpt-5-mini">GPT-5 Mini (أرخص)</option>
+          <option value="gpt-4o">GPT-4o</option>
         `;
       }
     }

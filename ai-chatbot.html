@@ -370,7 +370,7 @@
               <input type="checkbox" name="enabled-phone" value="${phoneNumber}" ${isChecked}
                 class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary">
               <div class="flex-1">
-                <span class="text-body-sm font-medium">${displayNumber}</span>
+                <span class="text-body-sm font-medium" dir="ltr">${displayNumber}</span>
                 ${verifiedName ? `<span class="text-caption text-muted-foreground mr-2">(${verifiedName})</span>` : ''}
               </div>
             </label>
@@ -419,38 +419,47 @@
       const statusTitle = document.getElementById('status-title');
       const statusDesc = document.getElementById('status-desc');
       
+      // حماية من العناصر الغير موجودة
+      if (!toggleBtn || !statusCard) return;
+      
+      const iconElement = statusIcon?.querySelector('i');
+      
       if (isEnabled) {
         toggleBtn.classList.remove('bg-muted');
         toggleBtn.classList.add('bg-primary');
-        toggleDot.classList.remove('translate-x-1');
-        toggleDot.classList.add('translate-x-6');
-        statusText.textContent = 'مفعل';
-        statusText.classList.add('text-primary');
-        statusText.classList.remove('text-muted-foreground');
+        toggleDot?.classList.remove('translate-x-1');
+        toggleDot?.classList.add('translate-x-6');
+        if (statusText) {
+          statusText.textContent = 'مفعل';
+          statusText.classList.add('text-primary');
+          statusText.classList.remove('text-muted-foreground');
+        }
         
         statusCard.classList.add('border-primary/50', 'bg-primary/5');
-        statusIcon.classList.remove('bg-muted');
-        statusIcon.classList.add('bg-primary/10');
-        statusIcon.querySelector('i').classList.remove('text-muted-foreground');
-        statusIcon.querySelector('i').classList.add('text-primary');
-        statusTitle.textContent = '🟢 الشات بوت مفعل';
-        statusDesc.textContent = 'سيرد البوت تلقائياً على رسائل العملاء';
+        statusIcon?.classList.remove('bg-muted');
+        statusIcon?.classList.add('bg-primary/10');
+        iconElement?.classList.remove('text-muted-foreground');
+        iconElement?.classList.add('text-primary');
+        if (statusTitle) statusTitle.textContent = '🟢 الشات بوت مفعل';
+        if (statusDesc) statusDesc.textContent = 'سيرد البوت تلقائياً على رسائل العملاء';
       } else {
         toggleBtn.classList.add('bg-muted');
         toggleBtn.classList.remove('bg-primary');
-        toggleDot.classList.add('translate-x-1');
-        toggleDot.classList.remove('translate-x-6');
-        statusText.textContent = 'معطل';
-        statusText.classList.remove('text-primary');
-        statusText.classList.add('text-muted-foreground');
+        toggleDot?.classList.add('translate-x-1');
+        toggleDot?.classList.remove('translate-x-6');
+        if (statusText) {
+          statusText.textContent = 'معطل';
+          statusText.classList.remove('text-primary');
+          statusText.classList.add('text-muted-foreground');
+        }
         
         statusCard.classList.remove('border-primary/50', 'bg-primary/5');
-        statusIcon.classList.add('bg-muted');
-        statusIcon.classList.remove('bg-primary/10');
-        statusIcon.querySelector('i').classList.add('text-muted-foreground');
-        statusIcon.querySelector('i').classList.remove('text-primary');
-        statusTitle.textContent = '🔴 الشات بوت معطل';
-        statusDesc.textContent = 'قم بتفعيل الشات بوت للرد التلقائي على رسائل العملاء';
+        statusIcon?.classList.add('bg-muted');
+        statusIcon?.classList.remove('bg-primary/10');
+        iconElement?.classList.add('text-muted-foreground');
+        iconElement?.classList.remove('text-primary');
+        if (statusTitle) statusTitle.textContent = '🔴 الشات بوت معطل';
+        if (statusDesc) statusDesc.textContent = 'قم بتفعيل الشات بوت للرد التلقائي على رسائل العملاء';
       }
     }
 

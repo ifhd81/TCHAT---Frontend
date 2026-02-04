@@ -612,10 +612,10 @@
       }
     }
 
-    // تنسيق التاريخ
+    // تنسيق التاريخ (أرقام إنجليزية 0-9)
     function formatDate(dateString) {
       const date = new Date(dateString);
-      return date.toLocaleString('ar-SA', {
+      return date.toLocaleString('ar-SA-u-nu-latn', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',

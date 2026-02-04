@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TCHAT - الشات بوت الذكي</title>
   <link rel="stylesheet" href="./style.css" />
+  <style>
+    .toggle-spinner-bar {
+      display: block;
+      height: 100%;
+      width: 40%;
+      background: linear-gradient(90deg, transparent, #10b981, transparent);
+      animation: toggle-spinner-linear 1s ease-in-out infinite;
+    }
+    @keyframes toggle-spinner-linear {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+  </style>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="./api.js"></script>
   <script src="./components/header.js"></script>
@@ -26,17 +39,21 @@
         <p class="text-body-sm text-muted-foreground">الرد التلقائي على رسائل العملاء باستخدام الذكاء الاصطناعي</p>
       </div>
       <div class="flex items-center gap-3">
-        <!-- زر التفعيل/التعطيل -->
-        <div class="flex items-center gap-2">
-          <span class="text-body-sm text-muted-foreground" id="status-text">معطل</span>
-          <button 
-            id="toggle-btn"
-            onclick="toggleChatbot()"
-            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 bg-muted"
-          >
-            <span id="toggle-dot" class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1"></span>
-          </button>
-        </div>
+        <!-- زر التفعيل/التعطيل (أخضر + سبينر خطي عند التحميل) -->
+        <button 
+          id="toggle-btn"
+          type="button"
+          onclick="toggleChatbot()"
+          class="relative flex h-[28px] min-w-[72px] flex-col items-stretch justify-center overflow-hidden rounded-full border border-border bg-card px-3 shadow-sm transition-colors duration-200 hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 disabled:pointer-events-none disabled:opacity-80"
+        >
+          <span class="flex items-center gap-2">
+            <span id="status-dot" class="h-2 w-2 shrink-0 rounded-full bg-muted-foreground transition-colors duration-200"></span>
+            <span id="status-text" class="text-[11px] font-medium text-muted-foreground leading-none pt-0.5">معطل</span>
+          </span>
+          <span id="toggle-spinner" class="absolute bottom-0 left-0 right-0 h-0.5 overflow-hidden bg-emerald-100 opacity-0 transition-opacity duration-200" aria-hidden="true">
+            <span class="toggle-spinner-bar"></span>
+          </span>
+        </button>
       </div>
     </section>
 
@@ -409,62 +426,75 @@
       }
     }
 
-    // تحديث واجهة الحالة
+    // تحديث واجهة الحالة (زر بسيط بدون حركة)
     function updateStatusUI() {
       const toggleBtn = document.getElementById('toggle-btn');
-      const toggleDot = document.getElementById('toggle-dot');
       const statusText = document.getElementById('status-text');
+      const statusDot = document.getElementById('status-dot');
       const statusCard = document.getElementById('status-card');
       const statusIcon = document.getElementById('status-icon');
       const statusTitle = document.getElementById('status-title');
       const statusDesc = document.getElementById('status-desc');
       
-      // حماية من العناصر الغير موجودة
       if (!toggleBtn || !statusCard) return;
       
       const iconElement = statusIcon?.querySelector('i');
       
       if (isEnabled) {
-        toggleBtn.classList.remove('bg-muted');
-        toggleBtn.classList.add('bg-primary');
-        toggleDot?.classList.remove('translate-x-1');
-        toggleDot?.classList.add('translate-x-6');
+        toggleBtn.classList.remove('border-border', 'bg-card', 'hover:bg-muted/50');
+        toggleBtn.classList.add('border-emerald-400/60', 'bg-emerald-50', 'hover:bg-emerald-100');
+        if (statusDot) {
+          statusDot.classList.remove('bg-muted-foreground');
+          statusDot.classList.add('bg-emerald-500');
+        }
         if (statusText) {
           statusText.textContent = 'مفعل';
-          statusText.classList.add('text-primary');
+          statusText.classList.add('font-semibold');
           statusText.classList.remove('text-muted-foreground');
+          statusText.style.color = '';
+          statusText.classList.add('text-emerald-700');
         }
-        
-        statusCard.classList.add('border-primary/50', 'bg-primary/5');
+        statusCard.classList.remove('border-border');
+        statusCard.classList.add('border-emerald-200', 'bg-emerald-50/50', 'shadow-sm');
         statusIcon?.classList.remove('bg-muted');
-        statusIcon?.classList.add('bg-primary/10');
+        statusIcon?.classList.add('bg-emerald-100', 'ring-2', 'ring-emerald-200');
         iconElement?.classList.remove('text-muted-foreground');
-        iconElement?.classList.add('text-primary');
-        if (statusTitle) statusTitle.textContent = '🟢 الشات بوت مفعل';
-        if (statusDesc) statusDesc.textContent = 'سيرد البوت تلقائياً على رسائل العملاء';
+        iconElement?.classList.add('text-emerald-600');
+        if (statusTitle) { statusTitle.textContent = 'الشات بوت يعمل'; statusTitle.classList.remove('text-primary'); statusTitle.classList.add('text-emerald-700'); }
+        if (statusDesc) { statusDesc.textContent = 'سيرد البوت تلقائياً على رسائل العملاء'; statusDesc.classList.remove('text-muted-foreground'); statusDesc.classList.add('text-foreground/80'); }
       } else {
-        toggleBtn.classList.add('bg-muted');
-        toggleBtn.classList.remove('bg-primary');
-        toggleDot?.classList.add('translate-x-1');
-        toggleDot?.classList.remove('translate-x-6');
+        toggleBtn.classList.add('border-border', 'bg-card', 'hover:bg-muted/50');
+        toggleBtn.classList.remove('border-emerald-400/60', 'bg-emerald-50', 'hover:bg-emerald-100');
+        if (statusDot) {
+          statusDot.classList.add('bg-muted-foreground');
+          statusDot.classList.remove('bg-emerald-500');
+        }
         if (statusText) {
           statusText.textContent = 'معطل';
-          statusText.classList.remove('text-primary');
+          statusText.classList.remove('font-semibold', 'text-emerald-700');
           statusText.classList.add('text-muted-foreground');
+          statusText.style.color = '';
         }
-        
-        statusCard.classList.remove('border-primary/50', 'bg-primary/5');
+        statusCard.classList.add('border-border');
+        statusCard.classList.remove('border-emerald-200', 'bg-emerald-50/50');
         statusIcon?.classList.add('bg-muted');
-        statusIcon?.classList.remove('bg-primary/10');
+        statusIcon?.classList.remove('bg-emerald-100', 'ring-2', 'ring-emerald-200');
         iconElement?.classList.add('text-muted-foreground');
-        iconElement?.classList.remove('text-primary');
-        if (statusTitle) statusTitle.textContent = '🔴 الشات بوت معطل';
-        if (statusDesc) statusDesc.textContent = 'قم بتفعيل الشات بوت للرد التلقائي على رسائل العملاء';
+        iconElement?.classList.remove('text-emerald-600');
+        if (statusTitle) { statusTitle.textContent = 'الشات بوت معطل'; statusTitle.classList.remove('text-emerald-700'); }
+        if (statusDesc) { statusDesc.textContent = 'قم بتفعيل الشات بوت للرد التلقائي على رسائل العملاء'; statusDesc.classList.add('text-muted-foreground'); statusDesc.classList.remove('text-foreground/80'); }
       }
     }
 
-    // تفعيل/تعطيل الشات بوت
+    // تفعيل/تعطيل الشات بوت (تعطيل الزر + سبينر خطي حتى اكتمال الطلب)
     async function toggleChatbot() {
+      const toggleBtn = document.getElementById('toggle-btn');
+      const spinner = document.getElementById('toggle-spinner');
+      if (!toggleBtn) return;
+      
+      toggleBtn.disabled = true;
+      if (spinner) spinner.classList.add('!opacity-100');
+      
       try {
         const newState = !isEnabled;
         const result = await toggleAIChatbot(newState);
@@ -479,6 +509,9 @@
       } catch (error) {
         console.error('خطأ في تغيير حالة البوت:', error);
         showToast('حدث خطأ في تغيير الحالة', 'error');
+      } finally {
+        toggleBtn.disabled = false;
+        if (spinner) spinner.classList.remove('!opacity-100');
       }
     }
 

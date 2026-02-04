@@ -102,8 +102,10 @@
               </label>
             </div>
             <div id="phone-input-container" class="mt-3 hidden">
-              <input type="text" id="enabled-phones" placeholder="مثال: 966501234567, 966509876543" class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
-              <p class="text-caption text-muted-foreground mt-1">أدخل أرقام الهواتف مفصولة بفاصلة (بدون +)</p>
+              <div id="phones-list" class="space-y-2 p-3 border rounded-md bg-muted/30">
+                <p class="text-body-sm text-muted-foreground">جاري تحميل الأرقام...</p>
+              </div>
+              <p class="text-caption text-muted-foreground mt-1">اختر الأرقام التي تريد تفعيل AI Chatbot عليها</p>
             </div>
           </div>
 
@@ -304,8 +306,9 @@
           // أرقام الهواتف المفعل عليها
           if (settings.enabled_phone_numbers && settings.enabled_phone_numbers.trim() !== '') {
             document.getElementById('phone-specific').checked = true;
-            document.getElementById('enabled-phones').value = settings.enabled_phone_numbers;
             document.getElementById('phone-input-container').classList.remove('hidden');
+            // تحميل الأرقام وتحديد المفعلة
+            await loadAvailablePhones();
           } else {
             document.getElementById('phone-all').checked = true;
             document.getElementById('phone-input-container').classList.add('hidden');
@@ -332,10 +335,57 @@
       
       if (phoneAll) {
         container.classList.add('hidden');
-        document.getElementById('enabled-phones').value = '';
       } else {
         container.classList.remove('hidden');
+        loadAvailablePhones();
       }
+    }
+
+    // تحميل الأرقام المتاحة
+    let availablePhones = [];
+    async function loadAvailablePhones() {
+      const container = document.getElementById('phones-list');
+      
+      try {
+        const phones = await loadMetaPhoneNumbers();
+        availablePhones = phones;
+        
+        if (!phones || phones.length === 0) {
+          container.innerHTML = '<p class="text-body-sm text-muted-foreground">لا توجد أرقام مربوطة</p>';
+          return;
+        }
+        
+        // الأرقام المحددة مسبقاً
+        const enabledPhones = currentSettings?.enabled_phone_numbers?.split(',').map(p => p.trim()) || [];
+        
+        container.innerHTML = phones.map(phone => {
+          const phoneNumber = phone.display_phone_number?.replace(/\D/g, '') || phone.id;
+          const displayNumber = phone.display_phone_number || phone.id;
+          const verifiedName = phone.verified_name || '';
+          const isChecked = enabledPhones.includes(phoneNumber) ? 'checked' : '';
+          
+          return `
+            <label class="flex items-center gap-3 p-2 rounded hover:bg-muted/50 cursor-pointer">
+              <input type="checkbox" name="enabled-phone" value="${phoneNumber}" ${isChecked}
+                class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary">
+              <div class="flex-1">
+                <span class="text-body-sm font-medium">${displayNumber}</span>
+                ${verifiedName ? `<span class="text-caption text-muted-foreground mr-2">(${verifiedName})</span>` : ''}
+              </div>
+            </label>
+          `;
+        }).join('');
+        
+      } catch (error) {
+        console.error('خطأ في تحميل الأرقام:', error);
+        container.innerHTML = '<p class="text-body-sm text-destructive">حدث خطأ في تحميل الأرقام</p>';
+      }
+    }
+
+    // جلب الأرقام المحددة
+    function getSelectedPhones() {
+      const checkboxes = document.querySelectorAll('input[name="enabled-phone"]:checked');
+      return Array.from(checkboxes).map(cb => cb.value).join(',');
     }
 
     // تحديث خيارات النماذج
@@ -427,7 +477,7 @@
       try {
         // تحديد الأرقام المفعل عليها
         const phoneAll = document.getElementById('phone-all').checked;
-        const enabledPhones = phoneAll ? '' : document.getElementById('enabled-phones').value.trim();
+        const enabledPhones = phoneAll ? '' : getSelectedPhones();
         
         const settings = {
           is_enabled: isEnabled,

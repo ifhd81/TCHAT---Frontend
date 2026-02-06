@@ -813,25 +813,35 @@
       isUploadingMedia = true;
       uploadedMediaHandle = null;
       
-      try {
+      const baseUrl = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1');
+      const doUpload = async (authToken) => {
         const formData = new FormData();
         formData.append('file', file);
-        
-        const token = localStorage.getItem('tchat_token');
-        const response = await fetch((typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1') + '/meta/upload', {
+        const res = await fetch(baseUrl + '/meta/upload', {
           method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + token
-          },
+          headers: { 'Authorization': 'Bearer ' + authToken },
           body: formData
         });
-        
-        const result = await response.json();
-        
+        return { response: res, result: await res.json() };
+      };
+
+      try {
+        let token = localStorage.getItem('access_token') || localStorage.getItem('tchat_token');
+        if (!token) {
+          throw new Error('يجب تسجيل الدخول أولاً');
+        }
+        let { response, result } = await doUpload(token);
+        // إذا 401: تجربة تجديد التوكن ثم إعادة المحاولة مرة واحدة
+        if (response.status === 401 && typeof refreshAccessToken === 'function') {
+          const newToken = await refreshAccessToken();
+          if (newToken) {
+            const retry = await doUpload(newToken);
+            response = retry.response;
+            result = retry.result;
+          }
+        }
         if (result.success && result.data?.handle) {
           uploadedMediaHandle = result.data.handle;
-          
-          // تحديث حالة الرفع
           const statusEl = document.getElementById('upload-status');
           if (statusEl) {
             statusEl.innerHTML = `

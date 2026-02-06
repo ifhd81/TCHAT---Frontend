@@ -818,7 +818,7 @@
         formData.append('file', file);
         
         const token = localStorage.getItem('tchat_token');
-        const response = await fetch(window.API_BASE_URL + '/meta/upload', {
+        const response = await fetch((typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1') + '/meta/upload', {
           method: 'POST',
           headers: {
             'Authorization': 'Bearer ' + token

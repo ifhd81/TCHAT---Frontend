@@ -670,6 +670,7 @@
     let buttonsCount = 0;
     let buttonsList = [];
     let uploadedMediaHandle = null; // لحفظ handle الملف المرفوع
+    let headerImagePreviewDataUrl = null; // معاينة محلية للصورة لظهورها في المعاينة الحية
 
     // ============ دوال التحقق من اسم القالب ============
     
@@ -763,8 +764,9 @@
       if (headerType === 'IMAGE') {
         const reader = new FileReader();
         reader.onload = (e) => {
-          previewImg.src = e.target.result;
-          previewImg.classList.remove('hidden');
+          headerImagePreviewDataUrl = e.target.result;
+          const imgEl = document.getElementById('header-media-preview-img');
+          if (imgEl) { imgEl.src = headerImagePreviewDataUrl; imgEl.classList.remove('hidden'); }
           updateLivePreview();
         };
         reader.readAsDataURL(file);
@@ -842,6 +844,8 @@
         }
         if (result.success && result.data?.handle) {
           uploadedMediaHandle = result.data.handle;
+          // المعاينة المحلية تبقى من reader.readAsDataURL؛ نحدّث المعاينة الحية
+          updateLivePreview();
           const statusEl = document.getElementById('upload-status');
           if (statusEl) {
             statusEl.innerHTML = `
@@ -857,8 +861,9 @@
       } catch (error) {
         console.error('❌ خطأ في رفع الملف:', error);
         uploadedMediaHandle = null;
-        
-        // عرض خطأ الرفع
+          headerImagePreviewDataUrl = null;
+          
+          // عرض خطأ الرفع
         const statusEl = document.getElementById('upload-status');
         if (statusEl) {
           statusEl.innerHTML = `
@@ -913,6 +918,7 @@
       document.getElementById('header-media-preview').classList.add('hidden');
       document.getElementById('header-media-placeholder').classList.remove('hidden');
       uploadedMediaHandle = null;
+      headerImagePreviewDataUrl = null;
       
       buttonsCount = 0;
       buttonsList = [];
@@ -955,6 +961,11 @@
       const mediaLabel = document.getElementById('header-media-label');
       const mediaFormats = document.getElementById('header-media-formats');
       const uploadIcon = mediaContainer?.querySelector('[data-lucide="image-plus"]');
+      
+      if (headerType !== 'IMAGE') {
+        headerImagePreviewDataUrl = null;
+        uploadedMediaHandle = null;
+      }
       
       // إخفاء جميع الحاويات أولاً
       textContainer.classList.add('hidden');
@@ -1237,11 +1248,9 @@
       // Header
       if (headerType !== 'none') {
         if (headerType === 'IMAGE') {
-          html += `<div class="w-full aspect-video bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-            <div class="flex flex-col items-center text-gray-500">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-              <span class="text-[10px] mt-1">صورة</span>
-            </div>
+          const headerImgSrc = headerImagePreviewDataUrl || '';
+          html += `<div class="w-full aspect-video bg-muted/20 flex items-center justify-center overflow-hidden">
+            ${headerImgSrc ? `<img src="${headerImgSrc}" class="w-full h-full object-cover" alt="" />` : `<div class="flex flex-col items-center text-gray-500"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><span class="text-[10px] mt-1">صورة</span></div>`}
           </div>`;
         } else if (headerType === 'VIDEO') {
           html += `<div class="w-full aspect-video bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">

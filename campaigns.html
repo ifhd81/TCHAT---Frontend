@@ -2808,6 +2808,21 @@
       return analysis;
     }
     
+    // استخراج رابط وسائط الرأس (صورة/فيديو/مستند) من القالب المحدد
+    function getHeaderMediaUrlFromTemplate(template, mediaType) {
+      if (!template || !template.components) return '';
+      const formatMap = { image: 'IMAGE', video: 'VIDEO', document: 'DOCUMENT' };
+      const expectedFormat = formatMap[mediaType];
+      const headerComp = template.components.find(c => c.type === 'HEADER' && c.format === expectedFormat);
+      if (!headerComp || !headerComp.example) return '';
+      const ex = headerComp.example;
+      const url = (ex.header_url && ex.header_url[0])
+        || (ex.header_handle && ex.header_handle[0])
+        || (ex.headerUrl && ex.headerUrl[0])
+        || (ex.headerHandle && ex.headerHandle[0]);
+      return url ? String(url).trim() : '';
+    }
+    
     // بناء مكونات القالب بناءً على التحليل الذكي
     function buildSmartComponents(template, variableValues = {}) {
       const analysis = analyzeTemplate(template);
@@ -2841,19 +2856,26 @@
             });
           }
         } else if (analysis.header.type === 'image') {
+          // استخدام صورة الرأس من القالب (المرفوعة عند إنشاء القالب) أو من قيم المتغيرات
+          const headerImageUrl = variableValues['header_image']
+            || getHeaderMediaUrlFromTemplate(template, 'image');
           headerComponent.parameters.push({
             type: 'image',
-            image: { link: 'https://placehold.co/800x400/png?text=Test+Image' }
+            image: { link: headerImageUrl || 'https://placehold.co/800x400/png?text=Test+Image' }
           });
         } else if (analysis.header.type === 'video') {
+          const headerVideoUrl = variableValues['header_video']
+            || getHeaderMediaUrlFromTemplate(template, 'video');
           headerComponent.parameters.push({
             type: 'video',
-            video: { link: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4' }
+            video: { link: headerVideoUrl || 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4' }
           });
         } else if (analysis.header.type === 'document') {
+          const headerDocUrl = variableValues['header_document']
+            || getHeaderMediaUrlFromTemplate(template, 'document');
           headerComponent.parameters.push({
             type: 'document',
-            document: { link: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', filename: 'test.pdf' }
+            document: { link: headerDocUrl || 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', filename: 'test.pdf' }
           });
         }
         
@@ -3282,6 +3304,7 @@
       const preview = {
         header: null,
         headerType: null,
+        headerMediaUrl: null,
         body: null,
         footer: null,
         buttons: []
@@ -3294,10 +3317,16 @@
             preview.header = component.text;
           } else if (component.format === 'IMAGE') {
             preview.header = '🖼️ صورة';
+            const ex = component.example || {};
+            preview.headerMediaUrl = (ex.header_url && ex.header_url[0]) || (ex.header_handle && ex.header_handle[0]) || (ex.headerUrl && ex.headerUrl[0]) || (ex.headerHandle && ex.headerHandle[0]) || null;
           } else if (component.format === 'VIDEO') {
             preview.header = '🎬 فيديو';
+            const ex = component.example || {};
+            preview.headerMediaUrl = (ex.header_url && ex.header_url[0]) || (ex.header_handle && ex.header_handle[0]) || (ex.headerUrl && ex.headerUrl[0]) || (ex.headerHandle && ex.headerHandle[0]) || null;
           } else if (component.format === 'DOCUMENT') {
             preview.header = '📄 ملف';
+            const ex = component.example || {};
+            preview.headerMediaUrl = (ex.header_url && ex.header_url[0]) || (ex.header_handle && ex.header_handle[0]) || (ex.headerUrl && ex.headerUrl[0]) || (ex.headerHandle && ex.headerHandle[0]) || null;
           }
         }
         
@@ -3494,12 +3523,31 @@
       // معاينة المحتوى
       let contentHTML = '<div class="bg-background rounded-lg p-3 border border-border space-y-2">';
       
-      // Header
+      // Header — عرض الشكل النهائي كما سيراه العميل
       if (preview.header) {
         if (preview.headerType === 'TEXT') {
           let headerText = escapeHtml(preview.header);
           headerText = replaceVariablesWithValues(headerText, varValues);
           contentHTML += `<p class="text-body-sm font-bold">${headerText}</p>`;
+        } else if (preview.headerType === 'IMAGE' && preview.headerMediaUrl) {
+          contentHTML += `<div class="rounded-lg overflow-hidden border border-border bg-muted/20 my-1">
+            <img src="${escapeHtml(preview.headerMediaUrl)}" alt="رأس القالب" class="w-full max-h-48 object-cover" loading="lazy"
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+            />
+            <div class="hidden items-center justify-center gap-2 py-6 text-muted-foreground text-body-sm" style="display:none;">
+              <i data-lucide="image" class="h-8 w-8"></i>
+              <span>صورة الرأس</span>
+            </div>
+          </div>`;
+        } else if (preview.headerType === 'VIDEO' && preview.headerMediaUrl) {
+          contentHTML += `<div class="rounded-lg overflow-hidden border border-border bg-black/10 my-1">
+            <video src="${escapeHtml(preview.headerMediaUrl)}" class="w-full max-h-40 object-contain" controls preload="metadata"></video>
+          </div>`;
+        } else if (preview.headerType === 'DOCUMENT' && preview.headerMediaUrl) {
+          contentHTML += `<a href="${escapeHtml(preview.headerMediaUrl)}" target="_blank" rel="noopener" class="flex items-center gap-2 rounded-lg border border-border bg-muted/20 p-3 my-1 text-body-sm text-primary hover:bg-muted/40">
+            <i data-lucide="file-text" class="h-5 w-5 shrink-0"></i>
+            <span>ملف مرفق</span>
+          </a>`;
         } else {
           contentHTML += `<p class="text-body-xs text-muted-foreground">${preview.header}</p>`;
         }

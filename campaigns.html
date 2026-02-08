@@ -2225,8 +2225,8 @@
     async function loadCampaigns(limit = 50) {
       try {
         const data = await apiRequest(`/campaigns?limit=${limit}`);
-        if (data.success && Array.isArray(data.data)) {
-          return data.data;
+        if (data.success) {
+          return Array.isArray(data.data) ? data.data : [];
         }
         console.error('فشل في جلب الحملات:', data);
         return [];

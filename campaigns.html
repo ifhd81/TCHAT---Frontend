@@ -3133,7 +3133,9 @@
           let suggestion = '';
           
           // تحليل نوع الخطأ وتقديم اقتراحات
-          if (errorMsg.includes('parameter') || errorMsg.includes('Parameter') || errorMsg.includes('132000')) {
+          if (errorMsg.includes('رابط صورة الرأس') || errorMsg.includes('رابط بديل') || errorMsg.includes('403') && errorMsg.includes('الرأس')) {
+            suggestion = 'أضف رابطاً عاماً (HTTPS) لصورة الرأس في الحقل «رابط بديل لصورة الرأس» أعلاه — روابط واتساب (scontent.whatsapp.net) لا تعمل عند الإرسال.';
+          } else if (errorMsg.includes('parameter') || errorMsg.includes('Parameter') || errorMsg.includes('132000')) {
             suggestion = 'القالب يحتاج متغيرات بصيغة خاصة. جرب قالب hello_world أو تأكد من إعداد القالب في Meta بشكل صحيح.';
           } else if (errorMsg.includes('format')) {
             suggestion = 'تأكد من اختيار القالب الصحيح واللغة المطابقة';
@@ -3470,6 +3472,29 @@
       ];
       
       let html = '';
+      
+      // حقل اختياري: رابط بديل لوسائط الرأس (صورة/فيديو/مستند) — روابط واتساب لا تعمل عند الإرسال
+      if (analysis.header.needed && ['image', 'video', 'document'].includes(analysis.header.type)) {
+        const headerLabel = analysis.header.type === 'image' ? 'رابط بديل لصورة الرأس' : analysis.header.type === 'video' ? 'رابط بديل لفيديو الرأس' : 'رابط بديل لمستند الرأس';
+        const headerKey = analysis.header.type === 'image' ? 'header_image' : analysis.header.type === 'video' ? 'header_video' : 'header_document';
+        html += `
+          <div class="space-y-1 p-3 rounded-lg border border-amber-500/30 bg-amber-500/5">
+            <label class="text-body-sm font-medium flex items-center gap-2">
+              <i data-lucide="image" class="h-4 w-4 text-amber-600"></i>
+              <span>${headerLabel} (اختياري)</span>
+            </label>
+            <p class="text-body-xs text-muted-foreground">روابط واتساب (scontent.whatsapp.net) لا تعمل عند الإرسال وتسبب فشل التسليم. استخدم رابطاً عاماً (HTTPS) من استضافة أو CDN.</p>
+            <input 
+              type="url" 
+              id="template-var-${headerKey}" 
+              data-var-num="${headerKey}"
+              placeholder="https://example.com/image.jpg" 
+              class="template-var-input flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" 
+              oninput="updatePreviewRealtime()"
+            />
+          </div>
+        `;
+      }
       
       for (let i = 0; i < totalVars; i++) {
         const varNum = i + 1;

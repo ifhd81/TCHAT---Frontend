@@ -1,5 +1,6 @@
-// إعدادات API — يُستبدل تلقائياً بقيمة VITE_API_URL من .env
-const API_BASE_URL = '__VITE_API_URL__';
+// إعدادات API — يُستبدل تلقائياً بقيمة VITE_API_URL من .env عند البناء؛ عند التحميل المباشر نستخدم fallback
+const _apiBase = '__VITE_API_URL__';
+const API_BASE_URL = (_apiBase.startsWith('http') ? _apiBase : 'https://tchat-production.up.railway.app/api/v1');
 
 // أيقونة مستخدم SVG (Lucide user) — تظهر دائماً دون الاعتماد على createIcons
 function userIconSvg(className) {

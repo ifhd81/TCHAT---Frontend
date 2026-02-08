@@ -3429,14 +3429,17 @@
     function renderVariableInputs() {
       const container = document.getElementById('template-variables-container');
       
-      if (!currentTemplateAnalysis || !currentTemplateAnalysis.needsVariables) {
+      if (!currentTemplateAnalysis) {
         container.innerHTML = '';
         return;
       }
       
-      const totalVars = currentTemplateAnalysis.body.count || 0;
+      const analysis = currentTemplateAnalysis;
+      const totalVars = analysis.body.count || 0;
+      const needsVariables = analysis.needsVariables;
+      const headerMediaNeeded = analysis.header?.needed && ['image','video','document'].includes(analysis.header?.type);
       
-      if (totalVars === 0) {
+      if (!needsVariables && !headerMediaNeeded) {
         container.innerHTML = '';
         return;
       }
@@ -3462,6 +3465,27 @@
       
       let html = '';
       
+      // حقل رابط وسائط الرأس (صورة/فيديو/ملف) — رابط عام مطلوب للإرسال
+      if (headerMediaNeeded) {
+        const mediaLabel = analysis.header.type === 'image' ? 'رابط صورة الرأس' : analysis.header.type === 'video' ? 'رابط فيديو الرأس' : 'رابط ملف الرأس';
+        html += `
+          <div class="space-y-1 rounded-lg border border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/30 p-3">
+            <label class="text-body-sm font-medium flex items-center gap-2 text-amber-800 dark:text-amber-200">
+              <i data-lucide="link" class="h-4 w-4"></i>
+              ${mediaLabel} (رابط عام)
+            </label>
+            <input 
+              type="url" 
+              id="template-header-media-url" 
+              placeholder="https://example.com/image.jpg — استخدم استضافة أو CDN عام"
+              class="template-var-input flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" 
+              oninput="updatePreviewRealtime()"
+            />
+            <p class="text-body-xs text-muted-foreground">رابط واتساب الداخلي غير مقبول. الصق رابطاً عاماً للصورة/الوسائط.</p>
+          </div>
+        `;
+      }
+      
       for (let i = 0; i < totalVars; i++) {
         const varNum = i + 1;
         html += `
@@ -3483,6 +3507,7 @@
       }
       
       container.innerHTML = html;
+      lucide.createIcons();
     }
     
     // تحديث المعاينة في الوقت الفعلي
@@ -3490,15 +3515,23 @@
       renderTemplatePreview();
     }
     
-    // الحصول على قيم المتغيرات المدخلة
+    // الحصول على قيم المتغيرات المدخلة (بما فيها رابط وسائط الرأس)
     function getVariableValues() {
       const values = {};
       const inputs = document.querySelectorAll('.template-var-input');
       
       inputs.forEach(input => {
         const varNum = input.getAttribute('data-var-num');
-        values[varNum] = input.value || '';
+        if (varNum) values[varNum] = input.value || '';
       });
+      
+      const headerMediaUrl = document.getElementById('template-header-media-url')?.value?.trim() || '';
+      if (headerMediaUrl) {
+        const t = currentTemplateAnalysis?.header?.type;
+        if (t === 'image') values['header_image'] = headerMediaUrl;
+        else if (t === 'video') values['header_video'] = headerMediaUrl;
+        else if (t === 'document') values['header_document'] = headerMediaUrl;
+      }
       
       return values;
     }
@@ -3551,15 +3584,16 @@
       // معاينة المحتوى
       let contentHTML = '<div class="bg-background rounded-lg p-3 border border-border space-y-2">';
       
-      // Header — عرض الشكل النهائي كما سيراه العميل
+      // Header — عرض الشكل النهائي كما سيراه العميل (الرابط المدخل أولاً)
       if (preview.header) {
+        const headerMediaUrlForPreview = varValues['header_image'] || varValues['header_video'] || varValues['header_document'] || preview.headerMediaUrl;
         if (preview.headerType === 'TEXT') {
           let headerText = escapeHtml(preview.header);
           headerText = replaceVariablesWithValues(headerText, varValues);
           contentHTML += `<p class="text-body-sm font-bold">${headerText}</p>`;
-        } else if (preview.headerType === 'IMAGE' && preview.headerMediaUrl) {
+        } else if (preview.headerType === 'IMAGE' && headerMediaUrlForPreview) {
           contentHTML += `<div class="rounded-lg overflow-hidden border border-border bg-muted/20 my-1">
-            <img src="${escapeHtml(preview.headerMediaUrl)}" alt="رأس القالب" class="w-full max-h-48 object-cover" loading="lazy"
+            <img src="${escapeHtml(headerMediaUrlForPreview)}" alt="رأس القالب" class="w-full max-h-48 object-cover" loading="lazy"
               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
             />
             <div class="hidden items-center justify-center gap-2 py-6 text-muted-foreground text-body-sm" style="display:none;">
@@ -3567,12 +3601,12 @@
               <span>صورة الرأس</span>
             </div>
           </div>`;
-        } else if (preview.headerType === 'VIDEO' && preview.headerMediaUrl) {
+        } else if (preview.headerType === 'VIDEO' && headerMediaUrlForPreview) {
           contentHTML += `<div class="rounded-lg overflow-hidden border border-border bg-black/10 my-1">
-            <video src="${escapeHtml(preview.headerMediaUrl)}" class="w-full max-h-40 object-contain" controls preload="metadata"></video>
+            <video src="${escapeHtml(headerMediaUrlForPreview)}" class="w-full max-h-40 object-contain" controls preload="metadata"></video>
           </div>`;
-        } else if (preview.headerType === 'DOCUMENT' && preview.headerMediaUrl) {
-          contentHTML += `<a href="${escapeHtml(preview.headerMediaUrl)}" target="_blank" rel="noopener" class="flex items-center gap-2 rounded-lg border border-border bg-muted/20 p-3 my-1 text-body-sm text-primary hover:bg-muted/40">
+        } else if (preview.headerType === 'DOCUMENT' && headerMediaUrlForPreview) {
+          contentHTML += `<a href="${escapeHtml(headerMediaUrlForPreview)}" target="_blank" rel="noopener" class="flex items-center gap-2 rounded-lg border border-border bg-muted/20 p-3 my-1 text-body-sm text-primary hover:bg-muted/40">
             <i data-lucide="file-text" class="h-5 w-5 shrink-0"></i>
             <span>ملف مرفق</span>
           </a>`;

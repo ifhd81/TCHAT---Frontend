@@ -1099,15 +1099,19 @@
       
       if (source === 'database') {
         try {
+          // جلب الإجمالي الحقيقي من إحصائيات النظام
+          const stats = await loadSystemStats();
+          const totalCount = (stats && stats.total_customers) ? stats.total_customers : 0;
+          databaseCustomersCount = totalCount;
+          updateSourceCount('database', totalCount);
+
+          // تحميل عينة للمعاينة فقط (الـ API يحدّ بـ 200)
           const customers = await loadCustomers(500);
           selectedRecipients = customers.map(customer => ({
             customer_id: customer.id,
             phone_number: customer.mobile || customer.phone,
             customer_name: customer.name
           })).filter(r => r.phone_number);
-
-          databaseCustomersCount = selectedRecipients.length;
-          updateSourceCount('database', databaseCustomersCount);
           updateRecipientsPreview();
         } catch (error) {
           previewEl.innerHTML = '<div class="text-center text-destructive text-body-sm">تعذر تحميل العملاء</div>';
@@ -1312,7 +1316,9 @@
         return;
       }
       
-      if (selectedRecipients.length === 0) {
+      const recipientsSource = document.getElementById('recipients-source').value;
+      const useAllDatabase = (recipientsSource === 'database');
+      if (!useAllDatabase && selectedRecipients.length === 0) {
         showToast('يرجى إضافة مستقبلين للحملة', 'error');
         return;
       }
@@ -1331,11 +1337,12 @@
           template_name: templateName,
           template_language: 'ar',
           whatsapp_phone_number_id: whatsappPhoneNumberID,
-          batch_size: sendType === 'all' ? selectedRecipients.length : batchSize,
+          batch_size: useAllDatabase ? (sendType === 'all' ? databaseCustomersCount : batchSize) : (sendType === 'all' ? selectedRecipients.length : batchSize),
           batch_interval_hours: sendType === 'all' ? 0 : (batchInterval >= 60 ? batchInterval / 60 : 0),
           batch_interval_minutes: sendType === 'all' ? 0 : batchInterval,
           is_smart_send: isSmartSend,
-          recipients: selectedRecipients
+          use_all_database: useAllDatabase,
+          recipients: useAllDatabase ? [] : selectedRecipients
         };
 
         const response = await fetch('https://tchat-production.up.railway.app/api/v1/campaigns', {
@@ -3437,9 +3444,8 @@
       const analysis = currentTemplateAnalysis;
       const totalVars = analysis.body.count || 0;
       const needsVariables = analysis.needsVariables;
-      const headerMediaNeeded = analysis.header?.needed && ['image','video','document'].includes(analysis.header?.type);
       
-      if (!needsVariables && !headerMediaNeeded) {
+      if (!needsVariables) {
         container.innerHTML = '';
         return;
       }
@@ -3464,27 +3470,6 @@
       ];
       
       let html = '';
-      
-      // حقل رابط وسائط الرأس (صورة/فيديو/ملف) — رابط عام مطلوب للإرسال
-      if (headerMediaNeeded) {
-        const mediaLabel = analysis.header.type === 'image' ? 'رابط صورة الرأس' : analysis.header.type === 'video' ? 'رابط فيديو الرأس' : 'رابط ملف الرأس';
-        html += `
-          <div class="space-y-1 rounded-lg border border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/30 p-3">
-            <label class="text-body-sm font-medium flex items-center gap-2 text-amber-800 dark:text-amber-200">
-              <i data-lucide="link" class="h-4 w-4"></i>
-              ${mediaLabel} (رابط عام)
-            </label>
-            <input 
-              type="url" 
-              id="template-header-media-url" 
-              placeholder="https://example.com/image.jpg — استخدم استضافة أو CDN عام"
-              class="template-var-input flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" 
-              oninput="updatePreviewRealtime()"
-            />
-            <p class="text-body-xs text-muted-foreground">رابط واتساب الداخلي غير مقبول. الصق رابطاً عاماً للصورة/الوسائط.</p>
-          </div>
-        `;
-      }
       
       for (let i = 0; i < totalVars; i++) {
         const varNum = i + 1;
@@ -3515,24 +3500,14 @@
       renderTemplatePreview();
     }
     
-    // الحصول على قيم المتغيرات المدخلة (بما فيها رابط وسائط الرأس)
+    // الحصول على قيم المتغيرات المدخلة
     function getVariableValues() {
       const values = {};
       const inputs = document.querySelectorAll('.template-var-input');
-      
       inputs.forEach(input => {
         const varNum = input.getAttribute('data-var-num');
         if (varNum) values[varNum] = input.value || '';
       });
-      
-      const headerMediaUrl = document.getElementById('template-header-media-url')?.value?.trim() || '';
-      if (headerMediaUrl) {
-        const t = currentTemplateAnalysis?.header?.type;
-        if (t === 'image') values['header_image'] = headerMediaUrl;
-        else if (t === 'video') values['header_video'] = headerMediaUrl;
-        else if (t === 'document') values['header_document'] = headerMediaUrl;
-      }
-      
       return values;
     }
     
@@ -3584,9 +3559,9 @@
       // معاينة المحتوى
       let contentHTML = '<div class="bg-background rounded-lg p-3 border border-border space-y-2">';
       
-      // Header — عرض الشكل النهائي كما سيراه العميل (الرابط المدخل أولاً)
+      // Header — عرض الشكل النهائي (صورة الرأس من القالب)
       if (preview.header) {
-        const headerMediaUrlForPreview = varValues['header_image'] || varValues['header_video'] || varValues['header_document'] || preview.headerMediaUrl;
+        const headerMediaUrlForPreview = preview.headerMediaUrl;
         if (preview.headerType === 'TEXT') {
           let headerText = escapeHtml(preview.header);
           headerText = replaceVariablesWithValues(headerText, varValues);

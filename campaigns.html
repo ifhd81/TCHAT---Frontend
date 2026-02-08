@@ -253,17 +253,24 @@
                   <option value="200">200 عميل</option>
                   <option value="300">300 عميل</option>
                   <option value="500">500 عميل</option>
+                  <option value="1000">1,000 عميل</option>
+                  <option value="5000">5,000 عميل</option>
+                  <option value="10000">10,000 عميل</option>
+                  <option value="20000">20,000 عميل</option>
                 </select>
               </div>
               <div class="space-y-2">
                 <label class="text-body-sm font-medium">الفترة بين الدفعات</label>
                 <select id="batch-interval" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                  <option value="1" selected>ساعة واحدة</option>
-                  <option value="2">ساعتان</option>
-                  <option value="3">3 ساعات</option>
-                  <option value="6">6 ساعات</option>
-                  <option value="12">12 ساعة</option>
-                  <option value="24">24 ساعة</option>
+                  <option value="5">5 دقائق</option>
+                  <option value="15">15 دقيقة</option>
+                  <option value="30">30 دقيقة</option>
+                  <option value="60" selected>ساعة واحدة</option>
+                  <option value="120">ساعتان</option>
+                  <option value="180">3 ساعات</option>
+                  <option value="360">6 ساعات</option>
+                  <option value="720">12 ساعة</option>
+                  <option value="1440">24 ساعة</option>
                 </select>
               </div>
               <div class="space-y-2">
@@ -558,6 +565,23 @@
     let currentPage = 1;
     const itemsPerPage = 10;
 
+    // تنسيق الفترة بين الدفعات (دقائق أو ساعات)
+    function formatCampaignInterval(campaign) {
+      const min = campaign.batch_interval_minutes || 0;
+      if (min > 0) {
+        if (min < 60) return min + (min === 1 ? ' دقيقة' : ' دقائق');
+        if (min === 60) return 'ساعة واحدة';
+        const h = min / 60;
+        if (h === 2) return 'ساعتان';
+        return h + ' ساعات';
+      }
+      const h = campaign.batch_interval_hours || 0;
+      if (h <= 0) return '-';
+      if (h === 1) return 'ساعة واحدة';
+      if (h === 2) return 'ساعتان';
+      return h + ' ساعات';
+    }
+
     // تحميل الحملات
     async function loadAndRenderCampaigns() {
       const tbody = document.getElementById('campaigns-table-body');
@@ -641,7 +665,7 @@
             <td class="px-4 py-4 text-center">
               <div class="text-body-sm text-muted-foreground">
                 <div class="number">${campaign.batch_size}</div>
-                <div>كل <span class="number">${campaign.batch_interval_hours}</span> ساعة</div>
+                <div>كل ${formatCampaignInterval(campaign)}</div>
               </div>
             </td>
             <td class="px-4 py-4 text-center">
@@ -1120,7 +1144,9 @@
 
       const totalRecipients = selectedRecipients.length;
       const batchCount = Math.ceil(totalRecipients / batchSize);
-      const totalDuration = (batchCount - 1) * batchInterval;
+      const totalDurationMinutes = (batchCount - 1) * batchInterval;
+      const intervalLabel = batchInterval < 60 ? (batchInterval + ' دقيقة') : (batchInterval === 60 ? 'ساعة واحدة' : (batchInterval / 60) + ' ساعة');
+      const durationLabel = totalDurationMinutes < 60 ? (totalDurationMinutes + ' دقيقة') : (totalDurationMinutes / 60) + ' ساعة';
 
       previewContent.innerHTML = `
           <div class="space-y-2 text-body-sm">
@@ -1134,11 +1160,11 @@
             </div>
             <div class="flex justify-between">
               <span>الفترة بين الدفعات:</span>
-              <span class="number">${batchInterval}</span> ساعة
+              <span class="number">${intervalLabel}</span>
             </div>
             <div class="flex justify-between">
               <span>المدة الإجمالية:</span>
-              <span class="number">${totalDuration}</span> ساعة
+              <span class="number">${durationLabel}</span>
             </div>
           </div>
       `;
@@ -1175,9 +1201,10 @@
         return;
       }
       
-      // حساب عدد الدفعات والمدة
+      // حساب عدد الدفعات والمدة (batchInterval بالدقائق)
       const totalBatches = sendType === 'all' ? 1 : Math.ceil(selectedRecipients.length / batchSize);
-      const totalDuration = sendType === 'all' ? 0 : (totalBatches - 1) * batchInterval;
+      const totalDurationMinutes = sendType === 'all' ? 0 : (totalBatches - 1) * batchInterval;
+      const totalDurationLabel = totalDurationMinutes < 60 ? (totalDurationMinutes + ' دقيقة') : (totalDurationMinutes / 60) + ' ساعة';
       
       // البحث عن اسم القالب
       const template = availableTemplates.find(t => t.name === templateName);
@@ -1230,7 +1257,7 @@
                 </div>
                 <div class="flex justify-between items-center py-2 border-b border-border">
                   <span class="text-muted-foreground">المدة الإجمالية</span>
-                  <span class="font-semibold number">${totalDuration} ساعة</span>
+                  <span class="font-semibold number">${totalDurationLabel}</span>
                 </div>
                 ` : ''}
                 <div class="flex justify-between items-center py-2">
@@ -1305,7 +1332,8 @@
           template_language: 'ar',
           whatsapp_phone_number_id: whatsappPhoneNumberID,
           batch_size: sendType === 'all' ? selectedRecipients.length : batchSize,
-          batch_interval_hours: sendType === 'all' ? 0 : batchInterval,
+          batch_interval_hours: sendType === 'all' ? 0 : (batchInterval >= 60 ? batchInterval / 60 : 0),
+          batch_interval_minutes: sendType === 'all' ? 0 : batchInterval,
           is_smart_send: isSmartSend,
           recipients: selectedRecipients
         };
@@ -1616,7 +1644,7 @@
                       </div>
                       <div class="flex items-center gap-2 text-body-sm">
                         <i data-lucide="clock" class="h-4 w-4 text-muted-foreground"></i>
-                        <span>الفترة: كل <span class="font-semibold number">${campaign.batch_interval_hours}</span> ساعة</span>
+                        <span>الفترة: كل <span class="font-semibold number">${formatCampaignInterval(campaign)}</span></span>
                       </div>
                       ${campaign.is_smart_send ? `
                         <div class="flex items-center gap-2 text-body-sm text-primary">

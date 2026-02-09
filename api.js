@@ -237,19 +237,23 @@ async function loadCustomers(limit = 50) {
   }
 }
 
-// تحميل قائمة المحادثات
-async function loadConversations(limit = 50) {
+// تحميل قائمة المحادثات مع دعم الـ pagination (كل صفحة ١٠٠)
+// limit: عدد المحادثات في الصفحة (افتراضي ١٠٠)، offset: التخطي للصفحة التالية
+// يُرجع: { data: [...], pagination: { limit, offset, has_more } }
+async function loadConversations(limit = 100, offset = 0) {
   try {
-    const data = await apiRequest(`/conversations?limit=${limit}`);
-    console.log('Conversations Response:', data);
-    if (data.success && Array.isArray(data.data)) {
-      return data.data;
+    const res = await apiRequest(`/conversations?limit=${limit}&offset=${offset}`);
+    if (res.success && Array.isArray(res.data)) {
+      return {
+        data: res.data,
+        pagination: res.pagination || { limit, offset, has_more: false },
+      };
     }
-    console.error('فشل في جلب المحادثات:', data);
-    return [];
+    console.error('فشل في جلب المحادثات:', res);
+    return { data: [], pagination: { limit, offset, has_more: false } };
   } catch (error) {
     console.error('خطأ في تحميل المحادثات:', error);
-    return [];
+    return { data: [], pagination: { limit, offset, has_more: false } };
   }
 }
 
@@ -275,7 +279,7 @@ let previousUnreadCount = 0;
 
 async function checkUnreadConversations() {
   try {
-    const conversations = await loadConversations(50);
+    const { data: conversations } = await loadConversations(100, 0);
     const unreadCount = conversations.filter(conv => !conv.is_read).length;
     
     const indicator = document.getElementById('unread-indicator');

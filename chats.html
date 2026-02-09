@@ -246,8 +246,10 @@
       return `${typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1'}/media/${mediaId}${t ? '?token=' + encodeURIComponent(t) : ''}`;
     }
 
+    const CONVERSATIONS_PAGE_SIZE = 100; // عدد المحادثات في كل صفحة
     let currentConversationId = null;
     let conversations = [];
+    let conversationsHasMore = false; // هل توجد صفحات إضافية للمحادثات؟
     let previousMessageCount = 0; // لتتبع عدد الرسائل
     let audioEnabled = false; // لتتبع تفعيل الصوت
     let is24HourWindowClosed = false; // تتبع حالة نافذة الـ 24 ساعة
@@ -347,63 +349,81 @@
       }
     }
 
-    async function loadAndRenderConversations(showLoading = false) {
+    // append: true = تحميل المزيد (إلحاق بالقائمة)، false = تحميل من البداية أو تحديث
+    async function loadAndRenderConversations(showLoading = false, append = false) {
       const listEl = document.getElementById('conversations-list');
-      
-      if (showLoading) {
+      const offset = append ? conversations.length : 0;
+
+      if (showLoading && !append) {
         listEl.innerHTML = '<div class="p-4 text-center text-body-sm text-muted-foreground">جاري تحميل المحادثات...</div>';
+      }
+      if (append) {
+        const loadMoreBtn = document.getElementById('conversations-load-more');
+        if (loadMoreBtn) {
+          loadMoreBtn.disabled = true;
+          loadMoreBtn.textContent = 'جاري التحميل...';
+        }
       }
 
       try {
-        const newConversations = await loadConversations(100);
-        
-        // التحقق من وجود محادثات جديدة أو رسائل جديدة
+        const { data: newConversations, pagination } = await loadConversations(CONVERSATIONS_PAGE_SIZE, offset);
+        conversationsHasMore = pagination && pagination.has_more === true;
+
+        if (append) {
+          conversations = conversations.concat(newConversations);
+          renderConversations();
+          const loadMoreBtn = document.getElementById('conversations-load-more');
+          if (loadMoreBtn) {
+            loadMoreBtn.disabled = false;
+            loadMoreBtn.textContent = 'تحميل المزيد';
+          }
+          return;
+        }
+
+        // التحقق من وجود محادثات جديدة أو رسائل جديدة (عند التحديث العادي)
         let shouldPlaySound = false;
-        
         if (!showLoading && conversations.length > 0) {
-          // البحث عن محادثات جديدة تماماً
           const oldIds = new Set(conversations.map(c => c.id));
           const newConvs = newConversations.filter(c => !oldIds.has(c.id) && !c.is_read);
-          
           if (newConvs.length > 0) {
             console.log('🆕 محادثة جديدة!', newConvs);
             shouldPlaySound = true;
           }
-          
-          // البحث عن محادثات تحولت من مقروءة إلى غير مقروءة (رسالة جديدة)
           for (const newConv of newConversations) {
             const oldConv = conversations.find(c => c.id === newConv.id);
-            if (oldConv) {
-              // تحقق إذا كان هناك رسالة جديدة (last_message_at تغير)
-              if (newConv.last_message_at !== oldConv.last_message_at && !newConv.is_read) {
-                console.log('💬 رسالة جديدة في محادثة:', newConv.customer_name);
-                shouldPlaySound = true;
-                break;
-              }
+            if (oldConv && newConv.last_message_at !== oldConv.last_message_at && !newConv.is_read) {
+              console.log('💬 رسالة جديدة في محادثة:', newConv.customer_name);
+              shouldPlaySound = true;
+              break;
             }
           }
         }
-        
-        // مقارنة البيانات الجديدة مع القديمة لتجنب إعادة العرض غير الضرورية
+
         const conversationsChanged = JSON.stringify(conversations) !== JSON.stringify(newConversations);
-        
         if (conversationsChanged) {
           conversations = newConversations;
           renderConversations();
           console.log('📝 تم تحديث قائمة المحادثات');
         }
-        
-        // تشغيل صوت التنبيه
         if (shouldPlaySound) {
           console.log('🔔 تشغيل صوت للمحادثة الجديدة/الرسالة الجديدة');
           playNotificationSound();
         }
       } catch (error) {
         console.error('خطأ في تحميل المحادثات:', error);
-        if (showLoading) {
+        if (showLoading && !append) {
           listEl.innerHTML = '<div class="p-4 text-center text-destructive text-body-sm">تعذر تحميل المحادثات</div>';
         }
+        const loadMoreBtn = document.getElementById('conversations-load-more');
+        if (loadMoreBtn) {
+          loadMoreBtn.disabled = false;
+          loadMoreBtn.textContent = 'تحميل المزيد';
+        }
       }
+    }
+
+    function loadMoreConversations() {
+      loadAndRenderConversations(false, true);
     }
 
     function renderConversations() {
@@ -473,7 +493,12 @@
             </div>
           </div>
         `;
-      }).join('');
+      }).join('') + (conversationsHasMore ? `
+      <div class="p-4 text-center border-t border-border">
+        <button type="button" id="conversations-load-more" onclick="loadMoreConversations()" class="inline-flex items-center justify-center gap-2 rounded-md bg-muted px-4 py-2 text-body-sm font-medium text-foreground hover:bg-muted/80 transition">
+          تحميل المزيد
+        </button>
+      </div>` : '');
       lucide.createIcons();
     }
 

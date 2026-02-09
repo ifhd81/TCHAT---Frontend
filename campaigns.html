@@ -179,12 +179,12 @@
             </div>
             
             <!-- صورة الرأس (تظهر عند اختيار قالب يحتوي صورة رأس) -->
-            <div id="create-campaign-header-image-box" class="space-y-2 p-3 rounded-lg border border-amber-500/30 bg-amber-500/5 hidden">
-              <label class="text-body-sm font-medium flex items-center gap-2">
-                <i data-lucide="image" class="h-4 w-4 text-amber-600"></i>
+            <div id="create-campaign-header-image-box" class="space-y-2 p-4 rounded-xl border border-primary/25 bg-primary/5 hidden">
+              <label class="text-body-sm font-medium flex items-center gap-2 text-foreground">
+                <i data-lucide="image" class="h-4 w-4 text-primary shrink-0"></i>
                 <span>صورة الرأس (مطلوب للقالب)</span>
               </label>
-              <p class="text-body-xs text-muted-foreground">ارفع صورة رأس الرسالة. بدونها قد يفشل التسليم.</p>
+              <p class="text-body-2xs text-muted-foreground">ارفع صورة رأس الرسالة. بدونها قد يفشل التسليم.</p>
               <input type="file" id="create-campaign-header-image-file" accept="image/jpeg,image/png,image/jpg" class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1 file:text-body-sm file:text-primary-foreground" />
               <input type="hidden" id="create-campaign-header-image-url" value="" />
               <div id="create-campaign-header-image-preview" class="hidden mt-2 rounded-lg overflow-hidden border border-border bg-muted/20 max-w-xs">
@@ -510,6 +510,28 @@
     </div>
   </div>
 
+  <!-- مودال تأكيد حذف الحملة -->
+  <div id="confirm-delete-campaign-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/50 backdrop-blur-sm" aria-modal="true">
+    <div class="mx-4 w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg">
+      <div class="flex items-center gap-3 text-destructive mb-4">
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10">
+          <i data-lucide="alert-triangle" class="h-5 w-5 text-destructive"></i>
+        </span>
+        <h3 class="text-heading-md font-semibold text-foreground">تأكيد حذف الحملة</h3>
+      </div>
+      <p class="text-body-sm text-muted-foreground mb-2">هل أنت متأكد من حذف الحملة <strong id="confirm-delete-campaign-name" class="text-foreground"></strong>؟</p>
+      <p class="text-body-xs text-muted-foreground mb-6">سيتم حذف الحملة وجميع بياناتها نهائياً ولا يمكن التراجع عن هذا الإجراء.</p>
+      <div class="flex items-center justify-end gap-2">
+        <button type="button" id="confirm-delete-campaign-cancel" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
+          إلغاء
+        </button>
+        <button type="button" id="confirm-delete-campaign-submit" class="inline-flex items-center gap-2 rounded-md bg-destructive px-4 py-2 text-body-sm font-medium text-destructive-foreground transition hover:bg-destructive/90">
+          حذف الحملة
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ==================== نظام الإشعارات Toast ====================
     function showToast(message, type = 'info') {
@@ -698,7 +720,7 @@
                     <i data-lucide="repeat" class="h-3 w-3"></i>
                   </button>
                 ` : ''}
-                <button onclick="deleteCampaign(${campaign.id}, '${campaign.name}')" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-destructive p-0 text-destructive-foreground transition hover:bg-destructive/90" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="حذف الحملة">
+                <button type="button" class="btn-delete-campaign inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-destructive p-0 text-destructive-foreground transition hover:bg-destructive/90" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="حذف الحملة" data-campaign-id="${campaign.id}" data-campaign-name="${(campaign.name || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}">
                   <i data-lucide="trash-2" class="h-3 w-3"></i>
                 </button>
               </div>
@@ -2067,14 +2089,8 @@
       }
     }
 
-    // حذف حملة واحدة
+    // حذف حملة واحدة (يُستدعى بعد التأكيد من المودال)
     async function deleteCampaign(campaignId, campaignName) {
-      const confirmed = confirm(`هل أنت متأكد من حذف الحملة "${campaignName}"؟\n\n⚠️ سيتم حذف الحملة وجميع بياناتها نهائياً ولا يمكن التراجع عن هذا الإجراء.`);
-      
-      if (!confirmed) {
-        return;
-      }
-
       try {
         const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}`, {
           method: 'DELETE',
@@ -2087,6 +2103,7 @@
         
         if (result.success) {
           showToast('تم حذف الحملة بنجاح!', 'success');
+          hideConfirmDeleteCampaignModal();
           refreshCampaigns();
         } else {
           showToast('فشل في حذف الحملة: ' + (result.error || result.message || 'خطأ غير معروف'), 'error');
@@ -2095,6 +2112,24 @@
         console.error('خطأ في حذف الحملة:', error);
         showToast('تعذر حذف الحملة. تحقق من الاتصال', 'error');
       }
+    }
+
+    let pendingDeleteCampaign = null;
+
+    function showConfirmDeleteCampaignModal(campaignId, campaignName) {
+      pendingDeleteCampaign = { id: campaignId, name: campaignName };
+      document.getElementById('confirm-delete-campaign-name').textContent = campaignName || '(بدون اسم)';
+      const modal = document.getElementById('confirm-delete-campaign-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function hideConfirmDeleteCampaignModal() {
+      pendingDeleteCampaign = null;
+      const modal = document.getElementById('confirm-delete-campaign-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
     }
 
     // حذف جميع الحملات
@@ -2377,6 +2412,28 @@
       
       lucide.createIcons();
       loadAndRenderCampaigns();
+
+      // تأكيد الحذف: عرض مودال التأكيد بدل confirm()
+      document.getElementById('campaigns-table-body').addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-delete-campaign');
+        if (!btn) return;
+        e.preventDefault();
+        const id = btn.getAttribute('data-campaign-id');
+        const name = btn.getAttribute('data-campaign-name') || '';
+        if (id) showConfirmDeleteCampaignModal(parseInt(id, 10), name);
+      });
+
+      document.getElementById('confirm-delete-campaign-cancel').addEventListener('click', hideConfirmDeleteCampaignModal);
+      document.getElementById('confirm-delete-campaign-submit').addEventListener('click', function() {
+        if (pendingDeleteCampaign) {
+          const { id, name } = pendingDeleteCampaign;
+          this.disabled = true;
+          deleteCampaign(id, name).finally(() => { this.disabled = false; });
+        }
+      });
+      document.getElementById('confirm-delete-campaign-modal').addEventListener('click', function(e) {
+        if (e.target === this) hideConfirmDeleteCampaignModal();
+      });
       
       // إضافة مستمعات للتحديث التلقائي
       document.getElementById('batch-size').addEventListener('change', updateBatchPreview);

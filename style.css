@@ -107,6 +107,18 @@
   font-weight: 400 !important;
 }
 
+.text-body-xs {
+  font-size: 10px;
+  line-height: 1.4;
+  font-weight: 400 !important;
+}
+
+.text-body-2xs {
+  font-size: 9px;
+  line-height: 1.35;
+  font-weight: 400 !important;
+}
+
 .text-button-lg {
   font-size: 14px;
   line-height: 1.2;

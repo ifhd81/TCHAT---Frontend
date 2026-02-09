@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,14 +12,15 @@
   <script src="./components/header.js"></script>
   <script src="./components/confirm-modal.js"></script>
 </head>
+
 <body class="rtl min-h-screen bg-background" style="font-family: 'LamaSans', sans-serif;">
-  
+
   <!-- Header Container -->
   <div id="header-container"></div>
 
   <!-- Main Content -->
   <main class="container mx-auto px-4 py-8">
-    
+
     <!-- Page Header -->
     <section class="mb-8 flex items-center justify-between">
       <div>
@@ -26,15 +28,18 @@
         <p class="text-body-sm text-muted-foreground">إنشاء وإدارة حملات واتساب للعملاء</p>
       </div>
       <div class="flex items-center gap-3">
-        <button onclick="showTestSendModal()" class="inline-flex items-center gap-2 rounded-md border border-primary bg-primary/10 px-4 py-2 text-button-md font-medium text-primary shadow-sm transition hover:bg-primary/20">
+        <button onclick="showTestSendModal()"
+          class="inline-flex items-center gap-2 rounded-md border border-primary bg-primary/10 px-4 py-2 text-button-md font-medium text-primary shadow-sm transition hover:bg-primary/20">
           <i data-lucide="send" class="h-4 w-4"></i>
           <span>إرسال تجريبي</span>
         </button>
-        <button onclick="deleteAllCampaigns()" class="inline-flex items-center gap-2 rounded-md border border-destructive bg-destructive/10 px-4 py-2 text-button-md font-medium text-destructive shadow-sm transition hover:bg-destructive/20">
+        <button onclick="deleteAllCampaigns()"
+          class="inline-flex items-center gap-2 rounded-md border border-destructive bg-destructive/10 px-4 py-2 text-button-md font-medium text-destructive shadow-sm transition hover:bg-destructive/20">
           <i data-lucide="trash-2" class="h-4 w-4"></i>
           <span>حذف الكل</span>
         </button>
-        <button onclick="showCreateCampaignModal()" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90">
+        <button onclick="showCreateCampaignModal()"
+          class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90">
           <i data-lucide="plus" class="h-4 w-4"></i>
           <span>حملة جديدة</span>
         </button>
@@ -50,11 +55,13 @@
             <h2 class="text-heading-md font-semibold">الحملات الحالية</h2>
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="updateAllCampaignStatuses()" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground">
+            <button onclick="updateAllCampaignStatuses()"
+              class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground">
               <i data-lucide="zap" class="h-4 w-4"></i>
               <span>تحديث الحالات</span>
             </button>
-            <button onclick="refreshCampaigns()" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
+            <button onclick="refreshCampaigns()"
+              class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
               <i data-lucide="refresh-cw" class="h-4 w-4"></i>
             </button>
           </div>
@@ -81,18 +88,24 @@
           </tbody>
         </table>
       </div>
-      
+
       <!-- Pagination -->
       <div class="border-t border-border p-4">
         <div class="flex items-center justify-between">
           <div class="text-body-sm text-muted-foreground">
-            عرض <span id="showing-from" class="text-body-sm font-medium number">0</span> - <span id="showing-to" class="text-body-sm font-medium number">0</span> من <span id="total-campaigns" class="text-body-sm font-medium number">0</span> حملة
+            عرض <span id="showing-from" class="text-body-sm font-medium number">0</span> - <span id="showing-to"
+              class="text-body-sm font-medium number">0</span> من <span id="total-campaigns"
+              class="text-body-sm font-medium number">0</span> حملة
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="goToFirstPage()" id="first-page-btn" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            <button onclick="goToFirstPage()" id="first-page-btn"
+              class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled>
               <i data-lucide="chevrons-right" class="h-4 w-4"></i>
             </button>
-            <button onclick="goToPrevPage()" id="prev-page-btn" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            <button onclick="goToPrevPage()" id="prev-page-btn"
+              class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled>
               <i data-lucide="chevron-right" class="h-4 w-4"></i>
             </button>
             <div class="flex items-center gap-1 px-2">
@@ -101,10 +114,14 @@
               <span class="text-body-sm text-muted-foreground">من</span>
               <span id="total-pages-num" class="text-body-sm font-medium number">1</span>
             </div>
-            <button onclick="goToNextPage()" id="next-page-btn" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            <button onclick="goToNextPage()" id="next-page-btn"
+              class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled>
               <i data-lucide="chevron-left" class="h-4 w-4"></i>
             </button>
-            <button onclick="goToLastPage()" id="last-page-btn" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            <button onclick="goToLastPage()" id="last-page-btn"
+              class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled>
               <i data-lucide="chevrons-left" class="h-4 w-4"></i>
             </button>
           </div>
@@ -130,65 +147,75 @@
   </div>
 
   <!-- Create Campaign Modal -->
-  <div id="create-campaign-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div id="create-campaign-modal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
     <div class="w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
       <div class="rounded-xl border bg-card shadow-lg">
-        
+
         <!-- Modal Header -->
         <div class="flex items-center justify-between border-b border-border p-6">
           <div>
             <h2 class="text-heading-lg font-bold">إنشاء حملة تسويقية جديدة</h2>
             <p class="text-body-sm text-muted-foreground mt-1">قم بإعداد الحملة واختيار المستقبلين</p>
           </div>
-          <button onclick="hideCreateCampaignModal()" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
+          <button onclick="hideCreateCampaignModal()"
+            class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
             <i data-lucide="x" class="h-4 w-4"></i>
           </button>
         </div>
 
         <!-- Modal Content -->
         <div class="p-6 space-y-6">
-          
+
           <!-- Step 1: Campaign Info -->
           <div class="space-y-4">
             <h3 class="text-heading-md font-semibold flex items-center gap-2">
-              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
+              <span
+                class="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
               معلومات الحملة
             </h3>
-            
+
             <div class="grid gap-4 md:grid-cols-2">
               <div class="space-y-2">
                 <label class="text-body-sm font-medium">اسم الحملة</label>
-                <input type="text" id="campaign-name" placeholder="أدخل اسم الحملة" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                <input type="text" id="campaign-name" placeholder="أدخل اسم الحملة"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
               </div>
               <div class="space-y-2">
                 <label class="text-body-sm font-medium">القالب</label>
-                <select id="campaign-template" onchange="onCreateCampaignTemplateChange()" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <select id="campaign-template" onchange="onCreateCampaignTemplateChange()"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <option value="">اختر القالب</option>
                 </select>
               </div>
             </div>
-            
+
             <div class="space-y-2">
               <label class="text-body-sm font-medium flex items-center gap-2">
                 <i data-lucide="phone" class="h-4 w-4"></i>
                 <span>رقم الواتساب للإرسال</span>
               </label>
-              <select id="whatsapp-phone-number" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" style="font-variant-numeric: lining-nums;">
+              <select id="whatsapp-phone-number"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                style="font-variant-numeric: lining-nums;">
                 <option value="">جاري تحميل الأرقام...</option>
               </select>
               <p class="text-body-xs text-muted-foreground">اختر الرقم الذي سيتم الإرسال منه في هذه الحملة</p>
             </div>
-            
+
             <!-- صورة الرأس (تظهر عند اختيار قالب يحتوي صورة رأس) -->
-            <div id="create-campaign-header-image-box" class="space-y-2 p-4 rounded-xl border border-primary/25 bg-primary/5 hidden">
+            <div id="create-campaign-header-image-box"
+              class="space-y-2 p-4 rounded-xl border border-primary/25 bg-primary/5 hidden">
               <label class="text-body-sm font-medium flex items-center gap-2 text-foreground">
                 <i data-lucide="image" class="h-4 w-4 text-primary shrink-0"></i>
                 <span>صورة الرأس (مطلوب للقالب)</span>
               </label>
               <p class="text-body-2xs text-muted-foreground">ارفع صورة رأس الرسالة. بدونها قد يفشل التسليم.</p>
-              <input type="file" id="create-campaign-header-image-file" accept="image/jpeg,image/png,image/jpg" class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1 file:text-body-sm file:text-primary-foreground" />
+              <input type="file" id="create-campaign-header-image-file" accept="image/jpeg,image/png,image/jpg"
+                class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1 file:text-body-sm file:text-primary-foreground" />
               <!-- مؤشر رفع الصورة -->
-              <div id="create-campaign-header-image-upload-progress" class="hidden mt-2 p-3 rounded-lg border border-primary/25 bg-primary/10 space-y-2">
+              <div id="create-campaign-header-image-upload-progress"
+                class="hidden mt-2 p-3 rounded-lg border border-primary/25 bg-primary/10 space-y-2">
                 <div class="flex items-center justify-between text-body-sm text-primary">
                   <div class="flex items-center gap-2">
                     <i data-lucide="loader-2" class="h-4 w-4 shrink-0 animate-spin"></i>
@@ -197,32 +224,38 @@
                   <span id="create-campaign-header-image-upload-percent" class="tabular-nums">0%</span>
                 </div>
                 <div class="h-2 rounded-full bg-primary/20 overflow-hidden">
-                  <div id="create-campaign-header-image-upload-progress-bar" class="h-full rounded-full bg-primary transition-[width] duration-150" style="width: 0%"></div>
+                  <div id="create-campaign-header-image-upload-progress-bar"
+                    class="h-full rounded-full bg-primary transition-[width] duration-150" style="width: 0%"></div>
                 </div>
               </div>
               <input type="hidden" id="create-campaign-header-image-url" value="" />
-              <div id="create-campaign-header-image-preview" class="hidden mt-2 rounded-lg overflow-hidden border border-border bg-muted/20 max-w-xs">
-                <img id="create-campaign-header-image-preview-img" src="" alt="معاينة" class="w-full max-h-32 object-cover" />
+              <div id="create-campaign-header-image-preview"
+                class="hidden mt-2 rounded-lg overflow-hidden border border-border bg-muted/20 max-w-xs">
+                <img id="create-campaign-header-image-preview-img" src="" alt="معاينة"
+                  class="w-full max-h-32 object-cover" />
               </div>
             </div>
-            
+
             <div class="space-y-2">
               <label class="text-body-sm font-medium">وصف الحملة</label>
-              <textarea id="campaign-description" placeholder="وصف مختصر للحملة" rows="3" class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
+              <textarea id="campaign-description" placeholder="وصف مختصر للحملة" rows="3"
+                class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
             </div>
           </div>
 
           <!-- Step 2: Recipients -->
           <div class="space-y-4">
             <h3 class="text-heading-md font-semibold flex items-center gap-2">
-              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">2</span>
+              <span
+                class="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">2</span>
               المستقبلين
             </h3>
-            
+
             <div class="grid gap-4 md:grid-cols-2">
               <div class="space-y-2">
                 <label class="text-body-sm font-medium">مصدر البيانات</label>
-                <select id="recipients-source" onchange="handleRecipientsSourceChange()" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <select id="recipients-source" onchange="handleRecipientsSourceChange()"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <option value="database" data-count="0">العملاء المسجلين (جاري التحميل...)</option>
                   <option value="manual" data-count="0">إدخال يدوي (0)</option>
                   <option value="csv" data-count="0">رفع ملف CSV (0)</option>
@@ -233,14 +266,17 @@
                   <i data-lucide="globe" class="h-4 w-4"></i>
                   <span>الدولة المستهدفة</span>
                 </label>
-                <select id="target-country-dial-code" onchange="onTargetCountryChange()" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <select id="target-country-dial-code" onchange="onTargetCountryChange()"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <option value="">جميع العملاء</option>
                 </select>
-                <p class="text-body-xs text-muted-foreground">اختياري: إرسال للأرقام التي تبدأ بمفتاح الدولة فقط (مثل +966)</p>
+                <p class="text-body-xs text-muted-foreground">اختياري: إرسال للأرقام التي تبدأ بمفتاح الدولة فقط (مثل
+                  +966)</p>
               </div>
               <div class="space-y-2" id="csv-upload-section" style="display: none;">
                 <label class="text-body-sm font-medium">ملف CSV</label>
-                <input type="file" id="csv-file" accept=".csv" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                <input type="file" id="csv-file" accept=".csv"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
               </div>
             </div>
 
@@ -248,13 +284,11 @@
             <div id="manual-input-section" class="space-y-4" style="display: none;">
               <div class="space-y-2">
                 <label class="text-body-sm font-medium">أرقام الهواتف والأسماء</label>
-                <textarea 
-                  id="manual-recipients" 
+                <textarea id="manual-recipients"
                   placeholder="أدخل الأرقام والأسماء بالتنسيق التالي:&#10;966501234567,أحمد محمد&#10;966509876543,فاطمة علي&#10;966555555555,خالد السعيد&#10;&#10;أو أرقام فقط (سطر واحد لكل رقم):&#10;966501234567&#10;966509876543"
-                  rows="8" 
+                  rows="8"
                   class="flex min-h-[160px] w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-mono"
-                  oninput="parseManualRecipients()"
-                ></textarea>
+                  oninput="parseManualRecipients()"></textarea>
               </div>
               <div class="flex items-center gap-4 text-body-sm text-muted-foreground">
                 <div class="flex items-center gap-2">
@@ -268,9 +302,11 @@
               </div>
             </div>
 
-            <div id="recipients-preview" class="rounded-xl border border-border bg-gradient-to-b from-muted/30 to-muted/10 p-0 overflow-hidden">
+            <div id="recipients-preview"
+              class="rounded-xl border border-border bg-gradient-to-b from-muted/30 to-muted/10 p-0 overflow-hidden">
               <div class="text-center text-body-sm text-muted-foreground py-8 px-4">
-                <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-3">
+                <div
+                  class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-3">
                   <i data-lucide="users" class="h-6 w-6"></i>
                 </div>
                 <p class="font-medium text-foreground/80">سيتم عرض المستقبلين هنا</p>
@@ -282,14 +318,16 @@
           <!-- Step 3: Batch Settings -->
           <div class="space-y-4">
             <h3 class="text-heading-md font-semibold flex items-center gap-2">
-              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">3</span>
+              <span
+                class="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">3</span>
               إعدادات الإرسال
             </h3>
-            
+
             <div class="grid gap-4 md:grid-cols-3">
               <div class="space-y-2">
                 <label class="text-body-sm font-medium">حجم الدفعة</label>
-                <select id="batch-size" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <select id="batch-size"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <option value="50">50 عميل</option>
                   <option value="100" selected>100 عميل</option>
                   <option value="200">200 عميل</option>
@@ -303,7 +341,8 @@
               </div>
               <div class="space-y-2">
                 <label class="text-body-sm font-medium">الفترة بين الدفعات</label>
-                <select id="batch-interval" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <select id="batch-interval"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <option value="5">5 دقائق</option>
                   <option value="15">15 دقيقة</option>
                   <option value="30">30 دقيقة</option>
@@ -317,7 +356,8 @@
               </div>
               <div class="space-y-2">
                 <label class="text-body-sm font-medium">نوع الإرسال</label>
-                <select id="send-type" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <select id="send-type"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <option value="batch" selected>مجزأ (موصى به)</option>
                   <option value="all">الكل دفعة واحدة</option>
                 </select>
@@ -327,15 +367,20 @@
             <!-- Smart Send Checkbox -->
             <div class="rounded-lg border border-border bg-card p-4">
               <label class="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" id="enable-smart-send" onchange="handleSmartSendToggle()" class="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary focus:ring-offset-2" checked />
+                <input type="checkbox" id="enable-smart-send" onchange="handleSmartSendToggle()"
+                  class="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  checked />
                 <div class="flex-1">
                   <div class="flex items-center gap-2">
                     <i data-lucide="zap" class="h-4 w-4 text-primary"></i>
                     <span class="text-body-md font-semibold">تفعيل الإرسال الذكي</span>
-                    <span class="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary">موصى به</span>
+                    <span
+                      class="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary">موصى
+                      به</span>
                   </div>
                   <p class="text-body-sm text-muted-foreground mt-1">
-                    استبعاد الأرقام التي تم الإرسال لها خلال آخر <span class="font-semibold text-foreground">10 أيام</span> لتجنب الإزعاج وتحسين معدل التفاعل
+                    استبعاد الأرقام التي تم الإرسال لها خلال آخر <span class="font-semibold text-foreground">10
+                      أيام</span> لتجنب الإزعاج وتحسين معدل التفاعل
                   </p>
                 </div>
               </label>
@@ -348,15 +393,17 @@
                 <div class="flex-1">
                   <h4 class="text-body-md font-semibold text-primary mb-1">الإرسال الذكي ✨</h4>
                   <p class="text-body-sm text-muted-foreground mb-3">
-                    سيتم فحص الأرقام المدخلة واستبعاد من تم الإرسال لهم خلال آخر <span class="font-semibold text-foreground">10 أيام</span> لتجنب الإزعاج وتحسين معدل التفاعل.
+                    سيتم فحص الأرقام المدخلة واستبعاد من تم الإرسال لهم خلال آخر <span
+                      class="font-semibold text-foreground">10 أيام</span> لتجنب الإزعاج وتحسين معدل التفاعل.
                   </p>
-                  <button onclick="runSmartSendCheck()" id="check-recipients-btn" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50">
+                  <button onclick="runSmartSendCheck()" id="check-recipients-btn"
+                    class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50">
                     <i data-lucide="scan-search" class="h-4 w-4"></i>
                     <span>فحص الأرقام الآن</span>
                   </button>
                 </div>
               </div>
-              
+
               <!-- Smart Send Results -->
               <div id="smart-send-results" class="mt-4 hidden">
                 <div class="grid gap-3 md:grid-cols-3">
@@ -370,7 +417,8 @@
                   </div>
                   <div class="rounded-lg border border-orange-500 bg-orange-500/10 p-3">
                     <div class="text-body-xs text-orange-700 dark:text-orange-400 mb-1">⚠️ مستبعد</div>
-                    <div class="text-heading-sm font-bold text-orange-600 dark:text-orange-400" id="smart-excluded">0</div>
+                    <div class="text-heading-sm font-bold text-orange-600 dark:text-orange-400" id="smart-excluded">0
+                    </div>
                   </div>
                 </div>
                 <div class="mt-3 text-body-xs text-muted-foreground">
@@ -392,15 +440,18 @@
 
         <!-- Modal Footer -->
         <div class="flex items-center justify-between border-t border-border p-6">
-          <button onclick="hideCreateCampaignModal()" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
+          <button onclick="hideCreateCampaignModal()"
+            class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
             <span>إلغاء</span>
           </button>
           <div class="flex items-center gap-3">
-            <button onclick="previewCampaign()" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
+            <button onclick="previewCampaign()"
+              class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
               <i data-lucide="eye" class="h-4 w-4"></i>
               <span>معاينة</span>
             </button>
-            <button onclick="createCampaign()" id="create-campaign-btn" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50">
+            <button onclick="createCampaign()" id="create-campaign-btn"
+              class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50">
               <i data-lucide="send" class="h-4 w-4"></i>
               <span>إنشاء الحملة</span>
             </button>
@@ -415,7 +466,7 @@
   <div id="test-send-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
     <div class="w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
       <div class="rounded-xl border bg-card shadow-lg">
-        
+
         <!-- Modal Header -->
         <div class="flex items-center justify-between border-b border-border p-6">
           <div class="flex items-center gap-3">
@@ -427,21 +478,24 @@
               <p class="text-body-sm text-muted-foreground">اختبر القالب قبل إرساله للعملاء</p>
             </div>
           </div>
-          <button onclick="hideTestSendModal()" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
+          <button onclick="hideTestSendModal()"
+            class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
             <i data-lucide="x" class="h-4 w-4"></i>
           </button>
         </div>
 
         <!-- Modal Content -->
         <div class="p-6 space-y-5">
-          
+
           <!-- رقم الهاتف -->
           <div class="space-y-2">
             <label class="text-body-sm font-medium flex items-center gap-2">
               <i data-lucide="phone" class="h-4 w-4 text-muted-foreground"></i>
               <span>رقم الهاتف</span>
             </label>
-            <input type="text" id="test-phone-number" placeholder="مثال: 966501234567" class="flex h-11 w-full rounded-md border border-input bg-background px-4 py-2 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-mono" dir="ltr" />
+            <input type="text" id="test-phone-number" placeholder="مثال: 966501234567"
+              class="flex h-11 w-full rounded-md border border-input bg-background px-4 py-2 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-mono"
+              dir="ltr" />
             <p class="text-body-xs text-muted-foreground">أدخل الرقم بصيغة دولية بدون + أو 00</p>
           </div>
 
@@ -451,7 +505,8 @@
               <i data-lucide="layout-template" class="h-4 w-4 text-muted-foreground"></i>
               <span>القالب</span>
             </label>
-            <select id="test-template" class="flex h-11 w-full rounded-md border border-input bg-background px-4 py-2 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <select id="test-template"
+              class="flex h-11 w-full rounded-md border border-input bg-background px-4 py-2 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <option value="">جاري تحميل القوالب...</option>
             </select>
           </div>
@@ -467,7 +522,8 @@
               <i data-lucide="globe" class="h-4 w-4 text-muted-foreground"></i>
               <span>لغة القالب</span>
             </label>
-            <select id="test-template-language" class="flex h-11 w-full rounded-md border border-input bg-background px-4 py-2 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <select id="test-template-language"
+              class="flex h-11 w-full rounded-md border border-input bg-background px-4 py-2 text-body-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <option value="ar">العربية</option>
               <option value="en">الإنجليزية</option>
               <option value="en_US">English (US)</option>
@@ -478,7 +534,7 @@
           <div id="template-analysis-result" class="hidden p-3 rounded-lg border">
             <!-- سيتم ملؤها ديناميكياً -->
           </div>
-          
+
           <!-- خيار التجاوز اليدوي -->
           <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-muted">
             <input type="checkbox" id="test-no-variables" class="h-4 w-4 rounded border-input" />
@@ -499,10 +555,12 @@
 
         <!-- Modal Footer -->
         <div class="flex items-center justify-between border-t border-border p-6">
-          <button onclick="hideTestSendModal()" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
+          <button onclick="hideTestSendModal()"
+            class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
             <span>إغلاق</span>
           </button>
-          <button onclick="sendTestMessage()" id="test-send-btn" class="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50">
+          <button onclick="sendTestMessage()" id="test-send-btn"
+            class="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50">
             <i data-lucide="send" class="h-4 w-4"></i>
             <span>إرسال الآن</span>
           </button>
@@ -513,17 +571,19 @@
   </div>
 
   <!-- Campaign Details Modal -->
-  <div id="campaign-details-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div id="campaign-details-modal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
     <div class="w-full max-w-6xl mx-4 max-h-[90vh] overflow-y-auto">
       <div class="rounded-xl border bg-card shadow-lg">
-        
+
         <!-- Modal Header -->
         <div class="flex items-center justify-between border-b border-border p-6">
           <div>
             <h2 id="details-campaign-name" class="text-heading-lg font-bold">تفاصيل الحملة</h2>
             <p class="text-body-sm text-muted-foreground mt-1">إحصائيات ومتابعة الحملة</p>
           </div>
-          <button onclick="hideCampaignDetailsModal()" class="inline-flex h-10 w-10 min-h-[40px] min-w-[40px] max-h-[40px] max-w-[40px] shrink-0 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground box-border">
+          <button onclick="hideCampaignDetailsModal()"
+            class="inline-flex h-10 w-10 min-h-[40px] min-w-[40px] max-h-[40px] max-w-[40px] shrink-0 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground box-border">
             <i data-lucide="x" class="h-4 w-4"></i>
           </button>
         </div>
@@ -538,7 +598,8 @@
   </div>
 
   <!-- مودال تأكيد حذف الحملة -->
-  <div id="confirm-delete-campaign-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/50 backdrop-blur-sm" aria-modal="true">
+  <div id="confirm-delete-campaign-modal"
+    class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/50 backdrop-blur-sm" aria-modal="true">
     <div class="mx-4 w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg">
       <div class="flex items-center gap-3 text-destructive mb-4">
         <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10">
@@ -546,13 +607,17 @@
         </span>
         <h3 class="text-heading-md font-semibold text-foreground">تأكيد حذف الحملة</h3>
       </div>
-      <p class="text-body-sm text-muted-foreground mb-2">هل أنت متأكد من حذف الحملة <strong id="confirm-delete-campaign-name" class="text-foreground"></strong>؟</p>
-      <p class="text-body-xs text-muted-foreground mb-6">سيتم حذف الحملة وجميع بياناتها نهائياً ولا يمكن التراجع عن هذا الإجراء.</p>
+      <p class="text-body-sm text-muted-foreground mb-2">هل أنت متأكد من حذف الحملة <strong
+          id="confirm-delete-campaign-name" class="text-foreground"></strong>؟</p>
+      <p class="text-body-xs text-muted-foreground mb-6">سيتم حذف الحملة وجميع بياناتها نهائياً ولا يمكن التراجع عن هذا
+        الإجراء.</p>
       <div class="flex items-center justify-end gap-2">
-        <button type="button" id="confirm-delete-campaign-cancel" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
+        <button type="button" id="confirm-delete-campaign-cancel"
+          class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
           إلغاء
         </button>
-        <button type="button" id="confirm-delete-campaign-submit" class="inline-flex items-center gap-2 rounded-md bg-destructive px-4 py-2 text-body-sm font-medium text-destructive-foreground transition hover:bg-destructive/90">
+        <button type="button" id="confirm-delete-campaign-submit"
+          class="inline-flex items-center gap-2 rounded-md bg-destructive px-4 py-2 text-body-sm font-medium text-destructive-foreground transition hover:bg-destructive/90">
           حذف الحملة
         </button>
       </div>
@@ -565,14 +630,14 @@
       // إزالة أي toast موجود
       const existingToast = document.querySelector('.toast-notification');
       if (existingToast) existingToast.remove();
-      
+
       // إنشاء عنصر Toast
       const toast = document.createElement('div');
       toast.className = 'toast-notification fixed bottom-4 left-4 z-[9999] rounded-lg px-4 py-3 shadow-lg transition-all duration-300 transform translate-y-full opacity-0 flex items-center gap-3 max-w-md';
-      
+
       // تحديد اللون والأيقونة حسب النوع
       let bgColor, icon;
-      switch(type) {
+      switch (type) {
         case 'success':
           bgColor = 'bg-primary text-white';
           icon = '<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
@@ -589,33 +654,33 @@
           bgColor = 'bg-foreground text-background';
           icon = '<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
       }
-      
+
       toast.classList.add(...bgColor.split(' '));
       toast.innerHTML = `${icon}<span class="text-body-sm">${message}</span>`;
       document.body.appendChild(toast);
-      
+
       // إظهار الـ Toast
       requestAnimationFrame(() => {
         toast.classList.remove('translate-y-full', 'opacity-0');
       });
-      
+
       // إخفاء الـ Toast بعد 4 ثواني
       setTimeout(() => {
         toast.classList.add('translate-y-full', 'opacity-0');
         setTimeout(() => toast.remove(), 300);
       }, 4000);
     }
-    
+
     // فحص تسجيل الدخول
     const isLoggedIn = localStorage.getItem('tchat_logged_in');
     const token = localStorage.getItem('access_token') || localStorage.getItem('tchat_token');
-    
+
     console.log('🔍 فحص تسجيل الدخول:', {
       isLoggedIn: isLoggedIn,
       token: token ? token.substring(0, 20) + '...' : 'null',
       tokenLength: token ? token.length : 0
     });
-    
+
     if (!isLoggedIn || isLoggedIn === 'false') {
       console.log('❌ المستخدم غير مسجل دخوله، إعادة توجيه لصفحة تسجيل الدخول');
       window.location.href = './login.html';
@@ -624,7 +689,7 @@
     let campaigns = [];
     let selectedRecipients = [];
     let availableTemplates = [];
-    
+
     // Pagination variables
     let currentPage = 1;
     const itemsPerPage = 10;
@@ -680,7 +745,7 @@
 
     function renderCampaigns() {
       const tbody = document.getElementById('campaigns-table-body');
-      
+
       if (!campaigns.length) {
         tbody.innerHTML = '<tr><td colspan="7" class="h-24 text-center text-body-sm text-muted-foreground">لا توجد حملات حالياً</td></tr>';
         updatePaginationInfo(0, 0, 0, 1, 1);
@@ -692,7 +757,7 @@
       const startIndex = (currentPage - 1) * itemsPerPage;
       const endIndex = Math.min(startIndex + itemsPerPage, campaigns.length);
       const currentCampaigns = campaigns.slice(startIndex, endIndex);
-      
+
       // تحديث معلومات الـ pagination
       updatePaginationInfo(startIndex + 1, endIndex, campaigns.length, currentPage, totalPages);
 
@@ -764,7 +829,7 @@
                     <i data-lucide="repeat" class="h-3 w-3"></i>
                   </button>
                 ` : ''}
-                <button type="button" class="btn-delete-campaign inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-destructive p-0 text-destructive-foreground transition hover:bg-destructive/90" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="حذف الحملة" data-campaign-id="${campaign.id}" data-campaign-name="${(campaign.name || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}">
+                <button type="button" class="btn-delete-campaign inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-destructive p-0 text-destructive-foreground transition hover:bg-destructive/90" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="حذف الحملة" data-campaign-id="${campaign.id}" data-campaign-name="${(campaign.name || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">
                   <i data-lucide="trash-2" class="h-3 w-3"></i>
                 </button>
               </div>
@@ -810,29 +875,29 @@
     // تحميل أرقام الواتساب
     async function loadWhatsAppPhoneNumbers() {
       const selectElement = document.getElementById('whatsapp-phone-number');
-      
+
       try {
         const phoneNumbers = await loadMetaPhoneNumbers();
-        
+
         if (phoneNumbers && phoneNumbers.length > 0) {
           selectElement.innerHTML = '<option value="">اختر رقم الواتساب</option>';
-          
+
           phoneNumbers.forEach(phone => {
             const option = document.createElement('option');
             option.value = phone.id;
-            
+
             // تنظيف وتنسيق رقم الهاتف
             let displayNumber = phone.display_phone_number || phone.id;
             // إزالة جميع الفراغات والرموز
             displayNumber = displayNumber.replace(/[\s\+\-\(\)]/g, '');
-            
+
             const verifiedName = phone.verified_name || 'غير محدد';
-            
+
             option.textContent = `${displayNumber} - ${verifiedName}`;
             option.setAttribute('data-phone-id', phone.id);
             selectElement.appendChild(option);
           });
-          
+
           // اختيار أول رقم بشكل افتراضي
           if (phoneNumbers.length > 0) {
             selectElement.value = phoneNumbers[0].id;
@@ -886,11 +951,11 @@
       if (headerPreview) headerPreview.classList.add('hidden');
       const headerProgress = document.getElementById('create-campaign-header-image-upload-progress');
       if (headerProgress) headerProgress.classList.add('hidden');
-      
+
       // إعادة تعيين أعداد المصادر
       updateSourceCount('manual', 0);
       updateSourceCount('csv', 0);
-      
+
       handleRecipientsSourceChange();
     }
 
@@ -924,7 +989,7 @@
         lucide.createIcons();
         if (!createCampaignHeaderImageListenerAttached && fileInput) {
           createCampaignHeaderImageListenerAttached = true;
-          fileInput.addEventListener('change', async function() {
+          fileInput.addEventListener('change', async function () {
             const file = this.files && this.files[0];
             if (!file) {
               if (urlInput) urlInput.value = '';
@@ -967,11 +1032,11 @@
                 xhr.open('POST', `${baseUrl}/campaigns/upload-header-image`);
                 xhr.setRequestHeader('Authorization', 'Bearer ' + token);
                 xhr.responseType = 'json';
-                xhr.upload.onprogress = function(ev) {
+                xhr.upload.onprogress = function (ev) {
                   if (ev.lengthComputable) setProgress((ev.loaded / ev.total) * 100);
                   else setProgress(50); // غير معروف الحجم
                 };
-                xhr.onload = function() {
+                xhr.onload = function () {
                   try {
                     const res = typeof xhr.response === 'object' ? xhr.response : JSON.parse(xhr.responseText || '{}');
                     resolve(res);
@@ -979,7 +1044,7 @@
                     reject(new Error('Invalid response'));
                   }
                 };
-                xhr.onerror = function() { reject(new Error('Network error')); };
+                xhr.onerror = function () { reject(new Error('Network error')); };
                 xhr.send(formData);
               });
               setProgress(100);
@@ -1017,7 +1082,7 @@
       try {
         availableTemplates = await loadMetaTemplates(100);
         const templateSelect = document.getElementById('campaign-template');
-        
+
         templateSelect.innerHTML = '<option value="">اختر القالب</option>' +
           availableTemplates
             .filter(template => template.status === 'APPROVED')
@@ -1034,19 +1099,19 @@
       const csvSection = document.getElementById('csv-upload-section');
       const manualSection = document.getElementById('manual-input-section');
       const targetCountryWrap = document.getElementById('target-country-wrap');
-      
+
       // إخفاء جميع الأقسام أولاً
       csvSection.style.display = 'none';
       manualSection.style.display = 'none';
       if (targetCountryWrap) targetCountryWrap.style.display = 'none';
-      
+
       // مسح المستقبلين عند تغيير المصدر
       selectedRecipients = [];
-      
+
       if (source === 'csv') {
         csvSection.style.display = 'block';
         // تحديث من عدد CSV المحفوظ
-        const csvCount = document.getElementById('csv-file').files.length > 0 ? 
+        const csvCount = document.getElementById('csv-file').files.length > 0 ?
           parseInt(document.querySelector('option[value="csv"]').dataset.count || 0) : 0;
         if (csvCount > 0) {
           // إعادة قراءة الملف إذا كان موجوداً
@@ -1064,7 +1129,7 @@
         loadCampaignCountryOptions().then(() => loadRecipientsPreview());
         return;
       }
-      
+
       updateRecipientsPreview();
       updateBatchPreview();
     }
@@ -1127,7 +1192,7 @@
     function parseManualRecipients() {
       const manualText = document.getElementById('manual-recipients').value.trim();
       const countEl = document.getElementById('manual-count');
-      
+
       if (!manualText) {
         selectedRecipients = [];
         countEl.textContent = '0';
@@ -1145,10 +1210,10 @@
 
         let phone = '';
         let name = '';
-        
+
         // دعم الفواصل المختلفة
         const separator = trimmedLine.includes(',') ? ',' : trimmedLine.includes(';') ? ';' : null;
-        
+
         if (separator) {
           // تنسيق: رقم,اسم أو رقم;اسم
           const parts = trimmedLine.split(separator).map(part => part.trim());
@@ -1158,10 +1223,10 @@
           // رقم فقط
           phone = trimmedLine;
         }
-        
+
         // تنظيف الرقم من المسافات والرموز
         phone = phone.replace(/[\s\-\+\(\)]/g, '');
-        
+
         // تحويل الأرقام التي تبدأ بـ 05 أو 5
         if (phone.startsWith('05') && phone.length === 10) {
           phone = '966' + phone.substring(1);
@@ -1172,7 +1237,7 @@
         } else if (phone.startsWith('+966')) {
           phone = phone.substring(1);
         }
-        
+
         // التحقق من صحة الرقم
         if (/^966\d{9}$/.test(phone)) {
           selectedRecipients.push({
@@ -1186,17 +1251,17 @@
       });
 
       countEl.textContent = selectedRecipients.length;
-      
+
       // تحديث العدد في قائمة المصادر
       updateSourceCount('manual', selectedRecipients.length);
-      
+
       // عرض رسالة إذا كان هناك أرقام غير صالحة
       if (invalidCount > 0 && selectedRecipients.length > 0) {
         showToast(`تم تجاهل ${invalidCount} رقم غير صالح`, 'warning');
       } else if (invalidCount > 0 && selectedRecipients.length === 0) {
         showToast('لم يتم العثور على أرقام صالحة. تأكد من التنسيق: 966XXXXXXXXX أو 05XXXXXXXX', 'error');
       }
-      
+
       updateRecipientsPreview();
       updateBatchPreview();
     }
@@ -1204,7 +1269,7 @@
     // معالجة رفع ملف CSV
     function handleCSVUpload(event) {
       const file = event.target.files[0];
-      
+
       if (!file) {
         selectedRecipients = [];
         updateRecipientsPreview();
@@ -1219,8 +1284,8 @@
       }
 
       const reader = new FileReader();
-      
-      reader.onload = function(e) {
+
+      reader.onload = function (e) {
         try {
           const text = e.target.result;
           const lines = text.split('\n').filter(line => line.trim());
@@ -1249,7 +1314,7 @@
               // رقم واسم (يمكن أن يكون الرقم في العمود الأول أو الثاني)
               const cleanPart0 = parts[0].replace(/[\s\-\+]/g, '');
               const cleanPart1 = parts[1].replace(/[\s\-\+]/g, '');
-              
+
               if (/^966\d{9}$/.test(cleanPart0)) {
                 // العمود الأول رقم صحيح
                 phone = cleanPart0;
@@ -1270,7 +1335,7 @@
 
             // تنظيف الرقم النهائي (إزالة كل شيء ما عدا الأرقام)
             phone = phone.replace(/[^\d]/g, '');
-            
+
             // محاولة تصحيح الأرقام التي تبدأ بـ 05
             if (phone.startsWith('05') && phone.length === 10) {
               phone = '966' + phone.substring(1);
@@ -1293,7 +1358,7 @@
 
           // تحديث العدد في قائمة المصادر
           updateSourceCount('csv', selectedRecipients.length);
-          
+
           if (selectedRecipients.length === 0) {
             showToast('لم يتم العثور على أرقام صحيحة في الملف', 'error');
           } else {
@@ -1307,7 +1372,7 @@
         }
       };
 
-      reader.onerror = function() {
+      reader.onerror = function () {
         showToast('فشل في قراءة الملف', 'error');
       };
 
@@ -1317,7 +1382,7 @@
     // تحديث معاينة المستقبلين
     function updateRecipientsPreview() {
       const previewEl = document.getElementById('recipients-preview');
-      
+
       if (selectedRecipients.length === 0) {
         previewEl.innerHTML = `
           <div class="text-center py-8 px-4">
@@ -1389,7 +1454,7 @@
     async function loadRecipientsPreview() {
       const previewEl = document.getElementById('recipients-preview');
       const source = document.getElementById('recipients-source').value;
-      
+
       if (source === 'database') {
         try {
           const dialCodeEl = document.getElementById('target-country-dial-code');
@@ -1440,7 +1505,7 @@
           if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
         }
       }
-      
+
       updateBatchPreview();
     }
 
@@ -1450,7 +1515,7 @@
       const sendType = document.getElementById('send-type').value;
       const batchSize = parseInt(document.getElementById('batch-size').value);
       const batchInterval = parseInt(document.getElementById('batch-interval').value);
-      
+
       if (sendType === 'all') {
         previewContent.innerHTML = `
           <div class="text-warning">
@@ -1508,36 +1573,36 @@
       const batchInterval = parseInt(document.getElementById('batch-interval').value);
       const sendType = document.getElementById('send-type').value;
       const isSmartSend = document.getElementById('enable-smart-send').checked;
-      
+
       // التحقق من البيانات
       if (!name) {
         showToast('يرجى إدخال اسم الحملة أولاً', 'warning');
         return;
       }
-      
+
       if (!templateName) {
         showToast('يرجى اختيار القالب أولاً', 'warning');
         return;
       }
-      
+
       if (selectedRecipients.length === 0) {
         showToast('يرجى إضافة مستقبلين أولاً', 'warning');
         return;
       }
-      
+
       // حساب عدد الدفعات والمدة (batchInterval بالدقائق)
       const totalBatches = sendType === 'all' ? 1 : Math.ceil(selectedRecipients.length / batchSize);
       const totalDurationMinutes = sendType === 'all' ? 0 : (totalBatches - 1) * batchInterval;
       const totalDurationLabel = totalDurationMinutes < 60 ? (totalDurationMinutes + ' دقيقة') : (totalDurationMinutes / 60) + ' ساعة';
-      
+
       // البحث عن اسم القالب
       const template = availableTemplates.find(t => t.name === templateName);
       const templateDisplay = template ? template.name : templateName;
-      
+
       // البحث عن رقم الواتساب
       const phoneSelect = document.getElementById('whatsapp-phone-number');
       const selectedPhone = phoneSelect.options[phoneSelect.selectedIndex]?.text || 'غير محدد';
-      
+
       // عرض المعاينة
       const previewHTML = `
         <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm" id="campaign-preview-overlay" onclick="if(event.target === this) this.remove()">
@@ -1602,7 +1667,7 @@
           </div>
         </div>
       `;
-      
+
       document.body.insertAdjacentHTML('beforeend', previewHTML);
       lucide.createIcons();
     }
@@ -1623,13 +1688,13 @@
         document.getElementById('campaign-name').focus();
         return;
       }
-      
+
       if (!templateName) {
         showToast('يرجى اختيار القالب', 'error');
         document.getElementById('campaign-template').focus();
         return;
       }
-      
+
       if (!whatsappPhoneNumberID) {
         showToast('يرجى اختيار رقم الواتساب للإرسال', 'error');
         document.getElementById('whatsapp-phone-number').focus();
@@ -1641,7 +1706,7 @@
         showToast('يرجى رفع صورة الرأس للقالب المحدد', 'error');
         return;
       }
-      
+
       const recipientsSource = document.getElementById('recipients-source').value;
       const useAllDatabase = (recipientsSource === 'database');
       if (!useAllDatabase && selectedRecipients.length === 0) {
@@ -1656,7 +1721,7 @@
 
       try {
         const isSmartSend = document.getElementById('enable-smart-send').checked;
-        
+
         const headerImageUrlEl = document.getElementById('create-campaign-header-image-url');
         const headerImageUrl = (headerImageUrlEl && headerImageUrlEl.value) ? headerImageUrlEl.value.trim() : '';
         const targetDialCodeEl = document.getElementById('target-country-dial-code');
@@ -1687,15 +1752,15 @@
         });
 
         const result = await response.json();
-        
+
         if (result.success) {
           let message = result.message || 'تم إنشاء الحملة بنجاح!';
-          
+
           // إذا كانت هناك أرقام مستبعدة، أضف تفاصيل
           if (result.excluded_count && result.excluded_count > 0) {
             message += ` (${result.final_count} مستقبل، ${result.excluded_count} مستبعد)`;
           }
-          
+
           showToast(message, 'success');
           hideCreateCampaignModal();
           refreshCampaigns();
@@ -1716,7 +1781,7 @@
     async function viewCampaignDetails(campaignId) {
       document.getElementById('campaign-details-modal').classList.remove('hidden');
       document.getElementById('campaign-details-modal').classList.add('flex');
-      
+
       const content = document.getElementById('campaign-details-content');
       content.innerHTML = '<div class="text-center text-body-sm text-muted-foreground">جاري تحميل تفاصيل الحملة...</div>';
 
@@ -1726,12 +1791,12 @@
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
           renderCampaignDetails(result.campaign, result.recipients || [], result.batches || [], result.actual_sent_count, result.total_recipients_count);
-          
+
           // تحميل أنواع أخطاء ميتا وأسباب الفشل إذا كانت هناك رسائل فاشلة
           if (result.campaign.failed_count > 0) {
             setTimeout(() => loadMetaErrors(campaignId), 300);
@@ -1823,7 +1888,7 @@
     async function loadFailureReasons(campaignId) {
       const contentDiv = document.getElementById('failure-reasons-content');
       if (!contentDiv) return;
-      
+
       contentDiv.innerHTML = `
         <div class="text-center text-body-sm text-muted-foreground">
           <i data-lucide="loader-2" class="h-6 w-6 mx-auto mb-2 animate-spin"></i>
@@ -1831,31 +1896,31 @@
         </div>
       `;
       lucide.createIcons();
-      
+
       try {
         const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/failure-reasons`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success && result.reasons && result.reasons.length > 0) {
           // ترتيب الأسباب حسب العدد (تنازلياً)
           const sortedReasons = result.reasons.sort((a, b) => b.count - a.count);
-          
+
           // حساب النسب المئوية
           const total = result.total_failed;
-          
+
           contentDiv.innerHTML = `
             <div class="space-y-3">
               ${sortedReasons.map((reason, index) => {
-                const percentage = ((reason.count / total) * 100).toFixed(1);
-                const barColor = getFailureReasonColor(reason.reason);
-                const icon = getFailureReasonIcon(reason.reason);
-                
-                return `
+            const percentage = ((reason.count / total) * 100).toFixed(1);
+            const barColor = getFailureReasonColor(reason.reason);
+            const icon = getFailureReasonIcon(reason.reason);
+
+            return `
                   <div class="rounded-lg border border-border bg-card p-4">
                     <div class="flex items-start gap-3">
                       <div class="flex-shrink-0">
@@ -1878,7 +1943,7 @@
                     </div>
                   </div>
                 `;
-              }).join('')}
+          }).join('')}
             </div>
             
             <div class="mt-4 rounded-lg border border-border bg-muted/30 p-4">
@@ -1896,7 +1961,7 @@
             </div>
           `;
         }
-        
+
         lucide.createIcons();
       } catch (error) {
         console.error('خطأ في تحميل أسباب الفشل:', error);
@@ -1978,28 +2043,28 @@
     function getFailureRecommendations(reasons) {
       const tips = [];
       const topReason = reasons[0]?.reason || '';
-      
+
       if (topReason.includes('طريقة الدفع')) {
         tips.push('⚠️ عاجل: تحقق من طريقة الدفع في Meta Business Manager');
         tips.push('تأكد من صلاحية البطاقة ووجود رصيد كافٍ');
       }
-      
+
       if (reasons.some(r => r.reason.includes('حماية النظام'))) {
         tips.push('استخدم قوالب معتمدة من Meta فقط');
         tips.push('لا ترسل لنفس العملاء بشكل متكرار');
         tips.push('استخدم الإرسال الذكي لتجنب التكرار');
       }
-      
+
       if (reasons.some(r => r.reason.includes('غير قابل للتسليم'))) {
         tips.push('نظّف قائمة الأرقام واحذف الأرقام غير الصحيحة');
         tips.push('تحقق من صحة الأرقام قبل الإرسال');
       }
-      
+
       if (tips.length === 0) {
         tips.push('قسّم الحملات إلى دفعات صغيرة (50-100 رسالة/ساعة)');
         tips.push('راقب معدل الفشل لكل دفعة');
       }
-      
+
       return tips;
     }
 
@@ -2010,10 +2075,10 @@
       const totalR = (totalRecipientsCount != null && totalRecipientsCount >= 0) ? totalRecipientsCount : (campaign.total_recipients || 0);
       document.getElementById('details-campaign-name').textContent = campaign.name;
       const content = document.getElementById('campaign-details-content');
-      
+
       const progressSent = totalR > 0 ? Math.min(100, Math.round((actualSentCount / totalR) * 100)) : 0;
-      const successRate = totalR > 0 
-        ? Math.round((campaign.delivered_count / totalR) * 100) 
+      const successRate = totalR > 0
+        ? Math.round((campaign.delivered_count / totalR) * 100)
         : 0;
 
       function formatBatchStatus(status) {
@@ -2085,14 +2150,14 @@
                 <div class="space-y-4">
                   <div>
                     <label class="text-body-sm font-semibold text-muted-foreground block mb-1">تاريخ الإنشاء</label>
-                    <div class="text-body-md"><span class="number">${new Date(campaign.created_at).toLocaleDateString('en-GB', { 
-                      year: 'numeric', 
-                      month: '2-digit', 
-                      day: '2-digit'
-                    })}</span> - <span class="number">${new Date(campaign.created_at).toLocaleTimeString('en-GB', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}</span></div>
+                    <div class="text-body-md"><span class="number">${new Date(campaign.created_at).toLocaleDateString('en-GB', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      })}</span> - <span class="number">${new Date(campaign.created_at).toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })}</span></div>
                   </div>
                   
                   <div>
@@ -2137,19 +2202,11 @@
             </div>
             <div class="overflow-x-auto">
               <table class="w-full min-w-[800px] caption-bottom text-sm table-fixed border-collapse" dir="rtl" style="table-layout: fixed;">
-                <colgroup>
-                  <col style="width: 8%">
-                  <col style="width: 14%">
-                  <col style="width: 18%">
-                  <col style="width: 20%">
-                  <col style="width: 20%">
-                  <col style="width: 20%">
-                </colgroup>
                 <thead class="bg-muted/50">
                   <tr class="border-b text-body-sm font-semibold text-muted-foreground [&>th]:align-middle [&>th]:whitespace-nowrap">
-                    <th class="px-4 py-3 text-right w-[8%]">الدفعة</th>
-                    <th class="px-4 py-3 text-center w-[14%]">عدد المستقبلين</th>
-                    <th class="px-4 py-3 text-center w-[18%]">الحالة</th>
+                    <th class="px-4 py-3 text-center w-[10%]">الدفعة</th>
+                    <th class="px-4 py-3 text-center w-[15%]">عدد المستقبلين</th>
+                    <th class="px-4 py-3 text-center w-[15%]">الحالة</th>
                     <th class="px-4 py-3 text-center w-[20%]">مجدول</th>
                     <th class="px-4 py-3 text-center w-[20%]">بدء</th>
                     <th class="px-4 py-3 text-center w-[20%]">انتهى</th>
@@ -2158,12 +2215,12 @@
                 <tbody class="divide-y divide-border [&>tr>td]:align-middle [&>tr>td]:overflow-hidden">
                   ${batches.length > 0 ? batches.map(b => `
                     <tr class="hover:bg-muted/40">
-                      <td class="px-4 py-3 text-right font-medium number w-[8%]" dir="ltr"><span class="block truncate">${formatNum(b.batch_number)}</span></td>
-                      <td class="px-4 py-3 text-center number w-[14%]" dir="ltr"><span class="block truncate">${formatNum(b.recipient_count)}</span></td>
-                      <td class="px-4 py-3 text-center w-[18%]"><span class="inline-block max-w-full truncate"><span class="inline-flex items-center rounded-full border px-2 py-1 text-xs font-semibold ${formatBatchStatusClass(b.status)}">${formatBatchStatus(b.status)}</span></span></td>
-                      <td class="px-4 py-3 text-center text-body-sm text-muted-foreground number w-[20%]" dir="ltr"><span class="block truncate" title="${formatDate(b.scheduled_at)}">${formatDate(b.scheduled_at)}</span></td>
-                      <td class="px-4 py-3 text-center text-body-sm text-muted-foreground number w-[20%]" dir="ltr"><span class="block truncate" title="${formatDate(b.started_at)}">${formatDate(b.started_at)}</span></td>
-                      <td class="px-4 py-3 text-center text-body-sm text-muted-foreground number w-[20%]" dir="ltr"><span class="block truncate" title="${formatDate(b.completed_at)}">${formatDate(b.completed_at)}</span></td>
+                      <td class="px-4 py-3 text-center font-medium"><span class="block truncate number" dir="ltr">${formatNum(b.batch_number)}</span></td>
+                      <td class="px-4 py-3 text-center"><span class="block truncate number" dir="ltr">${formatNum(b.recipient_count)}</span></td>
+                      <td class="px-4 py-3 text-center"><span class="inline-block max-w-full truncate"><span class="inline-flex items-center rounded-full border px-2 py-1 text-xs font-semibold ${formatBatchStatusClass(b.status)}">${formatBatchStatus(b.status)}</span></span></td>
+                      <td class="px-4 py-3 text-center text-body-sm text-muted-foreground"><span class="block truncate number" dir="ltr" title="${formatDate(b.scheduled_at)}">${formatDate(b.scheduled_at)}</span></td>
+                      <td class="px-4 py-3 text-center text-body-sm text-muted-foreground"><span class="block truncate number" dir="ltr" title="${formatDate(b.started_at)}">${formatDate(b.started_at)}</span></td>
+                      <td class="px-4 py-3 text-center text-body-sm text-muted-foreground"><span class="block truncate number" dir="ltr" title="${formatDate(b.completed_at)}">${formatDate(b.completed_at)}</span></td>
                     </tr>
                   `).join('') : `
                     <tr>
@@ -2331,19 +2388,19 @@
                         </span>
                       </td>
                       <td class="px-4 py-3 text-center text-body-sm text-muted-foreground">
-                        <span class="number">${recipient.sent_at ? new Date(recipient.sent_at).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'}) : '-'}</span>
+                        <span class="number">${recipient.sent_at ? new Date(recipient.sent_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '-'}</span>
                       </td>
                       <td class="px-4 py-3 text-center text-body-sm text-muted-foreground">
-                        <span class="number">${recipient.delivered_at ? new Date(recipient.delivered_at).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'}) : '-'}</span>
+                        <span class="number">${recipient.delivered_at ? new Date(recipient.delivered_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '-'}</span>
                       </td>
                       <td class="px-4 py-3 text-center text-body-sm text-muted-foreground">
-                        <span class="number">${recipient.read_at ? new Date(recipient.read_at).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'}) : '-'}</span>
+                        <span class="number">${recipient.read_at ? new Date(recipient.read_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '-'}</span>
                       </td>
                       <td class="px-4 py-3 text-center text-body-sm text-muted-foreground">
-                        <span class="number">${recipient.replied_at ? new Date(recipient.replied_at).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'}) : '-'}</span>
+                        <span class="number">${recipient.replied_at ? new Date(recipient.replied_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '-'}</span>
                       </td>
                       <td class="px-4 py-3 text-center text-body-sm text-muted-foreground">
-                        <span class="number">${recipient.clicked_at ? new Date(recipient.clicked_at).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'}) : '-'}</span>
+                        <span class="number">${recipient.clicked_at ? new Date(recipient.clicked_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '-'}</span>
                       </td>
                       <td class="px-4 py-3 text-center">
                         ${recipient.message_id ? `
@@ -2375,7 +2432,7 @@
           </div>
         </div>
       `;
-      
+
       lucide.createIcons();
     }
 
@@ -2403,7 +2460,7 @@
         });
 
         const result = await response.json();
-        
+
         if (result.success) {
           showToast('تم بدء الحملة بنجاح!', 'success');
           refreshCampaigns();
@@ -2435,7 +2492,7 @@
         });
 
         const result = await response.json();
-        
+
         if (result.success) {
           showToast('تم بدء إعادة الإرسال بنجاح!', 'success');
           refreshCampaigns();
@@ -2462,7 +2519,7 @@
       }
 
       const cleanPhone = phoneNumber.trim().replace(/[\s\-\+]/g, '');
-      
+
       if (!/^966\d{9}$/.test(cleanPhone)) {
         showToast('رقم الهاتف غير صحيح. يجب أن يبدأ بـ 966 ويحتوي على 12 رقماً', 'error');
         return;
@@ -2487,7 +2544,7 @@
         });
 
         const result = await response.json();
-        
+
         if (result.success) {
           showToast('تم إضافة المستقبل بنجاح!', 'success');
           viewCampaignDetails(campaignId); // إعادة تحميل التفاصيل
@@ -2509,9 +2566,9 @@
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
           showToast('تم إعادة حساب الإحصائيات بدقة!', 'success');
           // إعادة تحميل تفاصيل الحملة
@@ -2536,7 +2593,7 @@
         });
 
         const result = await response.json();
-        
+
         if (result.success) {
           showToast('تم حذف الحملة بنجاح!', 'success');
           hideConfirmDeleteCampaignModal();
@@ -2607,7 +2664,7 @@
         });
 
         const result = await response.json();
-        
+
         if (result.success) {
           showToast(`تم حذف ${result.deleted_count} حملة بنجاح!`, 'success');
           refreshCampaigns();
@@ -2631,7 +2688,7 @@
         });
 
         const result = await response.json();
-        
+
         if (result.success) {
           showToast(`تم فحص وتحديث ${result.updated_count} حملة`, 'success');
           refreshCampaigns();
@@ -2652,7 +2709,7 @@
     function handleSmartSendToggle() {
       const smartSendEnabled = document.getElementById('enable-smart-send').checked;
       const smartSendInfo = document.getElementById('smart-send-info');
-      
+
       if (smartSendEnabled) {
         smartSendInfo.classList.remove('hidden');
       } else {
@@ -2674,11 +2731,11 @@
     async function runSmartSendCheck() {
       const checkBtn = document.getElementById('check-recipients-btn');
       const resultsDiv = document.getElementById('smart-send-results');
-      
+
       // جمع أرقام الهواتف من المستقبلين
       let phoneNumbers = [];
       const source = document.getElementById('recipients-source').value;
-      
+
       if (source === 'manual') {
         const manualText = document.getElementById('manual-recipients').value;
         const lines = manualText.split('\n').filter(line => line.trim());
@@ -2692,17 +2749,17 @@
           phoneNumbers = window.parsedRecipients.map(r => r.phone_number);
         }
       }
-      
+
       if (phoneNumbers.length === 0) {
         showToast('لا توجد أرقام للفحص. يرجى إضافة مستقبلين أولاً', 'warning');
         return;
       }
-      
+
       // تعطيل الزر وإظهار رسالة التحميل
       checkBtn.disabled = true;
       checkBtn.innerHTML = '<i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i><span>جاري الفحص...</span>';
       lucide.createIcons();
-      
+
       try {
         const response = await fetch(`${API_BASE_URL}/campaigns/smart-send-check`, {
           method: 'POST',
@@ -2714,25 +2771,25 @@
             phone_numbers: phoneNumbers
           })
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
           // حفظ الأرقام المسموحة للاستخدام عند إنشاء الحملة
           smartSendFilteredRecipients = result.allowed_numbers;
-          
+
           // عرض النتائج
           document.getElementById('smart-total').textContent = result.total;
           document.getElementById('smart-allowed').textContent = result.allowed;
           document.getElementById('smart-excluded').textContent = result.excluded;
           document.getElementById('smart-message').textContent = result.message;
-          
+
           resultsDiv.classList.remove('hidden');
-          
+
           // تحديث عدد المستقبلين في الواجهة بعد الفحص الذكي
           updateManualCountAfterSmartSend();
           updateRecipientsPreview();
-          
+
         } else {
           showToast('فشل في فحص الأرقام: ' + (result.error || 'خطأ غير معروف'), 'error');
         }
@@ -2750,9 +2807,9 @@
     // تحديث عداد الإدخال اليدوي فقط بعد الفحص الذكي (لا يستبدل دالة معاينة المستقبلين)
     function updateManualCountAfterSmartSend() {
       if (!smartSendFilteredRecipients || smartSendFilteredRecipients.length === 0) return;
-      
+
       const source = document.getElementById('recipients-source').value;
-      
+
       if (source === 'manual') {
         document.getElementById('manual-count').textContent = smartSendFilteredRecipients.length;
       }
@@ -2765,36 +2822,36 @@
       document.getElementById('total-campaigns').textContent = total;
       document.getElementById('current-page-num').textContent = current;
       document.getElementById('total-pages-num').textContent = totalPages;
-      
+
       // تحديث حالة الأزرار
       const firstBtn = document.getElementById('first-page-btn');
       const prevBtn = document.getElementById('prev-page-btn');
       const nextBtn = document.getElementById('next-page-btn');
       const lastBtn = document.getElementById('last-page-btn');
-      
+
       firstBtn.disabled = current === 1;
       prevBtn.disabled = current === 1;
       nextBtn.disabled = current === totalPages;
       lastBtn.disabled = current === totalPages;
-      
+
       // تحديث الأيقونات
       lucide.createIcons();
     }
-    
+
     function goToFirstPage() {
       if (currentPage !== 1) {
         currentPage = 1;
         renderCampaigns();
       }
     }
-    
+
     function goToPrevPage() {
       if (currentPage > 1) {
         currentPage--;
         renderCampaigns();
       }
     }
-    
+
     function goToNextPage() {
       const totalPages = Math.ceil(campaigns.length / itemsPerPage);
       if (currentPage < totalPages) {
@@ -2802,7 +2859,7 @@
         renderCampaigns();
       }
     }
-    
+
     function goToLastPage() {
       const totalPages = Math.ceil(campaigns.length / itemsPerPage);
       if (currentPage !== totalPages) {
@@ -2844,12 +2901,12 @@
     document.addEventListener('DOMContentLoaded', () => {
       // تهيئة مكون الهيدر
       renderHeader('header-container', { activePage: 'campaigns' });
-      
+
       lucide.createIcons();
       loadAndRenderCampaigns();
 
       // تأكيد الحذف: عرض مودال التأكيد بدل confirm()
-      document.getElementById('campaigns-table-body').addEventListener('click', function(e) {
+      document.getElementById('campaigns-table-body').addEventListener('click', function (e) {
         const btn = e.target.closest('.btn-delete-campaign');
         if (!btn) return;
         e.preventDefault();
@@ -2859,24 +2916,24 @@
       });
 
       document.getElementById('confirm-delete-campaign-cancel').addEventListener('click', hideConfirmDeleteCampaignModal);
-      document.getElementById('confirm-delete-campaign-submit').addEventListener('click', function() {
+      document.getElementById('confirm-delete-campaign-submit').addEventListener('click', function () {
         if (pendingDeleteCampaign) {
           const { id, name } = pendingDeleteCampaign;
           this.disabled = true;
           deleteCampaign(id, name).finally(() => { this.disabled = false; });
         }
       });
-      document.getElementById('confirm-delete-campaign-modal').addEventListener('click', function(e) {
+      document.getElementById('confirm-delete-campaign-modal').addEventListener('click', function (e) {
         if (e.target === this) hideConfirmDeleteCampaignModal();
       });
-      
+
       // إضافة مستمعات للتحديث التلقائي
       document.getElementById('batch-size').addEventListener('change', updateBatchPreview);
       document.getElementById('batch-interval').addEventListener('change', updateBatchPreview);
-      
+
       // إضافة مستمع لرفع ملف CSV
       document.getElementById('csv-file').addEventListener('change', handleCSVUpload);
-      
+
       // تفعيل الإرسال الذكي افتراضياً
       handleSmartSendToggle();
     });
@@ -2885,42 +2942,42 @@
 
     // دالة مساعدة لفحص الرمز المميز
     function isValidToken(token) {
-      return token && 
-             token !== 'null' && 
-             token !== 'undefined' && 
-             token.length > 10 &&
-             token.includes('.');
+      return token &&
+        token !== 'null' &&
+        token !== 'undefined' &&
+        token.length > 10 &&
+        token.includes('.');
     }
 
     // عرض تفاصيل الرسالة (skipRefresh: تجنب إعادة محاولة التجديد عند 401 لتجنب التكرار اللانهائي)
     async function showMessageDetails(messageId, skipRefresh) {
       try {
         console.log('🔍 جاري جلب تفاصيل الرسالة:', messageId);
-        
+
         // فحص معرف الرسالة
         if (!messageId || messageId === 'null' || messageId === 'undefined' || messageId === '') {
           console.error('❌ معرف الرسالة غير صالح:', messageId);
           showToast('معرف الرسالة غير صالح', 'error');
           return;
         }
-        
+
         // فحص الرمز المميز
         const token = localStorage.getItem('access_token') || localStorage.getItem('tchat_token');
         const isLoggedIn = localStorage.getItem('tchat_logged_in');
-        
+
         console.log('🔍 فحص الرمز المميز:', {
           token: token ? token.substring(0, 20) + '...' : 'null',
           isLoggedIn: isLoggedIn,
           tokenLength: token ? token.length : 0
         });
-        
+
         if (!isLoggedIn || isLoggedIn === 'false') {
           console.error('❌ المستخدم غير مسجل دخوله');
           showToast('يجب تسجيل الدخول أولاً', 'error');
           window.location.href = './login.html';
           return;
         }
-        
+
         if (!isValidToken(token)) {
           console.error('❌ لا يوجد رمز مميز صالح');
           console.log('🔍 تفاصيل التخزين:', {
@@ -2929,7 +2986,7 @@
             isLoggedIn: localStorage.getItem('tchat_logged_in'),
             allKeys: Object.keys(localStorage)
           });
-          
+
           // محاولة إعادة تسجيل الدخول تلقائياً
           console.log('🔄 محاولة إعادة تسجيل الدخول...');
           const refreshToken = localStorage.getItem('tchat_refresh_token');
@@ -2942,7 +2999,7 @@
                   'Authorization': `Bearer ${refreshToken}`
                 }
               });
-              
+
               if (refreshResponse.ok) {
                 const refreshData = await refreshResponse.json();
                 if (refreshData.success && refreshData.token) {
@@ -2956,7 +3013,7 @@
               console.error('❌ فشل في تجديد الرمز المميز:', error);
             }
           }
-          
+
           showToast('انتهت صلاحية الجلسة', 'error');
           localStorage.removeItem('tchat_token');
           localStorage.removeItem('tchat_logged_in');
@@ -2964,7 +3021,7 @@
           window.location.href = './login.html';
           return;
         }
-        
+
         const response = await fetch(`${API_BASE_URL}/messages/${messageId}`, {
           method: 'GET',
           headers: {
@@ -2976,7 +3033,7 @@
         if (!response.ok) {
           const errorText = await response.text();
           console.error('خطأ في الاستجابة:', errorText);
-          
+
           // معالجة خطأ 401: محاولة تجديد الرمز ثم إعادة الطلب مرة واحدة قبل اعتبار الجلسة منتهية
           if (response.status === 401) {
             if (!skipRefresh) {
@@ -3008,7 +3065,7 @@
             window.location.href = './login.html';
             return;
           }
-          
+
           throw new Error(`HTTP error! status: ${response.status} - ${errorText.substring(0, 100)}`);
         }
 
@@ -3020,7 +3077,7 @@
         }
 
         const result = await response.json();
-        
+
         if (result.success && result.data) {
           displayMessageDetails(result.data);
         } else {
@@ -3041,16 +3098,16 @@
     function displayMessageDetails(message) {
       const modal = document.getElementById('message-details-modal');
       const content = document.getElementById('message-details-content');
-      
+
       // تحويل التواريخ (أرقام غربية 1234567890)
       const createdAt = new Date(message.created_at).toLocaleString('ar-SA', { numberingSystem: 'latn' });
-      const timestampReceived = message.timestamp_received ? 
+      const timestampReceived = message.timestamp_received ?
         new Date(message.timestamp_received * 1000).toLocaleString('ar-SA', { numberingSystem: 'latn' }) : 'غير محدد';
-      
+
       // تحديد نوع المصدر
       let sourceTypeText = '';
       let sourceIcon = '';
-      switch(message.source_type) {
+      switch (message.source_type) {
         case 'campaign':
           sourceTypeText = 'حملة تسويقية';
           sourceIcon = '📢';
@@ -3071,7 +3128,7 @@
       // تحديد حالة الرسالة
       let statusText = '';
       let statusColor = '';
-      switch(message.status) {
+      switch (message.status) {
         case 'sent':
           statusText = 'مرسلة';
           statusColor = 'text-blue-600';
@@ -3198,11 +3255,11 @@
       `;
 
       modal.classList.remove('hidden');
-      
+
       // ضمان ظهور النافذة في المقدمة
       modal.style.zIndex = '9999';
       modal.style.position = 'fixed';
-      
+
       // إعادة تفعيل الأيقونات
       setTimeout(() => {
         lucide.createIcons();
@@ -3215,14 +3272,14 @@
     }
 
     // إغلاق النافذة عند النقر خارجها
-    document.getElementById('message-details-modal').addEventListener('click', function(e) {
+    document.getElementById('message-details-modal').addEventListener('click', function (e) {
       if (e.target === this) {
         closeMessageDetails();
       }
     });
 
     // إغلاق النافذة عند الضغط على Escape
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
         const modal = document.getElementById('message-details-modal');
         if (modal && !modal.classList.contains('hidden')) {
@@ -3246,12 +3303,12 @@
       const modal = document.getElementById('test-send-modal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
-      
+
       // إخفاء نتائج سابقة
       document.getElementById('test-send-result').classList.add('hidden');
       document.getElementById('test-phone-number').value = '';
       testMessageID = null;
-      
+
       // تحميل القوالب
       await loadTestTemplates();
       lucide.createIcons();
@@ -3262,7 +3319,7 @@
       const modal = document.getElementById('test-send-modal');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
-      
+
       // إيقاف فحص الحالة
       if (statusCheckInterval) {
         clearInterval(statusCheckInterval);
@@ -3274,12 +3331,12 @@
     async function loadTestTemplates() {
       const templateSelect = document.getElementById('test-template');
       templateSelect.innerHTML = '<option value="">جاري تحميل القوالب...</option>';
-      
+
       try {
         testSendTemplates = await loadMetaTemplates(100);
-        
+
         const approvedTemplates = testSendTemplates.filter(t => t.status === 'APPROVED');
-        
+
         // فرز القوالب: القوالب البسيطة (بدون متغيرات) أولاً
         const sortedTemplates = approvedTemplates.sort((a, b) => {
           const aHasVars = hasTemplateVariables(a);
@@ -3288,7 +3345,7 @@
           if (!aHasVars && bHasVars) return -1;
           return 0;
         });
-        
+
         if (sortedTemplates.length > 0) {
           templateSelect.innerHTML = '<option value="">اختر القالب</option>' +
             '<option value="hello_world" data-lang="en_US">🧪 hello_world (اختباري - إنجليزي)</option>' +
@@ -3308,24 +3365,24 @@
           '<option value="hello_world" data-lang="en_US">🧪 hello_world (اختباري - إنجليزي)</option>';
       }
     }
-    
+
     // فحص إذا كان القالب يحتاج متغيرات (يستخدم النظام الذكي)
     function hasTemplateVariables(template) {
       if (!template || !template.components) return false;
-      
+
       // استخدام التحليل الذكي
       const analysis = analyzeTemplate(template);
       return analysis.needsVariables;
     }
-    
+
     // ==================== نظام ذكي لاكتشاف متغيرات القالب ====================
-    
+
     // استخراج عدد المتغيرات من نص القالب
     function extractVariablesCount(text) {
       if (!text) return 0;
       const matches = text.match(/\{\{(\d+)\}\}/g);
       if (!matches) return 0;
-      
+
       // استخراج أكبر رقم متغير
       let maxVar = 0;
       for (const match of matches) {
@@ -3334,7 +3391,7 @@
       }
       return maxVar;
     }
-    
+
     // تحليل ذكي لمكونات القالب
     function analyzeTemplate(template) {
       const analysis = {
@@ -3345,12 +3402,12 @@
         confidence: 'high', // high, medium, low
         reason: ''
       };
-      
+
       if (!template || !template.components) {
         analysis.reason = 'القالب بسيط بدون مكونات';
         return analysis;
       }
-      
+
       for (const component of template.components) {
         // تحليل الـ HEADER
         if (component.type === 'HEADER') {
@@ -3378,7 +3435,7 @@
             // إذا لا يوجد example، فالوسائط ثابتة (مرفوعة مسبقاً)
           }
         }
-        
+
         // تحليل الـ BODY
         if (component.type === 'BODY') {
           // طريقة 1: البحث عن {{1}}, {{2}}, ... في النص
@@ -3388,7 +3445,7 @@
             analysis.body.count = varsCount;
             analysis.needsVariables = true;
           }
-          
+
           // طريقة 2: التحقق من وجود example.body_text
           if (component.example && component.example.body_text) {
             const exampleTexts = component.example.body_text;
@@ -3404,19 +3461,19 @@
             }
           }
         }
-        
+
         // تحليل الـ BUTTONS
         if (component.type === 'BUTTONS' && component.buttons) {
           for (let i = 0; i < component.buttons.length; i++) {
             const btn = component.buttons[i];
-            
+
             if (btn.type === 'URL') {
               // التحقق من وجود متغير في الـ URL
               const hasVariable = btn.url && btn.url.match(/\{\{\d+\}\}/);
-              
+
               // التحقق من وجود example
               const hasExample = btn.example && btn.example.length > 0;
-              
+
               if (hasVariable || hasExample) {
                 analysis.buttons.push({
                   index: i,
@@ -3430,7 +3487,7 @@
           }
         }
       }
-      
+
       // تحديد مستوى الثقة
       if (analysis.needsVariables) {
         if (analysis.body.examples.length > 0 || analysis.header.count > 0) {
@@ -3444,10 +3501,10 @@
         analysis.confidence = 'high';
         analysis.reason = 'القالب بسيط بدون متغيرات';
       }
-      
+
       return analysis;
     }
-    
+
     // استخراج رابط وسائط الرأس (صورة/فيديو/مستند) من القالب المحدد
     function getHeaderMediaUrlFromTemplate(template, mediaType) {
       if (!template || !template.components) return '';
@@ -3462,32 +3519,32 @@
         || (ex.headerHandle && ex.headerHandle[0]);
       return url ? String(url).trim() : '';
     }
-    
+
     // بناء مكونات القالب بناءً على التحليل الذكي
     function buildSmartComponents(template, variableValues = {}) {
       const analysis = analyzeTemplate(template);
       const components = [];
-      
+
       console.log('🧠 تحليل ذكي للقالب:', template?.name);
       console.log('🧠 نتيجة التحليل:', JSON.stringify(analysis, null, 2));
       console.log('🧠 قيم المتغيرات:', JSON.stringify(variableValues, null, 2));
-      
+
       // إذا لم يحتاج القالب متغيرات، نرجع مصفوفة فارغة
       if (!analysis.needsVariables) {
         console.log('✅ القالب لا يحتاج متغيرات - إرسال بدون components');
         return { components: [], analysis };
       }
-      
+
       // تحويل قيم المتغيرات إلى مصفوفة
       const varArray = [];
       for (let i = 1; i <= 10; i++) {
         varArray.push(variableValues[i.toString()] || `قيمة ${i}`);
       }
-      
+
       // إضافة مكون الـ HEADER إذا كان مطلوباً
       if (analysis.header.needed) {
         const headerComponent = { type: 'header', parameters: [] };
-        
+
         if (analysis.header.type === 'text') {
           for (let i = 0; i < analysis.header.count; i++) {
             headerComponent.parameters.push({
@@ -3518,26 +3575,26 @@
             document: { link: headerDocUrl || 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', filename: 'test.pdf' }
           });
         }
-        
+
         if (headerComponent.parameters.length > 0) {
           components.push(headerComponent);
         }
       }
-      
+
       // إضافة مكون الـ BODY إذا كان مطلوباً
       if (analysis.body.needed && analysis.body.count > 0) {
         const bodyComponent = { type: 'body', parameters: [] };
-        
+
         for (let i = 0; i < analysis.body.count; i++) {
           bodyComponent.parameters.push({
             type: 'text',
             text: varArray[i] || `قيمة ${i + 1}`
           });
         }
-        
+
         components.push(bodyComponent);
       }
-      
+
       // إضافة مكونات الأزرار إذا كانت مطلوبة
       for (const btn of analysis.buttons) {
         components.push({
@@ -3550,18 +3607,18 @@
           }]
         });
       }
-      
+
       console.log('📤 المكونات المبنية:', JSON.stringify(components, null, 2));
-      
+
       return { components, analysis };
     }
-    
+
     // استخراج محتوى القالب للعرض
     function getTemplateDisplayContent(template) {
       if (!template || !template.components) return '';
-      
+
       let content = '';
-      
+
       for (const component of template.components) {
         if (component.type === 'HEADER' && component.format === 'TEXT' && component.text) {
           content += '*' + component.text + '*\n\n';
@@ -3573,7 +3630,7 @@
           content += '\n\n_' + component.text + '_';
         }
       }
-      
+
       return content || (template ? template.name : '');
     }
 
@@ -3582,38 +3639,38 @@
       const phoneNumber = document.getElementById('test-phone-number').value.trim();
       const templateName = document.getElementById('test-template').value;
       const templateLang = document.getElementById('test-template-language').value;
-      
+
       // جمع قيم المتغيرات من الحقول الديناميكية
       const varValues = getVariableValues();
       const customerName = varValues['1'] || ''; // المتغير الأول هو اسم العميل
-      
+
       // التحقق من البيانات
       if (!phoneNumber) {
         showToast('يرجى إدخال رقم الهاتف', 'error');
         return;
       }
-      
+
       // تنظيف الرقم
       const cleanPhone = phoneNumber.replace(/[\s\-\+]/g, '');
       if (!/^\d{10,15}$/.test(cleanPhone)) {
         showToast('رقم الهاتف غير صحيح. يجب أن يحتوي على 10-15 رقماً', 'error');
         return;
       }
-      
+
       if (!templateName) {
         showToast('يرجى اختيار القالب', 'error');
         return;
       }
-      
+
       const sendBtn = document.getElementById('test-send-btn');
       const resultDiv = document.getElementById('test-send-result');
       const resultContent = document.getElementById('test-send-result-content');
-      
+
       // تعطيل الزر وعرض حالة الإرسال
       sendBtn.disabled = true;
       sendBtn.innerHTML = '<i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i><span>جاري الإرسال...</span>';
       lucide.createIcons();
-      
+
       // عرض حالة الانتظار
       resultDiv.classList.remove('hidden');
       resultContent.className = 'rounded-lg border border-muted bg-muted/30 p-4';
@@ -3629,36 +3686,36 @@
         </div>
       `;
       lucide.createIcons();
-      
+
       try {
         // تحديد اللغة الصحيحة للقالب
         let finalLang = templateLang;
-        
+
         // قالب hello_world يحتاج en_US بالضبط
         if (templateName === 'hello_world') {
           finalLang = 'en_US';
         }
-        
+
         // البحث عن لغة القالب من البيانات المحملة
         const selectedTemplate = testSendTemplates.find(t => t.name === templateName);
         if (selectedTemplate && selectedTemplate.language) {
           finalLang = selectedTemplate.language;
         }
-        
+
         // استخراج محتوى القالب للعرض
         const templateContent = getTemplateDisplayContent(selectedTemplate);
-        
+
         // استخدام النظام الذكي لتحليل القالب مع قيم المتغيرات المدخلة
         const { components: smartComponents, analysis } = buildSmartComponents(selectedTemplate, varValues);
-        
+
         // التحقق من خيار التجاوز اليدوي
         const forceNoVariables = document.getElementById('test-no-variables').checked;
-        
+
         console.log('🧠 إرسال قالب:', templateName, 'بلغة:', finalLang);
         console.log('🧠 تحليل القالب:', analysis.reason);
         console.log('🧠 يحتاج متغيرات:', analysis.needsVariables);
         console.log('🧠 تجاوز يدوي (بدون متغيرات):', forceNoVariables);
-        
+
         // بناء البيانات للإرسال
         const requestBody = {
           to: cleanPhone,
@@ -3667,7 +3724,7 @@
           template_language: finalLang,
           template_content: templateContent
         };
-        
+
         // إضافة المكونات بناءً على التحليل الذكي (إلا إذا تم التجاوز يدوياً)
         if (!forceNoVariables && smartComponents && smartComponents.length > 0) {
           requestBody.template_components = smartComponents;
@@ -3675,17 +3732,17 @@
         } else {
           console.log('📤 إرسال بدون متغيرات');
         }
-        
+
         console.log('📤 بيانات الطلب النهائية:', JSON.stringify(requestBody, null, 2));
-        
+
         const result = await apiRequest('/whatsapp/send', {
           method: 'POST',
           body: JSON.stringify(requestBody)
         });
-        
+
         if (result.success) {
           testMessageID = result.message_id;
-          
+
           // عرض نجاح الإرسال
           resultContent.className = 'rounded-lg border border-primary bg-primary/5 p-4';
           resultContent.innerHTML = `
@@ -3728,15 +3785,15 @@
             </div>
           `;
           lucide.createIcons();
-          
+
           // بدء متابعة الحالة
           startStatusTracking();
-          
+
         } else {
           // فشل الإرسال
           let errorMsg = result.message || result.error || 'خطأ غير معروف';
           let suggestion = '';
-          
+
           // تحليل نوع الخطأ وتقديم اقتراحات
           if (errorMsg.includes('رابط صورة الرأس') || errorMsg.includes('صورة الرأس') || (errorMsg.includes('403') && errorMsg.includes('الرأس'))) {
             suggestion = 'ارفع صورة رأس من حقل «صورة الرأس» أعلاه، أو استخدم رابطاً عاماً (HTTPS) — روابط واتساب لا تعمل عند الإرسال.';
@@ -3749,7 +3806,7 @@
           } else if (errorMsg.includes('limit') || errorMsg.includes('حد')) {
             suggestion = 'تم الوصول للحد الأقصى من الرسائل. حاول لاحقاً';
           }
-          
+
           resultContent.className = 'rounded-lg border border-destructive bg-destructive/5 p-4';
           resultContent.innerHTML = `
             <div class="space-y-3">
@@ -3798,21 +3855,21 @@
     // متابعة حالة الرسالة
     function startStatusTracking() {
       if (!testMessageID) return;
-      
+
       let checkCount = 0;
       const maxChecks = 30; // 30 محاولة (30 ثانية)
-      
+
       statusCheckInterval = setInterval(async () => {
         checkCount++;
-        
+
         if (checkCount > maxChecks) {
           clearInterval(statusCheckInterval);
           statusCheckInterval = null;
-          
+
           // تحديث حالة التتبع - انتهت المدة
           const deliveredDiv = document.getElementById('status-delivered');
           const readDiv = document.getElementById('status-read');
-          
+
           if (deliveredDiv && !deliveredDiv.classList.contains('delivered-done')) {
             deliveredDiv.innerHTML = `
               <i data-lucide="check-check" class="h-4 w-4 text-muted-foreground"></i>
@@ -3821,7 +3878,7 @@
             `;
             lucide.createIcons();
           }
-          
+
           if (readDiv && !readDiv.classList.contains('read-done')) {
             readDiv.innerHTML = `
               <i data-lucide="eye" class="h-4 w-4 text-muted-foreground"></i>
@@ -3830,13 +3887,13 @@
             `;
             lucide.createIcons();
           }
-          
+
           return;
         }
-        
+
         try {
           const result = await apiRequest(`/messages/${testMessageID}`);
-          
+
           if (result.success && result.data) {
             updateStatusUI(result.data.status);
           }
@@ -3850,9 +3907,9 @@
     function updateStatusUI(status) {
       const deliveredDiv = document.getElementById('status-delivered');
       const readDiv = document.getElementById('status-read');
-      
+
       if (!deliveredDiv || !readDiv) return;
-      
+
       // تحديث حالة التسليم
       if (status === 'delivered' || status === 'read') {
         deliveredDiv.className = 'flex items-center gap-3 p-2 rounded-lg bg-success/10 delivered-done';
@@ -3863,7 +3920,7 @@
         `;
         lucide.createIcons();
       }
-      
+
       // تحديث حالة القراءة
       if (status === 'read') {
         readDiv.className = 'flex items-center gap-3 p-2 rounded-lg bg-blue-500/10 read-done';
@@ -3873,7 +3930,7 @@
           <i data-lucide="check" class="h-4 w-4 text-blue-500 mr-auto"></i>
         `;
         lucide.createIcons();
-        
+
         // إيقاف التتبع بعد القراءة
         if (statusCheckInterval) {
           clearInterval(statusCheckInterval);
@@ -3888,7 +3945,7 @@
         `;
         lucide.createIcons();
       }
-      
+
       // حالة الفشل
       if (status === 'failed') {
         deliveredDiv.className = 'flex items-center gap-3 p-2 rounded-lg bg-destructive/10';
@@ -3896,14 +3953,14 @@
           <i data-lucide="x" class="h-4 w-4 text-destructive"></i>
           <span class="text-body-sm text-destructive font-medium">فشل التسليم</span>
         `;
-        
+
         readDiv.className = 'flex items-center gap-3 p-2 rounded-lg bg-muted/30';
         readDiv.innerHTML = `
           <i data-lucide="eye-off" class="h-4 w-4 text-muted-foreground"></i>
           <span class="text-body-sm text-muted-foreground">-</span>
         `;
         lucide.createIcons();
-        
+
         // إيقاف التتبع
         if (statusCheckInterval) {
           clearInterval(statusCheckInterval);
@@ -3916,11 +3973,11 @@
     function setupTestTemplateListener() {
       const templateSelect = document.getElementById('test-template');
       if (templateSelect) {
-        templateSelect.addEventListener('change', function() {
+        templateSelect.addEventListener('change', function () {
           const selectedOption = this.options[this.selectedIndex];
           const lang = selectedOption?.getAttribute('data-lang');
           const templateName = this.value;
-          
+
           // تحديث اللغة
           if (lang) {
             const langSelect = document.getElementById('test-template-language');
@@ -3932,17 +3989,17 @@
               langSelect.value = 'en';
             }
           }
-          
+
           // عرض نتيجة التحليل الذكي
           updateTemplateAnalysis(templateName);
         });
       }
     }
-    
+
     // استخراج محتوى القالب للعرض المفصل
     function getTemplatePreview(template) {
       if (!template || !template.components) return null;
-      
+
       const preview = {
         header: null,
         headerType: null,
@@ -3951,7 +4008,7 @@
         footer: null,
         buttons: []
       };
-      
+
       for (const component of template.components) {
         if (component.type === 'HEADER') {
           preview.headerType = component.format;
@@ -3971,15 +4028,15 @@
             preview.headerMediaUrl = (ex.header_url && ex.header_url[0]) || (ex.header_handle && ex.header_handle[0]) || (ex.headerUrl && ex.headerUrl[0]) || (ex.headerHandle && ex.headerHandle[0]) || null;
           }
         }
-        
+
         if (component.type === 'BODY') {
           preview.body = component.text;
         }
-        
+
         if (component.type === 'FOOTER') {
           preview.footer = component.text;
         }
-        
+
         if (component.type === 'BUTTONS' && component.buttons) {
           for (const btn of component.buttons) {
             if (btn.type === 'URL') {
@@ -3992,25 +4049,25 @@
           }
         }
       }
-      
+
       return preview;
     }
-    
+
     // متغير لتخزين القالب الحالي والتحليل
     let currentTemplateAnalysis = null;
     let currentTemplatePreview = null;
-    
+
     // عرض نتيجة التحليل الذكي ومحتوى القالب
     function updateTemplateAnalysis(templateName) {
       const analysisDiv = document.getElementById('template-analysis-result');
       const variablesContainer = document.getElementById('template-variables-container');
-      
+
       if (!templateName) {
         analysisDiv.classList.add('hidden');
         variablesContainer.innerHTML = '';
         return;
       }
-      
+
       if (templateName === 'hello_world') {
         // hello_world قالب بسيط
         currentTemplateAnalysis = { needsVariables: false };
@@ -4019,7 +4076,7 @@
         renderTemplatePreview();
         return;
       }
-      
+
       // البحث عن القالب في القائمة
       const template = testSendTemplates.find(t => t.name === templateName);
       if (!template) {
@@ -4027,36 +4084,36 @@
         variablesContainer.innerHTML = '';
         return;
       }
-      
+
       // تحليل القالب
       currentTemplateAnalysis = analyzeTemplate(template);
       currentTemplatePreview = getTemplatePreview(template);
-      
+
       // إنشاء حقول المتغيرات
       renderVariableInputs();
-      
+
       // عرض المعاينة
       renderTemplatePreview();
     }
-    
+
     // إنشاء حقول إدخال المتغيرات
     function renderVariableInputs() {
       const container = document.getElementById('template-variables-container');
-      
+
       if (!currentTemplateAnalysis) {
         container.innerHTML = '';
         return;
       }
-      
+
       const analysis = currentTemplateAnalysis;
       const totalVars = analysis.body.count || 0;
       const needsVariables = analysis.needsVariables;
-      
+
       if (!needsVariables) {
         container.innerHTML = '';
         return;
       }
-      
+
       // أسماء افتراضية للمتغيرات
       const varLabels = [
         'اسم العميل',
@@ -4066,7 +4123,7 @@
         'المتغير الخامس',
         'المتغير السادس'
       ];
-      
+
       const varPlaceholders = [
         'مثال: أحمد',
         'مثال: قيمة 2',
@@ -4075,9 +4132,9 @@
         'مثال: قيمة 5',
         'مثال: قيمة 6'
       ];
-      
+
       let html = '';
-      
+
       // صورة الرأس: حقل رفع صورة (للقوالب التي تحتوي صورة رأس)
       if (analysis.header.needed && analysis.header.type === 'image') {
         html += `
@@ -4121,7 +4178,7 @@
           </div>
         `;
       }
-      
+
       for (let i = 0; i < totalVars; i++) {
         const varNum = i + 1;
         html += `
@@ -4141,14 +4198,14 @@
           </div>
         `;
       }
-      
+
       container.innerHTML = html;
       lucide.createIcons();
 
       // رفع صورة الرأس: عند اختيار ملف نرفعه ثم نملأ الرابط في الحقل المخفي
       const fileInput = document.getElementById('header-image-file-input');
       if (fileInput) {
-        fileInput.addEventListener('change', async function() {
+        fileInput.addEventListener('change', async function () {
           const file = this.files && this.files[0];
           const hiddenInput = document.getElementById('template-var-header_image');
           const previewDiv = document.getElementById('header-image-preview');
@@ -4198,12 +4255,12 @@
         });
       }
     }
-    
+
     // تحديث المعاينة في الوقت الفعلي
     function updatePreviewRealtime() {
       renderTemplatePreview();
     }
-    
+
     // الحصول على قيم المتغيرات المدخلة
     function getVariableValues() {
       const values = {};
@@ -4214,23 +4271,23 @@
       });
       return values;
     }
-    
+
     // عرض معاينة القالب مع القيم الحالية
     function renderTemplatePreview() {
       const analysisDiv = document.getElementById('template-analysis-result');
-      
+
       if (!currentTemplatePreview) {
         analysisDiv.classList.add('hidden');
         return;
       }
-      
+
       analysisDiv.classList.remove('hidden');
       analysisDiv.className = 'p-3 rounded-lg border border-border bg-muted/30 space-y-3';
-      
+
       const analysis = currentTemplateAnalysis;
       const preview = currentTemplatePreview;
       const varValues = getVariableValues();
-      
+
       // حالة القالب
       let statusHTML = '';
       if (!analysis || !analysis.needsVariables) {
@@ -4251,7 +4308,7 @@
         if (analysis.buttons.length > 0) {
           details.push(`${analysis.buttons.length} زر ديناميكي`);
         }
-        
+
         statusHTML = `
           <div class="flex items-center gap-2 mb-2">
             <i data-lucide="eye" class="h-4 w-4 text-muted-foreground"></i>
@@ -4259,10 +4316,10 @@
           </div>
         `;
       }
-      
+
       // معاينة المحتوى
       let contentHTML = '<div class="bg-background rounded-lg p-3 border border-border space-y-2">';
-      
+
       // Header — عرض الشكل النهائي (صورة الرأس من القالب)
       if (preview.header) {
         const headerMediaUrlForPreview = preview.headerMediaUrl;
@@ -4293,19 +4350,19 @@
           contentHTML += `<p class="text-body-xs text-muted-foreground">${preview.header}</p>`;
         }
       }
-      
+
       // Body
       if (preview.body) {
         let bodyText = escapeHtml(preview.body);
         bodyText = replaceVariablesWithValues(bodyText, varValues);
         contentHTML += `<p class="text-body-sm whitespace-pre-wrap">${bodyText}</p>`;
       }
-      
+
       // Footer
       if (preview.footer) {
         contentHTML += `<p class="text-body-xs text-muted-foreground border-t border-border pt-2 mt-2">${escapeHtml(preview.footer)}</p>`;
       }
-      
+
       // Buttons
       if (preview.buttons && preview.buttons.length > 0) {
         contentHTML += '<div class="flex flex-wrap gap-2 border-t border-border pt-2 mt-2">';
@@ -4317,13 +4374,13 @@
         }
         contentHTML += '</div>';
       }
-      
+
       contentHTML += '</div>';
-      
+
       analysisDiv.innerHTML = statusHTML + contentHTML;
       lucide.createIcons();
     }
-    
+
     // استبدال المتغيرات بالقيم المدخلة
     function replaceVariablesWithValues(text, values) {
       return text.replace(/\{\{(\d+)\}\}/g, (match, num) => {
@@ -4335,7 +4392,7 @@
         }
       });
     }
-    
+
     // دالة مساعدة لتهريب HTML
     function escapeHtml(text) {
       if (!text) return '';
@@ -4343,9 +4400,10 @@
       div.textContent = text;
       return div.innerHTML;
     }
-    
+
     // تهيئة listener عند تحميل الصفحة
     document.addEventListener('DOMContentLoaded', setupTestTemplateListener);
   </script>
 </body>
+
 </html>

@@ -799,9 +799,7 @@
             </td>
             <td class="px-4 py-4 text-center">
               <div class="space-y-1">
-                <div class="text-body-sm">
-                  <span class="number">${sentR}</span> / <span class="number">${totalR}</span>
-                </div>
+                <span class="inline-flex items-center rounded-full border px-2 py-1 text-xs font-semibold number ${progressPercent >= 100 ? 'bg-success/20 text-success' : progressPercent > 0 ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'}" dir="ltr">${sentR} / ${totalR}</span>
                 <div class="w-full bg-muted rounded-full h-2">
                   <div class="bg-primary h-2 rounded-full transition-all" style="width: ${progressPercent}%"></div>
                 </div>
@@ -1798,6 +1796,8 @@
 
         if (result.success) {
           renderCampaignDetails(result.campaign, result.recipients || [], result.batches || [], result.actual_sent_count, result.total_recipients_count);
+          const refreshBtn = document.getElementById('batch-refresh-btn');
+          if (refreshBtn) refreshBtn.onclick = () => refreshCampaignProgress(campaignId);
 
           // تحميل أنواع أخطاء ميتا وأسباب الفشل إذا كانت هناك رسائل فاشلة
           if (result.campaign.failed_count > 0) {
@@ -1810,6 +1810,64 @@
       } catch (error) {
         console.error('خطأ في تحميل تفاصيل الحملة:', error);
         content.innerHTML = '<div class="text-center text-destructive text-body-sm">تعذر تحميل تفاصيل الحملة</div>';
+      }
+    }
+
+    // تحديث أرقام الدفعات والتقدم فقط (بدون إعادة تحميل المودال)
+    async function refreshCampaignProgress(campaignId) {
+      const btn = document.getElementById('batch-refresh-btn');
+      const tbody = document.getElementById('batch-activity-tbody');
+      const progressEl = document.getElementById('campaign-progress-content');
+      if (!btn || !tbody || !progressEl) return;
+      const origHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" class="h-3.5 w-3.5 animate-spin"></i>';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      try {
+        const res = await fetch(`${API_BASE_URL}/campaigns/${campaignId}`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token')}` }
+        });
+        const result = await res.json();
+        if (!result.success) throw new Error(result.error || 'فشل التحديث');
+        const batches = result.batches || [];
+        const actualSentCount = result.actual_sent_count != null ? result.actual_sent_count : 0;
+        const totalR = (result.total_recipients_count != null && result.total_recipients_count >= 0) ? result.total_recipients_count : (result.campaign?.total_recipients || 0);
+        const progressSent = totalR > 0 ? Math.min(100, Math.round((actualSentCount / totalR) * 100)) : 0;
+        const formatNum = (n) => (n == null || n === '') ? '0' : Number(n).toLocaleString('en-US');
+        const formatDate = (d) => {
+          if (d == null || d === undefined || d === '') return '-';
+          const dt = new Date(d);
+          return isNaN(dt.getTime()) ? '-' : dt.toLocaleString('ar-SA', { dateStyle: 'short', timeStyle: 'short', numberingSystem: 'latn' });
+        };
+        const formatBatchStatus = (s) => ({ pending: 'معلّقة', processing: 'جاري التشغيل', completed: 'تمت', failed: 'فشلت' }[s] || s);
+        const formatBatchStatusClass = (s) => ({ pending: 'bg-muted text-muted-foreground', processing: 'bg-primary/20 text-primary', completed: 'bg-success/20 text-success', failed: 'bg-destructive/20 text-destructive' }[s] || 'bg-muted');
+        tbody.innerHTML = batches.length > 0 ? batches.map(b => `
+          <tr class="hover:bg-muted/40" data-batch-number="${b.batch_number}">
+            <td class="px-4 py-3 text-center font-medium"><span class="block truncate number" dir="ltr">${formatNum(b.batch_number)}</span></td>
+            <td class="px-4 py-3 text-center"><span class="block truncate number" dir="ltr">${formatNum(b.recipient_count)}</span></td>
+            <td class="px-4 py-3 text-center"><span class="batch-badge inline-flex items-center rounded-full border px-2 py-1 text-xs font-semibold number ${formatBatchStatusClass(b.status)}" dir="ltr" title="${formatBatchStatus(b.status)}">${formatNum(b.recipients_sent != null ? b.recipients_sent : 0)} / ${formatNum(b.recipient_count || 0)}</span></td>
+            <td class="px-4 py-3 text-center text-body-sm text-muted-foreground"><span class="block truncate number" dir="ltr" title="${formatDate(b.scheduled_at)}">${formatDate(b.scheduled_at)}</span></td>
+            <td class="px-4 py-3 text-center text-body-sm text-muted-foreground"><span class="block truncate number" dir="ltr" title="${formatDate(b.started_at)}">${formatDate(b.started_at)}</span></td>
+            <td class="px-4 py-3 text-center text-body-sm text-muted-foreground"><span class="block truncate number" dir="ltr" title="${formatDate(b.completed_at)}">${formatDate(b.completed_at)}</span></td>
+          </tr>
+        `).join('') : '<tr><td colspan="6" class="px-4 py-8 text-center text-body-sm text-muted-foreground">لا توجد دفعات مسجّلة لهذه الحملة</td></tr>';
+        progressEl.innerHTML = `
+          <div class="flex-1">
+            <div class="flex justify-between text-body-sm mb-1">
+              <span class="number" dir="ltr">${formatNum(actualSentCount)} / ${formatNum(totalR)}</span>
+              <span class="number" dir="ltr">${progressSent}%</span>
+            </div>
+            <div class="w-full bg-muted rounded-full h-2">
+              <div class="bg-primary h-2 rounded-full transition-all progress-bar-fill" style="width: ${progressSent}%"></div>
+            </div>
+          </div>
+        `;
+      } catch (e) {
+        console.error('تحديث التقدم:', e);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origHtml;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
       }
     }
 
@@ -2198,7 +2256,7 @@
             <div class="border-b border-border px-6 py-4">
               <h3 class="text-heading-md font-semibold flex items-center justify-between gap-2">
                 <span class="flex items-center gap-2"><i data-lucide="layers" class="h-5 w-5 text-primary"></i><span>نشاط الدفعات</span></span>
-                <button type="button" onclick="var m=document.getElementById('campaign-details-modal'); var id=m&&m.dataset.currentCampaignId; if(id) viewCampaignDetails(id);" class="inline-flex items-center gap-1 rounded-md border border-input bg-background px-2 py-1.5 text-body-xs font-medium hover:bg-accent hover:text-accent-foreground">تحديث</button>
+                <button type="button" id="batch-refresh-btn" class="inline-flex items-center gap-1 rounded-md border border-input bg-background px-2 py-1.5 text-body-xs font-medium hover:bg-accent hover:text-accent-foreground">تحديث</button>
               </h3>
               <p class="text-body-sm text-muted-foreground mt-1">حالة كل دفعة: معلّقة، جاري التشغيل، تمت أو فشلت. للدفعة «جاري التشغيل» يظهر التقدم (X / Y مرسل). البيانات أسفل من سجلات الدفعات.</p>
             </div>
@@ -2214,12 +2272,12 @@
                     <th class="px-4 py-3 text-center w-[20%]">انتهى</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-border [&>tr>td]:align-middle [&>tr>td]:overflow-hidden">
+                <tbody id="batch-activity-tbody" class="divide-y divide-border [&>tr>td]:align-middle [&>tr>td]:overflow-hidden">
                   ${batches.length > 0 ? batches.map(b => `
-                    <tr class="hover:bg-muted/40">
+                    <tr class="hover:bg-muted/40" data-batch-number="${b.batch_number}">
                       <td class="px-4 py-3 text-center font-medium"><span class="block truncate number" dir="ltr">${formatNum(b.batch_number)}</span></td>
                       <td class="px-4 py-3 text-center"><span class="block truncate number" dir="ltr">${formatNum(b.recipient_count)}</span></td>
-                      <td class="px-4 py-3 text-center"><span class="inline-block max-w-full truncate"><span class="inline-flex items-center rounded-full border px-2 py-1 text-xs font-semibold ${formatBatchStatusClass(b.status)}">${formatBatchStatus(b.status)}</span>${(b.status === 'processing' && (b.recipients_sent != null || b.recipient_count > 0)) ? `<div class="text-body-xs text-muted-foreground mt-1 number" dir="ltr">${formatNum(b.recipients_sent != null ? b.recipients_sent : 0)} / ${formatNum(b.recipient_count)} مرسل</div>` : ''}</span></td>
+                      <td class="px-4 py-3 text-center"><span class="batch-badge inline-flex items-center rounded-full border px-2 py-1 text-xs font-semibold number ${formatBatchStatusClass(b.status)}" dir="ltr" title="${formatBatchStatus(b.status)}">${formatNum(b.recipients_sent != null ? b.recipients_sent : 0)} / ${formatNum(b.recipient_count || 0)}</span></td>
                       <td class="px-4 py-3 text-center text-body-sm text-muted-foreground"><span class="block truncate number" dir="ltr" title="${formatDate(b.scheduled_at)}">${formatDate(b.scheduled_at)}</span></td>
                       <td class="px-4 py-3 text-center text-body-sm text-muted-foreground"><span class="block truncate number" dir="ltr" title="${formatDate(b.started_at)}">${formatDate(b.started_at)}</span></td>
                       <td class="px-4 py-3 text-center text-body-sm text-muted-foreground"><span class="block truncate number" dir="ltr" title="${formatDate(b.completed_at)}">${formatDate(b.completed_at)}</span></td>
@@ -2237,14 +2295,14 @@
           <!-- التقدم (مطابق لأرقام البطاقات: أُرسلت = عدد المحاولات الفعلي) -->
           <div class="rounded-lg border bg-card p-4">
             <h3 class="text-body-md font-semibold text-muted-foreground mb-2">التقدم</h3>
-            <div class="flex items-center gap-4">
+            <div id="campaign-progress-content" class="flex items-center gap-4">
               <div class="flex-1">
                 <div class="flex justify-between text-body-sm mb-1">
                   <span class="number" dir="ltr">${formatNum(actualSentCount)} / ${formatNum(totalR)}</span>
                   <span class="number" dir="ltr">${progressSent}%</span>
                 </div>
                 <div class="w-full bg-muted rounded-full h-2">
-                  <div class="bg-primary h-2 rounded-full transition-all" style="width: ${progressSent}%"></div>
+                  <div class="bg-primary h-2 rounded-full transition-all progress-bar-fill" style="width: ${progressSent}%"></div>
                 </div>
               </div>
             </div>

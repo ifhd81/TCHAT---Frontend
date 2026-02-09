@@ -242,7 +242,7 @@
     // رابط الوسائط مع التوكن في query (لعمل img/video/audio في المتصفح دون إرسال رؤوس)
     function getMediaUrl(mediaId) {
       const t = localStorage.getItem('access_token') || localStorage.getItem('tchat_token') || '';
-      return `${typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'https://tchat-production.up.railway.app/api/v1'}/media/${mediaId}${t ? '?token=' + encodeURIComponent(t) : ''}`;
+      return `${typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1'}/media/${mediaId}${t ? '?token=' + encodeURIComponent(t) : ''}`;
     }
 
     let currentConversationId = null;

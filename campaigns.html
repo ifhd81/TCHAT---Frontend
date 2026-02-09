@@ -1345,7 +1345,7 @@
           recipients: useAllDatabase ? [] : selectedRecipients
         };
 
-        const response = await fetch('https://tchat-production.up.railway.app/api/v1/campaigns', {
+        const response = await fetch(`${API_BASE_URL}/campaigns`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1389,7 +1389,7 @@
       content.innerHTML = '<div class="text-center text-body-sm text-muted-foreground">جاري تحميل تفاصيل الحملة...</div>';
 
       try {
-        const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}`, {
+        const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
@@ -1427,7 +1427,7 @@
       lucide.createIcons();
       
       try {
-        const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}/failure-reasons`, {
+        const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/failure-reasons`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
@@ -1833,7 +1833,7 @@
       }
 
       try {
-        const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}/start`, {
+        const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/start`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
@@ -1861,7 +1861,7 @@
       }
 
       try {
-        const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}/resend`, {
+        const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/resend`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
@@ -1906,7 +1906,7 @@
           }]
         };
 
-        const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}/recipients`, {
+        const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/recipients`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1932,7 +1932,7 @@
     // إعادة حساب إحصائيات الحملة بدقة
     async function fixCampaignStats(campaignId) {
       try {
-        const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}/fix-stats`, {
+        const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/fix-stats`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
@@ -1963,7 +1963,7 @@
       }
 
       try {
-        const response = await fetch(`https://tchat-production.up.railway.app/api/v1/campaigns/${campaignId}`, {
+        const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
@@ -2000,7 +2000,7 @@
       }
 
       try {
-        const response = await fetch('https://tchat-production.up.railway.app/api/v1/campaigns/delete-all', {
+        const response = await fetch(`${API_BASE_URL}/campaigns/delete-all`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -2028,7 +2028,7 @@
     // تحديث حالات جميع الحملات
     async function updateAllCampaignStatuses() {
       try {
-        const response = await fetch('https://tchat-production.up.railway.app/api/v1/campaigns/update-statuses', {
+        const response = await fetch(`${API_BASE_URL}/campaigns/update-statuses`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
@@ -2109,7 +2109,7 @@
       lucide.createIcons();
       
       try {
-        const response = await fetch('https://tchat-production.up.railway.app/api/v1/campaigns/smart-send-check', {
+        const response = await fetch(`${API_BASE_URL}/campaigns/smart-send-check`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -2330,7 +2330,7 @@
           const refreshToken = localStorage.getItem('tchat_refresh_token');
           if (refreshToken && refreshToken !== 'null') {
             try {
-              const refreshResponse = await fetch('https://tchat-production.up.railway.app/api/v1/auth/refresh', {
+              const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -2360,7 +2360,7 @@
           return;
         }
         
-        const response = await fetch(`https://tchat-production.up.railway.app/api/v1/messages/${messageId}`, {
+        const response = await fetch(`${API_BASE_URL}/messages/${messageId}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -2378,7 +2378,7 @@
               const refreshToken = localStorage.getItem('tchat_refresh_token');
               if (refreshToken && refreshToken !== 'null') {
                 try {
-                  const refreshResponse = await fetch('https://tchat-production.up.railway.app/api/v1/auth/refresh', {
+                  const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${refreshToken}` }
                   });
@@ -3567,7 +3567,7 @@
             showToast('يرجى تسجيل الدخول', 'error');
             return;
           }
-          const baseUrl = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'https://tchat-production.up.railway.app/api/v1').replace(/\/$/, '');
+          const baseUrl = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1').replace(/\/$/, '');
           const formData = new FormData();
           formData.append('file', file);
           try {

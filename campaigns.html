@@ -214,6 +214,16 @@
                   <option value="csv" data-count="0">رفع ملف CSV (0)</option>
                 </select>
               </div>
+              <div class="space-y-2" id="target-country-wrap" style="display: none;">
+                <label class="text-body-sm font-medium flex items-center gap-2">
+                  <i data-lucide="globe" class="h-4 w-4"></i>
+                  <span>الدولة المستهدفة</span>
+                </label>
+                <select id="target-country-dial-code" onchange="onTargetCountryChange()" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <option value="">جميع العملاء</option>
+                </select>
+                <p class="text-body-xs text-muted-foreground">اختياري: إرسال للأرقام التي تبدأ بمفتاح الدولة فقط (مثل +966)</p>
+              </div>
               <div class="space-y-2" id="csv-upload-section" style="display: none;">
                 <label class="text-body-sm font-medium">ملف CSV</label>
                 <input type="file" id="csv-file" accept=".csv" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
@@ -807,7 +817,10 @@
       document.getElementById('create-campaign-modal').classList.remove('hidden');
       document.getElementById('create-campaign-modal').classList.add('flex');
       loadTemplatesForCampaign();
-      loadRecipientsPreview();
+      const src = document.getElementById('recipients-source').value;
+      const targetWrap = document.getElementById('target-country-wrap');
+      if (targetWrap) targetWrap.style.display = (src === 'database') ? 'block' : 'none';
+      loadCampaignCountryOptions().then(function () { loadRecipientsPreview(); });
       loadWhatsAppPhoneNumbers();
     }
 
@@ -823,6 +836,8 @@
       document.getElementById('campaign-template').value = '';
       document.getElementById('whatsapp-phone-number').value = '';
       document.getElementById('recipients-source').value = 'database';
+      const targetCountrySelect = document.getElementById('target-country-dial-code');
+      if (targetCountrySelect) targetCountrySelect.value = '';
       document.getElementById('csv-file').value = '';
       document.getElementById('manual-recipients').value = '';
       selectedRecipients = [];
@@ -944,10 +959,12 @@
       const source = document.getElementById('recipients-source').value;
       const csvSection = document.getElementById('csv-upload-section');
       const manualSection = document.getElementById('manual-input-section');
+      const targetCountryWrap = document.getElementById('target-country-wrap');
       
       // إخفاء جميع الأقسام أولاً
       csvSection.style.display = 'none';
       manualSection.style.display = 'none';
+      if (targetCountryWrap) targetCountryWrap.style.display = 'none';
       
       // مسح المستقبلين عند تغيير المصدر
       selectedRecipients = [];
@@ -968,12 +985,68 @@
         manualSection.style.display = 'block';
         parseManualRecipients(); // تحديث العداد
       } else {
-        // database
-        loadRecipientsPreview();
+        // database: إظهار خيار الدولة المستهدفة وتحميل القائمة
+        if (targetCountryWrap) targetCountryWrap.style.display = 'block';
+        loadCampaignCountryOptions().then(() => loadRecipientsPreview());
+        return;
       }
       
       updateRecipientsPreview();
       updateBatchPreview();
+    }
+
+    // تحميل خيارات الدول للحملة (أرقام تبدأ بمفتاح الدولة)
+    async function loadCampaignCountryOptions() {
+      const select = document.getElementById('target-country-dial-code');
+      if (!select) return;
+      try {
+        const base = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1').replace(/\/$/, '');
+        const token = localStorage.getItem('access_token') || localStorage.getItem('tchat_token');
+        const res = await fetch(`${base}/campaigns/customer-countries`, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const json = await res.json();
+        select.innerHTML = '<option value="">جميع العملاء</option>';
+        if (json.success && Array.isArray(json.data)) {
+          json.data.forEach(function (item) {
+            const opt = document.createElement('option');
+            opt.value = item.dial_code;
+            opt.textContent = item.label_ar + ' (+' + item.dial_code + ') — ' + (item.count || 0);
+            opt.dataset.count = String(item.count || 0);
+            select.appendChild(opt);
+          });
+        }
+        lucide.createIcons();
+      } catch (e) {
+        console.error('تحميل دول الحملة:', e);
+      }
+    }
+
+    // عند تغيير الدولة المستهدفة: تحديث العدد والمعاينة
+    function onTargetCountryChange() {
+      const source = document.getElementById('recipients-source').value;
+      if (source !== 'database') return;
+      const dialCode = (document.getElementById('target-country-dial-code') || {}).value || '';
+      updateDatabaseCountByDialCode(dialCode);
+    }
+
+    async function updateDatabaseCountByDialCode(dialCode) {
+      const base = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1').replace(/\/$/, '');
+      const token = localStorage.getItem('access_token') || localStorage.getItem('tchat_token');
+      try {
+        const url = dialCode
+          ? `${base}/campaigns/customer-count?dial_code=${encodeURIComponent(dialCode)}`
+          : `${base}/campaigns/customer-count`;
+        const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+        const json = await res.json();
+        const count = (json.count != null) ? json.count : (json.data && json.data.count != null ? json.data.count : 0);
+        databaseCustomersCount = count;
+        updateSourceCount('database', count);
+        updateRecipientsPreview();
+        updateBatchPreview();
+      } catch (e) {
+        console.error('تحديث عدد العملاء حسب الدولة:', e);
+      }
     }
 
     // تحليل المستقبلين من الإدخال اليدوي
@@ -1225,9 +1298,19 @@
       
       if (source === 'database') {
         try {
-          // جلب الإجمالي الحقيقي من إحصائيات النظام
-          const stats = await loadSystemStats();
-          const totalCount = (stats && stats.total_customers) ? stats.total_customers : 0;
+          const dialCodeEl = document.getElementById('target-country-dial-code');
+          const dialCode = (dialCodeEl && dialCodeEl.value) ? dialCodeEl.value.trim() : '';
+          let totalCount = 0;
+          if (dialCode) {
+            const base = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1').replace(/\/$/, '');
+            const token = localStorage.getItem('access_token') || localStorage.getItem('tchat_token');
+            const res = await fetch(`${base}/campaigns/customer-count?dial_code=${encodeURIComponent(dialCode)}`, { headers: { 'Authorization': 'Bearer ' + token } });
+            const json = await res.json();
+            totalCount = (json.count != null) ? json.count : (json.data && json.data.count != null ? json.data.count : 0);
+          } else {
+            const stats = await loadSystemStats();
+            totalCount = (stats && stats.total_customers) ? stats.total_customers : 0;
+          }
           databaseCustomersCount = totalCount;
           updateSourceCount('database', totalCount);
 
@@ -1465,6 +1548,8 @@
         
         const headerImageUrlEl = document.getElementById('create-campaign-header-image-url');
         const headerImageUrl = (headerImageUrlEl && headerImageUrlEl.value) ? headerImageUrlEl.value.trim() : '';
+        const targetDialCodeEl = document.getElementById('target-country-dial-code');
+        const targetCountryDialCode = (useAllDatabase && targetDialCodeEl && targetDialCodeEl.value) ? targetDialCodeEl.value.trim() : '';
         const campaignData = {
           name: name,
           description: description,
@@ -1477,6 +1562,7 @@
           batch_interval_minutes: sendType === 'all' ? 0 : batchInterval,
           is_smart_send: isSmartSend,
           use_all_database: useAllDatabase,
+          target_country_dial_code: targetCountryDialCode,
           recipients: useAllDatabase ? [] : selectedRecipients
         };
 

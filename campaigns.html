@@ -625,18 +625,41 @@
   </div>
 
   <script>
-    // استدعاء آمن لمودال التأكيد/الإدخال (يعمل حتى لو لم يُحمّل confirm-modal.js)
-    function safeConfirmModal(opts) {
+    // تحميل سكربت المودال المخصص إن لم يكن محمّلاً (نفس مسار الصفحة)
+    var _confirmModalScriptLoaded = false;
+    function loadConfirmModalScript() {
+      if (_confirmModalScriptLoaded || typeof window.showConfirmModal === 'function') return Promise.resolve();
+      _confirmModalScriptLoaded = true;
+      var base = window.location.href.replace(/\/[^/]*$/, '/');
+      var src = base + 'components/confirm-modal.js';
+      return new Promise(function (resolve) {
+        var el = document.createElement('script');
+        el.src = src;
+        el.onload = resolve;
+        el.onerror = resolve;
+        document.head.appendChild(el);
+      });
+    }
+    // استدعاء آمن لمودال التأكيد — يفضّل المودال المخصص، ويرجع لـ confirm() فقط عند الفشل
+    async function safeConfirmModal(opts) {
+      if (typeof window.showConfirmModal === 'function') {
+        return window.showConfirmModal(opts);
+      }
+      await loadConfirmModalScript();
       if (typeof window.showConfirmModal === 'function') {
         return window.showConfirmModal(opts);
       }
       return Promise.resolve(confirm(opts.message || 'تأكيد'));
     }
-    function safePromptModal(opts) {
+    async function safePromptModal(opts) {
       if (typeof window.showPromptModal === 'function') {
         return window.showPromptModal(opts);
       }
-      const v = prompt(opts.message || '', opts.placeholder || '');
+      await loadConfirmModalScript();
+      if (typeof window.showPromptModal === 'function') {
+        return window.showPromptModal(opts);
+      }
+      var v = prompt(opts.message || '', opts.placeholder || '');
       if (v === null) return Promise.resolve(null);
       if (opts.requiredValue != null && v.trim() !== opts.requiredValue) return Promise.resolve(null);
       return Promise.resolve(v.trim());

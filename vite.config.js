@@ -5,7 +5,7 @@ import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 const apiJsPath = resolve(__dirname, 'api.js')
 
 export default defineConfig(({ mode }) => {
-  // تحميل .env من مجلد frontend (حتى لو شغّلت npm run dev من جذر المشروع)
+  // تحميل .env من مجلد frontend — رابط الباكند من VITE_API_URL فقط (لا روابط ثابتة)
   const env = loadEnv(mode, __dirname, '')
   const apiBaseUrl = env.VITE_API_URL || process.env.VITE_API_URL || 'http://localhost:3000/api/v1'
 
@@ -62,6 +62,11 @@ export default defineConfig(({ mode }) => {
               console.error('inject-api-url-dev:', e)
             }
           }
+          if (path === '/config.js' || path.endsWith('/config.js')) {
+            res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
+            res.end(`window.API_BASE_URL=${JSON.stringify(apiBaseUrl)};\n`)
+            return
+          }
           next()
         })
       }
@@ -75,7 +80,8 @@ export default defineConfig(({ mode }) => {
           let content = readFileSync(resolve(__dirname, 'api.js'), 'utf-8');
           content = content.replace("'__VITE_API_URL__'", JSON.stringify(apiBaseUrl));
           writeFileSync(resolve(__dirname, 'dist/api.js'), content);
-          console.log('✓ api.js written with API_BASE_URL:', apiBaseUrl);
+          writeFileSync(resolve(__dirname, 'dist/config.js'), `window.API_BASE_URL=${JSON.stringify(apiBaseUrl)};\n`);
+          console.log('✓ api.js + config.js written with API_BASE_URL from .env:', apiBaseUrl);
         } catch (err) {
           console.error('Error writing api.js:', err);
         }

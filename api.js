@@ -1,6 +1,8 @@
-// إعدادات API — يُستبدل تلقائياً بقيمة VITE_API_URL من .env عند البناء فقط؛ لا رابط ثابت في الكود
+// إعدادات API — المصدر الوحيد: config.js (يُولَّد من .env عند البناء) ثم القيمة المحقونة عند البناء
 const _apiBase = '__VITE_API_URL__';
-const API_BASE_URL = (_apiBase.startsWith('http') ? _apiBase : '/api/v1');
+const API_BASE_URL = (typeof window !== 'undefined' && window.API_BASE_URL)
+  ? window.API_BASE_URL
+  : (_apiBase && _apiBase.startsWith('http') ? _apiBase : '/api/v1');
 
 // أيقونة مستخدم SVG (Lucide user) — تظهر دائماً دون الاعتماد على createIcons
 function userIconSvg(className) {

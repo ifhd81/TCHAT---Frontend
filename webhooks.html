@@ -597,13 +597,13 @@
           await loadWebhooksData();
           
           // إظهار رسالة نجاح
-          alert(`✅ تم حذف ${response.deleted_count || 'جميع'} سجل بنجاح`);
+          showToast(`تم حذف ${response.deleted_count || 'جميع'} سجل بنجاح`, 'success');
         } else {
-          alert('❌ فشل في حذف السجلات: ' + (response.message || 'خطأ غير معروف'));
+          showToast('فشل في حذف السجلات: ' + (response.message || 'خطأ غير معروف'), 'error');
         }
       } catch (error) {
         console.error('Error deleting webhooks:', error);
-        alert('❌ حدث خطأ أثناء حذف السجلات. يرجى المحاولة مرة أخرى.');
+        showToast('حدث خطأ أثناء حذف السجلات. يرجى المحاولة مرة أخرى.', 'error');
       } finally {
         // إعادة تفعيل الزر
         confirmBtn.disabled = false;

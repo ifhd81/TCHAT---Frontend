@@ -809,7 +809,7 @@
       selectedTemplate = availableTemplates.find(t => t.name === templateName && t.language === templateLanguage);
       
       if (!selectedTemplate) {
-        alert('لم يتم العثور على القالب');
+        showToast('لم يتم العثور على القالب', 'error');
         return;
       }
       
@@ -972,13 +972,13 @@
             refreshConversations();
           }, 2000);
           
-          alert('تم إرسال القالب بنجاح');
+          showToast('تم إرسال القالب بنجاح', 'success');
         } else {
-          alert('فشل في إرسال القالب: ' + (result.message || 'خطأ غير معروف'));
+          showToast('فشل في إرسال القالب: ' + (result.message || 'خطأ غير معروف'), 'error');
         }
       } catch (error) {
         console.error('خطأ في إرسال القالب:', error);
-        alert('تعذر إرسال القالب. تحقق من الاتصال.');
+        showToast('تعذر إرسال القالب. تحقق من الاتصال.', 'error');
       } finally {
         sendBtn.disabled = false;
         sendBtn.innerHTML = '<i data-lucide="send" class="h-4 w-4"></i> إرسال القالب';
@@ -1079,11 +1079,11 @@
             refreshConversations();
           }, 2000);
         } else {
-          alert('فشل في إرسال الرسالة: ' + (result.message || 'خطأ غير معروف'));
+          showToast('فشل في إرسال الرسالة: ' + (result.message || 'خطأ غير معروف'), 'error');
         }
       } catch (error) {
         console.error('خطأ في إرسال الرسالة:', error);
-        alert('تعذر إرسال الرسالة. تحقق من الاتصال.');
+        showToast('تعذر إرسال الرسالة. تحقق من الاتصال.', 'error');
       } finally {
         // إعادة تفعيل الزر
         sendButton.disabled = false;
@@ -1823,7 +1823,7 @@
       
       if (!audio) {
         console.error('❌ عنصر الصوت غير موجود!');
-        alert('خطأ: ملف الصوت غير موجود');
+        showToast('خطأ: ملف الصوت غير موجود', 'error');
         return;
       }
       
@@ -1855,7 +1855,7 @@
           })
           .catch(error => {
             console.error('🔇 فشل تشغيل الصوت:', error);
-            alert('خطأ في تشغيل الصوت: ' + error.message);
+            showToast('خطأ في تشغيل الصوت: ' + error.message, 'error');
             audioEnabled = false;
           });
       }
@@ -1885,7 +1885,7 @@
         // فحص معرف الرسالة
         if (!messageId || messageId === 'null' || messageId === 'undefined' || messageId === '') {
           console.error('❌ معرف الرسالة غير صالح:', messageId);
-          alert('معرف الرسالة غير صالح');
+          showToast('معرف الرسالة غير صالح', 'error');
           return;
         }
         
@@ -1901,7 +1901,7 @@
         
         if (!isLoggedIn || isLoggedIn === 'false') {
           console.error('❌ المستخدم غير مسجل دخوله');
-          alert('يجب تسجيل الدخول أولاً لعرض تفاصيل الرسالة');
+          showToast('يجب تسجيل الدخول أولاً لعرض تفاصيل الرسالة', 'error');
           window.location.href = './login.html';
           return;
         }
@@ -1936,7 +1936,7 @@
             }
           }
           
-          alert('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى');
+showToast('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى', 'error');
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
           localStorage.removeItem('tchat_logged_in');
@@ -1945,7 +1945,7 @@
           window.location.href = './login.html';
           return;
         }
-        
+
         const response = await fetch(`${API_BASE_URL}/messages/${messageId}`, {
           method: 'GET',
           headers: {
@@ -1981,7 +1981,7 @@
               }
             }
             console.error('❌ انتهت صلاحية الرمز المميز');
-            alert('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى');
+            showToast('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى', 'error');
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('tchat_logged_in');
@@ -1993,7 +1993,7 @@
           
           // 404 أو غيره — رسالة واضحة بدون اعتبارها انتهاء جلسة
           if (response.status === 404) {
-            alert('الرسالة غير موجودة أو لا يمكن جلب تفاصيلها.');
+            showToast('الرسالة غير موجودة أو لا يمكن جلب تفاصيلها.', 'error');
             return;
           }
           
@@ -2014,14 +2014,14 @@
         } else {
           console.error('❌ فشل في جلب تفاصيل الرسالة:', result);
           if (result.error === 'الرسالة غير موجودة') {
-            alert('الرسالة غير موجودة في قاعدة البيانات. قد تكون قديمة أو محذوفة.');
+            showToast('الرسالة غير موجودة في قاعدة البيانات. قد تكون قديمة أو محذوفة.', 'error');
           } else {
             throw new Error(result.message || 'فشل في جلب تفاصيل الرسالة');
           }
         }
       } catch (error) {
         console.error('خطأ في جلب تفاصيل الرسالة:', error);
-        alert('تعذر جلب تفاصيل الرسالة: ' + error.message);
+        showToast('تعذر جلب تفاصيل الرسالة: ' + error.message, 'error');
       }
     }
 

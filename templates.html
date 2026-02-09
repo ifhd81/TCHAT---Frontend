@@ -753,7 +753,7 @@
       
       if (file.size > maxSizes[headerType]) {
         const maxMB = maxSizes[headerType] / (1024 * 1024);
-        alert(`حجم الملف يتجاوز الحد الأقصى (${maxMB}MB)`);
+        showToast(`حجم الملف يتجاوز الحد الأقصى (${maxMB}MB)`, 'error');
         event.target.value = '';
         return;
       }
@@ -1331,7 +1331,7 @@
     function addButton() {
       const currentButtons = collectButtons();
       if (currentButtons.length >= META_LIMITS.max_buttons) {
-        alert(`الحد الأقصى ${META_LIMITS.max_buttons} أزرار`);
+        showToast(`الحد الأقصى ${META_LIMITS.max_buttons} أزرار`, 'warning');
         return;
       }
       
@@ -1394,14 +1394,14 @@
       if (errors.length === 0) {
         // عرض رسالة تأكيد
         const name = document.getElementById('template-name').value.trim();
-        alert(`✅ القالب "${name}" جاهز للإرسال!\n\nيمكنك الآن النقر على "إرسال للمراجعة" لإرسال القالب إلى Meta.`);
+        showToast(`القالب "${name}" جاهز للإرسال! يمكنك الآن النقر على "إرسال للمراجعة" لإرسال القالب إلى Meta.`, 'success');
       }
     }
 
     async function submitTemplate() {
       // التحقق إذا كان الرفع جاري
       if (isUploadingMedia) {
-        alert('يرجى انتظار اكتمال رفع الملف');
+        showToast('يرجى انتظار اكتمال رفع الملف', 'warning');
         return;
       }
       
@@ -1498,7 +1498,7 @@
         });
 
         if (response.success) {
-          alert(`✅ تم إنشاء القالب "${name}" بنجاح!\n\nالحالة: قيد المراجعة\nسيتم مراجعته من Meta خلال 24 ساعة تقريباً.`);
+          showToast(`تم إنشاء القالب "${name}" بنجاح! الحالة: قيد المراجعة. سيتم مراجعته من Meta خلال 24 ساعة تقريباً.`, 'success');
           closeCreateModal();
           loadTemplates();
         } else {

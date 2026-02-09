@@ -1349,7 +1349,7 @@
             ${selectedRecipients.slice(0, 5).map((r, i) => `
               <div class="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-body-sm ${i % 2 === 0 ? 'bg-background/60' : 'bg-muted/30'} hover:bg-muted/50 transition-colors">
                 <div class="flex items-center gap-2 min-w-0 flex-1">
-                  <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary text-body-xs font-semibold">${(r.customer_name || '؟').charAt(0)}</span>
+                  <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">${typeof userIconSvg === 'function' ? userIconSvg('h-4 w-4') : '<i data-lucide=\"user\" class=\"h-4 w-4\"></i>'}</span>
                   <span class="truncate font-medium text-foreground">${r.customer_name || '—'}</span>
                 </div>
                 <span class="number shrink-0 text-muted-foreground font-mono text-body-xs dir-ltr">${r.phone_number}</span>

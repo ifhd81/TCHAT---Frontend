@@ -1746,6 +1746,79 @@
       }
     }
 
+    // تحميل جدول أنواع أخطاء ميتا (اسم الخطأ، الوصف، عدد الأحداث)
+    async function loadMetaErrors(campaignId) {
+      const contentDiv = document.getElementById('meta-errors-content');
+      if (!contentDiv) return;
+      contentDiv.innerHTML = `
+        <div class="text-center text-body-sm text-muted-foreground">
+          <i data-lucide="loader-2" class="h-6 w-6 mx-auto mb-2 animate-spin"></i>
+          <p>جاري تحميل أنواع الأخطاء...</p>
+        </div>
+      `;
+      lucide.createIcons();
+      try {
+        const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/meta-errors`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token')}` }
+        });
+        const result = await response.json();
+        if (result.success && result.meta_errors && result.meta_errors.length > 0) {
+          contentDiv.innerHTML = `
+            <div class="overflow-x-auto">
+              <table class="w-full caption-bottom text-sm">
+                <thead class="bg-muted/50">
+                  <tr class="border-b text-right text-body-sm font-semibold text-muted-foreground">
+                    <th class="px-4 py-3">اسم الخطأ</th>
+                    <th class="px-4 py-3">وصف الخطأ</th>
+                    <th class="px-4 py-3 text-center w-32">
+                      <span class="inline-flex items-center gap-1">عدد الأحداث <i data-lucide="arrow-down-up" class="h-3 w-3"></i></span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border">
+                  ${result.meta_errors.map(row => `
+                    <tr class="hover:bg-muted/40">
+                      <td class="px-4 py-3 font-medium text-foreground">${escapeHtml(row.error_name)}</td>
+                      <td class="px-4 py-3 text-body-sm text-muted-foreground">${escapeHtml(row.error_description)}</td>
+                      <td class="px-4 py-3 text-center font-semibold number" dir="ltr">${formatMetaErrorCount(row.number_of_events)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        } else {
+          contentDiv.innerHTML = `
+            <div class="text-center text-body-sm text-muted-foreground py-6">
+              <i data-lucide="info" class="h-8 w-8 mx-auto mb-2"></i>
+              <p>لا توجد بيانات أخطاء من ميتا لهذه الحملة</p>
+              <p class="text-body-xs mt-1">(البيانات تُستخرج من سجلات الويب هوك للرسائل الفاشلة)</p>
+            </div>
+          `;
+        }
+        lucide.createIcons();
+      } catch (e) {
+        console.error('تحميل أخطاء ميتا:', e);
+        contentDiv.innerHTML = `
+          <div class="text-center text-destructive text-body-sm py-4">
+            <i data-lucide="alert-triangle" class="h-8 w-8 mx-auto mb-2"></i>
+            <p>تعذر تحميل أنواع الأخطاء</p>
+          </div>
+        `;
+        lucide.createIcons();
+      }
+    }
+    function formatMetaErrorCount(n) {
+      if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+      return String(n);
+    }
+    function escapeHtml(s) {
+      if (!s) return '';
+      const div = document.createElement('div');
+      div.textContent = s;
+      return div.innerHTML;
+    }
+
     // دالة تحميل أسباب الفشل
     async function loadFailureReasons(campaignId) {
       const contentDiv = document.getElementById('failure-reasons-content');

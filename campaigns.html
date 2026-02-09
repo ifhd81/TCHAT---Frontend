@@ -683,22 +683,22 @@
                 <div>كل ${formatCampaignInterval(campaign)}</div>
               </div>
             </td>
-            <td class="px-4 py-4 text-center">
+            <td class="px-4 py-2 text-center align-middle">
               <div class="flex items-center justify-center gap-1">
-                <button onclick="viewCampaignDetails(${campaign.id})" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground" title="عرض التفاصيل">
+                <button onclick="viewCampaignDetails(${campaign.id})" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-input bg-background p-0 text-muted-foreground transition hover:text-foreground" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="عرض التفاصيل">
                   <i data-lucide="eye" class="h-3 w-3"></i>
                 </button>
                 ${campaign.status === 'draft' ? `
-                  <button onclick="startCampaign(${campaign.id})" class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground transition hover:bg-primary/90" title="بدء الحملة">
+                  <button onclick="startCampaign(${campaign.id})" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary p-0 text-primary-foreground transition hover:bg-primary/90" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="بدء الحملة">
                     <i data-lucide="play" class="h-3 w-3"></i>
                   </button>
                 ` : ''}
                 ${campaign.status === 'running' || campaign.status === 'completed' ? `
-                  <button onclick="resendCampaign(${campaign.id})" class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-warning text-warning-foreground transition hover:bg-warning/90" title="إعادة الإرسال">
+                  <button onclick="resendCampaign(${campaign.id})" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-warning p-0 text-warning-foreground transition hover:bg-warning/90" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="إعادة الإرسال">
                     <i data-lucide="repeat" class="h-3 w-3"></i>
                   </button>
                 ` : ''}
-                <button onclick="deleteCampaign(${campaign.id}, '${campaign.name}')" class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-destructive text-destructive-foreground transition hover:bg-destructive/90" title="حذف الحملة">
+                <button onclick="deleteCampaign(${campaign.id}, '${campaign.name}')" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-destructive p-0 text-destructive-foreground transition hover:bg-destructive/90" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="حذف الحملة">
                   <i data-lucide="trash-2" class="h-3 w-3"></i>
                 </button>
               </div>

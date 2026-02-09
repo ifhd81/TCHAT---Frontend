@@ -161,7 +161,7 @@
               </div>
               <div class="space-y-2">
                 <label class="text-body-sm font-medium">القالب</label>
-                <select id="campaign-template" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <select id="campaign-template" onchange="onCreateCampaignTemplateChange()" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <option value="">اختر القالب</option>
                 </select>
               </div>
@@ -176,6 +176,20 @@
                 <option value="">جاري تحميل الأرقام...</option>
               </select>
               <p class="text-body-xs text-muted-foreground">اختر الرقم الذي سيتم الإرسال منه في هذه الحملة</p>
+            </div>
+            
+            <!-- صورة الرأس (تظهر عند اختيار قالب يحتوي صورة رأس) -->
+            <div id="create-campaign-header-image-box" class="space-y-2 p-3 rounded-lg border border-amber-500/30 bg-amber-500/5 hidden">
+              <label class="text-body-sm font-medium flex items-center gap-2">
+                <i data-lucide="image" class="h-4 w-4 text-amber-600"></i>
+                <span>صورة الرأس (مطلوب للقالب)</span>
+              </label>
+              <p class="text-body-xs text-muted-foreground">ارفع صورة رأس الرسالة. بدونها قد يفشل التسليم.</p>
+              <input type="file" id="create-campaign-header-image-file" accept="image/jpeg,image/png,image/jpg" class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1 file:text-body-sm file:text-primary-foreground" />
+              <input type="hidden" id="create-campaign-header-image-url" value="" />
+              <div id="create-campaign-header-image-preview" class="hidden mt-2 rounded-lg overflow-hidden border border-border bg-muted/20 max-w-xs">
+                <img id="create-campaign-header-image-preview-img" src="" alt="معاينة" class="w-full max-h-32 object-cover" />
+              </div>
             </div>
             
             <div class="space-y-2">
@@ -790,12 +804,101 @@
       document.getElementById('csv-file').value = '';
       document.getElementById('manual-recipients').value = '';
       selectedRecipients = [];
+      // إخفاء صورة الرأس ومسح قيمها
+      const headerBox = document.getElementById('create-campaign-header-image-box');
+      if (headerBox) headerBox.classList.add('hidden');
+      const headerUrl = document.getElementById('create-campaign-header-image-url');
+      if (headerUrl) headerUrl.value = '';
+      const headerFile = document.getElementById('create-campaign-header-image-file');
+      if (headerFile) headerFile.value = '';
+      const headerPreview = document.getElementById('create-campaign-header-image-preview');
+      if (headerPreview) headerPreview.classList.add('hidden');
       
       // إعادة تعيين أعداد المصادر
       updateSourceCount('manual', 0);
       updateSourceCount('csv', 0);
       
       handleRecipientsSourceChange();
+    }
+
+    // عند تغيير القالب في نموذج إنشاء الحملة: إظهار حقل صورة الرأس إن كان القالب يحتويها
+    let createCampaignHeaderImageListenerAttached = false;
+    async function onCreateCampaignTemplateChange() {
+      const templateName = document.getElementById('campaign-template').value;
+      const box = document.getElementById('create-campaign-header-image-box');
+      const urlInput = document.getElementById('create-campaign-header-image-url');
+      const fileInput = document.getElementById('create-campaign-header-image-file');
+      const previewDiv = document.getElementById('create-campaign-header-image-preview');
+      const previewImg = document.getElementById('create-campaign-header-image-preview-img');
+      if (!box) return;
+      if (!templateName) {
+        box.classList.add('hidden');
+        if (urlInput) urlInput.value = '';
+        if (fileInput) fileInput.value = '';
+        if (previewDiv) previewDiv.classList.add('hidden');
+        return;
+      }
+      const template = (availableTemplates || []).find(t => t.name === templateName);
+      if (!template) {
+        box.classList.add('hidden');
+        return;
+      }
+      const analysis = typeof analyzeTemplate === 'function' ? analyzeTemplate(template) : { header: { needed: false } };
+      if (analysis.header && analysis.header.needed && analysis.header.type === 'image') {
+        box.classList.remove('hidden');
+        lucide.createIcons();
+        if (!createCampaignHeaderImageListenerAttached && fileInput) {
+          createCampaignHeaderImageListenerAttached = true;
+          fileInput.addEventListener('change', async function() {
+            const file = this.files && this.files[0];
+            if (!file) {
+              if (urlInput) urlInput.value = '';
+              if (previewDiv) previewDiv.classList.add('hidden');
+              return;
+            }
+            if (!file.type.match(/^image\/(jpeg|png|jpg)$/)) {
+              showToast('الملف يجب أن يكون صورة (JPEG أو PNG)', 'error');
+              return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+              showToast('حجم الصورة يجب ألا يتجاوز 5 ميجابايت', 'error');
+              return;
+            }
+            const token = localStorage.getItem('access_token') || localStorage.getItem('tchat_token');
+            if (!token) {
+              showToast('يرجى تسجيل الدخول', 'error');
+              return;
+            }
+            const baseUrl = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1').replace(/\/$/, '');
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+              const res = await fetch(`${baseUrl}/campaigns/upload-header-image`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token },
+                body: formData
+              });
+              const data = await res.json();
+              if (data.success && data.url) {
+                if (urlInput) urlInput.value = data.url;
+                if (previewImg) previewImg.src = data.url;
+                if (previewDiv) previewDiv.classList.remove('hidden');
+                showToast('تم رفع الصورة بنجاح', 'success');
+              } else {
+                showToast(data.message || data.error || 'فشل رفع الصورة', 'error');
+              }
+            } catch (err) {
+              console.error('رفع صورة الرأس:', err);
+              showToast('فشل رفع الصورة', 'error');
+            }
+          });
+        }
+      } else {
+        box.classList.add('hidden');
+        if (urlInput) urlInput.value = '';
+        if (fileInput) fileInput.value = '';
+        if (previewDiv) previewDiv.classList.add('hidden');
+      }
     }
 
     // تحميل القوالب للحملة
@@ -1316,6 +1419,12 @@
         document.getElementById('whatsapp-phone-number').focus();
         return;
       }
+      const headerImageBox = document.getElementById('create-campaign-header-image-box');
+      const headerImageUrlEl = document.getElementById('create-campaign-header-image-url');
+      if (headerImageBox && !headerImageBox.classList.contains('hidden') && headerImageUrlEl && !headerImageUrlEl.value.trim()) {
+        showToast('يرجى رفع صورة الرأس للقالب المحدد', 'error');
+        return;
+      }
       
       const recipientsSource = document.getElementById('recipients-source').value;
       const useAllDatabase = (recipientsSource === 'database');
@@ -1332,12 +1441,15 @@
       try {
         const isSmartSend = document.getElementById('enable-smart-send').checked;
         
+        const headerImageUrlEl = document.getElementById('create-campaign-header-image-url');
+        const headerImageUrl = (headerImageUrlEl && headerImageUrlEl.value) ? headerImageUrlEl.value.trim() : '';
         const campaignData = {
           name: name,
           description: description,
           template_name: templateName,
           template_language: 'ar',
           whatsapp_phone_number_id: whatsappPhoneNumberID,
+          header_image_url: headerImageUrl,
           batch_size: useAllDatabase ? (sendType === 'all' ? databaseCustomersCount : batchSize) : (sendType === 'all' ? selectedRecipients.length : batchSize),
           batch_interval_hours: sendType === 'all' ? 0 : (batchInterval >= 60 ? batchInterval / 60 : 0),
           batch_interval_minutes: sendType === 'all' ? 0 : batchInterval,

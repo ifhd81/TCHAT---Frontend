@@ -629,6 +629,23 @@
       return h + ' ساعات';
     }
 
+    // نفس التنسيق لكن يُرجع HTML آمن للعرض (الرقم في .number والنص العربي خارجه لتجنب انعكاس الحروف)
+    function formatCampaignIntervalHtml(campaign) {
+      const min = campaign.batch_interval_minutes || 0;
+      if (min > 0) {
+        if (min < 60) return `<span class="number">${min}</span> ${min === 1 ? 'دقيقة' : 'دقائق'}`;
+        if (min === 60) return 'ساعة واحدة';
+        const h = min / 60;
+        if (h === 2) return 'ساعتان';
+        return `<span class="number">${h}</span> ساعات`;
+      }
+      const h = campaign.batch_interval_hours || 0;
+      if (h <= 0) return '-';
+      if (h === 1) return 'ساعة واحدة';
+      if (h === 2) return 'ساعتان';
+      return `<span class="number">${h}</span> ساعات`;
+    }
+
     // تحميل الحملات
     async function loadAndRenderCampaigns() {
       const tbody = document.getElementById('campaigns-table-body');
@@ -712,7 +729,7 @@
             <td class="px-4 py-4 text-center">
               <div class="text-body-sm text-muted-foreground">
                 <div class="number">${campaign.batch_size}</div>
-                <div>كل ${formatCampaignInterval(campaign)}</div>
+                <div>كل ${formatCampaignIntervalHtml(campaign)}</div>
               </div>
             </td>
             <td class="px-4 py-2 text-center align-middle">
@@ -1358,8 +1375,13 @@
       const totalRecipients = selectedRecipients.length;
       const batchCount = Math.ceil(totalRecipients / batchSize);
       const totalDurationMinutes = (batchCount - 1) * batchInterval;
-      const intervalLabel = batchInterval < 60 ? (batchInterval + ' دقيقة') : (batchInterval === 60 ? 'ساعة واحدة' : (batchInterval / 60) + ' ساعة');
-      const durationLabel = totalDurationMinutes < 60 ? (totalDurationMinutes + ' دقيقة') : (totalDurationMinutes / 60) + ' ساعة';
+      // عرض الرقم داخل .number والنص العربي خارجه لتجنب انعكاس الحروف (bidi)
+      const intervalLabelHtml = batchInterval < 60
+        ? `<span class="number">${batchInterval}</span> دقيقة`
+        : (batchInterval === 60 ? 'ساعة واحدة' : `<span class="number">${batchInterval / 60}</span> ساعة`);
+      const durationLabelHtml = totalDurationMinutes < 60
+        ? `<span class="number">${totalDurationMinutes}</span> دقيقة`
+        : `<span class="number">${totalDurationMinutes / 60}</span> ساعة`;
 
       previewContent.innerHTML = `
           <div class="space-y-2 text-body-sm">
@@ -1373,11 +1395,11 @@
             </div>
             <div class="flex justify-between">
               <span>الفترة بين الدفعات:</span>
-              <span class="number">${intervalLabel}</span>
+              <span>${intervalLabelHtml}</span>
             </div>
             <div class="flex justify-between">
               <span>المدة الإجمالية:</span>
-              <span class="number">${durationLabel}</span>
+              <span>${durationLabelHtml}</span>
             </div>
           </div>
       `;
@@ -1872,7 +1894,7 @@
                       </div>
                       <div class="flex items-center gap-2 text-body-sm">
                         <i data-lucide="clock" class="h-4 w-4 text-muted-foreground"></i>
-                        <span>الفترة: كل <span class="font-semibold number">${formatCampaignInterval(campaign)}</span></span>
+                        <span>الفترة: كل <span class="font-semibold">${formatCampaignIntervalHtml(campaign)}</span></span>
                       </div>
                       ${campaign.is_smart_send ? `
                         <div class="flex items-center gap-2 text-body-sm text-primary">

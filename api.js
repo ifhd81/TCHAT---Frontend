@@ -129,23 +129,38 @@ async function loadSystemStats() {
   }
 }
 
+// تخزين مؤقت لأرقام الهواتف (2 دقيقة) لتقليل طلبات /meta/phone-numbers أثناء الحملات المتكررة وتجنب 80008
+let _metaPhoneNumbersCache = { data: null, until: 0 };
+const META_PHONE_NUMBERS_CACHE_MS = 2 * 60 * 1000;
+
 // تحميل جميع أرقام WhatsApp من Meta
-async function loadMetaPhoneNumbers() {
+async function loadMetaPhoneNumbers(forceRefresh = false) {
+  const now = Date.now();
+  if (!forceRefresh && _metaPhoneNumbersCache.data != null && now < _metaPhoneNumbersCache.until) {
+    return _metaPhoneNumbersCache.data;
+  }
   try {
     const data = await apiRequest('/meta/phone-numbers');
     
     console.log('Meta Phone Numbers Response:', data);
     
+    let result = [];
     if (data.success && Array.isArray(data.data)) {
-      return data.data;
+      result = data.data;
     } else if (data.success && data.data) {
-      return [data.data];
+      result = [data.data];
     } else {
       console.error('فشل في جلب أرقام Meta:', data);
       return [];
     }
+    _metaPhoneNumbersCache = { data: result, until: now + META_PHONE_NUMBERS_CACHE_MS };
+    return result;
   } catch (error) {
     console.error('خطأ في تحميل أرقام Meta:', error);
+    // عند الفشل (مثلاً 80008) نُرجع الكاش القديم إن وُجد لتمكين الواجهة من العمل
+    if (_metaPhoneNumbersCache.data != null) {
+      return _metaPhoneNumbersCache.data;
+    }
     throw error;
   }
 }

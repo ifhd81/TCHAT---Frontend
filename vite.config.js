@@ -87,7 +87,7 @@ export default defineConfig(({ mode }) => {
         }
       }
     },
-    // نسخ components (مثل header.js) إلى dist حتى تعمل الصفحات بعد النشر
+    // نسخ components (header.js، confirm-modal.js) إلى dist حتى تعمل الصفحات بعد النشر
     {
       name: 'copy-components',
       closeBundle() {
@@ -98,7 +98,11 @@ export default defineConfig(({ mode }) => {
             resolve(__dirname, 'components/header.js'),
             resolve(componentsDir, 'header.js')
           );
-          console.log('✓ components/header.js copied to dist');
+          copyFileSync(
+            resolve(__dirname, 'components/confirm-modal.js'),
+            resolve(componentsDir, 'confirm-modal.js')
+          );
+          console.log('✓ components/header.js + confirm-modal.js copied to dist');
         } catch (err) {
           console.error('Error copying components:', err);
         }

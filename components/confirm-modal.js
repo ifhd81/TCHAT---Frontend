@@ -13,7 +13,7 @@
     wrap.className = 'fixed inset-0 z-[70] hidden items-center justify-center bg-black/50 backdrop-blur-sm';
     wrap.setAttribute('aria-modal', 'true');
     wrap.innerHTML = `
-      <div class="mx-4 w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg animate-slide-up" role="dialog" aria-labelledby="tchat-confirm-title">
+      <div class="mx-4 w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg animate-pop-in" role="dialog" aria-labelledby="tchat-confirm-title">
         <div id="tchat-confirm-icon-wrap" class="flex items-center gap-3 mb-4">
           <span id="tchat-confirm-icon" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
             <i data-lucide="help-circle" class="h-5 w-5 text-primary"></i>
@@ -41,7 +41,7 @@
     wrap.className = 'fixed inset-0 z-[70] hidden items-center justify-center bg-black/50 backdrop-blur-sm';
     wrap.setAttribute('aria-modal', 'true');
     wrap.innerHTML = `
-      <div class="mx-4 w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg animate-slide-up" role="dialog" aria-labelledby="tchat-prompt-title">
+      <div class="mx-4 w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg animate-pop-in" role="dialog" aria-labelledby="tchat-prompt-title">
         <div class="flex items-center gap-3 mb-4">
           <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
             <i data-lucide="edit-3" class="h-5 w-5 text-primary"></i>

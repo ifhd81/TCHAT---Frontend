@@ -171,7 +171,7 @@
           <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
             <div class="flex flex-col space-y-1.5 p-6 border-b">
               <h3 class="text-heading-md font-semibold leading-none tracking-tight">تنبيهات وأحداث ميتا</h3>
-              <p class="text-body-sm text-muted-foreground">account_alerts، جودة الرقم، جودة/حالة القالب — نعرضها عند استقبالها</p>
+              <p class="text-body-sm text-muted-foreground">تنبيهات، جودة، قوالب، تحديثات الحساب والأمان — نعرضها عند استقبالها</p>
             </div>
             <div class="p-6" id="meta-alerts-container">
               <p class="text-body-sm text-muted-foreground">جاري التحميل...</p>
@@ -361,7 +361,15 @@
           account_alerts: 'تنبيهات الحساب',
           phone_number_quality_update: 'تحديث جودة الرقم',
           message_template_quality_update: 'جودة القالب',
-          message_template_status_update: 'حالة القالب'
+          message_template_status_update: 'حالة القالب',
+          account_update: 'تحديث الحساب',
+          account_review_update: 'تحديث مراجعة الحساب',
+          business_capability_update: 'تحديث قدرات الأعمال',
+          phone_number_name_update: 'تحديث اسم الرقم',
+          message_template_components_update: 'تحديث مكونات القالب',
+          template_category_update: 'تحديث فئة القالب',
+          security: 'أحداث أمنية',
+          user_preferences: 'تفضيلات المستخدم'
         };
         return labels[eventType] || eventType;
       }
@@ -370,7 +378,7 @@
         const container = document.getElementById('meta-alerts-container');
         if (!container) return;
         if (!alerts || alerts.length === 0) {
-          container.innerHTML = '<p class="text-body-sm text-muted-foreground">لا توجد تنبيهات حديثة — تظهر هنا عند استقبال account_alerts أو تحديثات الجودة/القالب من ميتا.</p>';
+          container.innerHTML = '<p class="text-body-sm text-muted-foreground">لا توجد تنبيهات حديثة — تظهر هنا عند استقبال أي حدث من ميتا (تنبيهات، جودة، قوالب، تحديثات الحساب، إلخ).</p>';
           return;
         }
         const rows = alerts.map(a => {

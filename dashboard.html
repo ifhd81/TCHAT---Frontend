@@ -66,22 +66,35 @@
               <p class="text-body-sm text-muted-foreground">رسالة واتساب</p>
             </div>
           </div>
+        </div>
 
+        <!-- سكور ميتا + تنبيهات ميتا — صف واحد بعمودين -->
+        <div class="grid gap-4 md:grid-cols-2 mb-6">
           <!-- سكور استخدام واجهة ميتا (X-App-Usage) — مع تنبيه عند الارتفاع -->
-          <div class="rounded-lg border bg-card text-card-foreground shadow-sm" id="meta-usage-card">
+          <div class="rounded-lg border border-blue-700 bg-blue-600 text-white shadow-sm" id="meta-usage-card">
             <div class="p-6 flex flex-row items-center justify-between space-y-0 pb-2">
-              <h3 class="tracking-tight text-body-md font-medium">سكور استخدام ميتا</h3>
+              <h3 class="tracking-tight text-body-md font-medium text-white">سكور استخدام ميتا</h3>
               <span id="meta-usage-badge" class="hidden"></span>
-              <i data-lucide="activity" class="h-4 w-4 text-muted-foreground"></i>
+              <i data-lucide="activity" class="h-4 w-4 text-white/80"></i>
             </div>
             <div class="p-6 pt-0">
               <div class="flex items-baseline gap-2 flex-wrap">
-                <span class="text-heading-xl font-bold" id="meta-usage-max">—</span>
-                <span class="text-body-sm text-muted-foreground">% (أعلى نسبة)</span>
+                <span class="text-heading-xl font-bold text-white" id="meta-usage-max">—</span>
+                <span class="text-body-sm text-white/90">% (أعلى نسبة)</span>
               </div>
-              <p class="text-body-sm text-muted-foreground mt-1" id="meta-usage-detail">call_count, total_cputime, total_time — تُحدَّث مع كل إرسال</p>
-              <p class="text-body-xs text-muted-foreground mt-2" id="meta-usage-hint">≥70%: تأخير 150ms • ≥90%: تأخير 450ms لتجنب 429</p>
-              <p class="text-body-xs mt-2 hidden" id="meta-usage-regain"><span id="meta-usage-regain-text"></span></p>
+              <p class="text-body-sm text-white/90 mt-1" id="meta-usage-detail">call_count, total_cputime, total_time — تُحدَّث مع كل إرسال</p>
+              <p class="text-body-xs text-white/80 mt-2" id="meta-usage-hint">≥70%: تأخير 150ms • ≥90%: تأخير 450ms لتجنب 429</p>
+              <p class="text-body-xs mt-2 hidden text-white/90" id="meta-usage-regain"><span id="meta-usage-regain-text"></span></p>
+            </div>
+          </div>
+          <!-- تنبيهات وأحداث ميتا -->
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="flex flex-col space-y-1.5 p-6 border-b">
+              <h3 class="text-heading-md font-semibold leading-none tracking-tight">تنبيهات وأحداث ميتا</h3>
+              <p class="text-body-sm text-muted-foreground">تنبيهات، جودة، قوالب، تحديثات الحساب والأمان — نعرضها عند استقبالها</p>
+            </div>
+            <div class="p-6" id="meta-alerts-container">
+              <p class="text-body-sm text-muted-foreground">جاري التحميل...</p>
             </div>
           </div>
         </div>
@@ -164,17 +177,6 @@
                   <i data-lucide="chevron-left" class="h-4 w-4"></i>
                 </button>
               </div>
-            </div>
-          </div>
-
-          <!-- تنبيهات وأحداث ميتا (account_alerts، جودة، قوالب) -->
-          <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div class="flex flex-col space-y-1.5 p-6 border-b">
-              <h3 class="text-heading-md font-semibold leading-none tracking-tight">تنبيهات وأحداث ميتا</h3>
-              <p class="text-body-sm text-muted-foreground">تنبيهات، جودة، قوالب، تحديثات الحساب والأمان — نعرضها عند استقبالها</p>
-            </div>
-            <div class="p-6" id="meta-alerts-container">
-              <p class="text-body-sm text-muted-foreground">جاري التحميل...</p>
             </div>
           </div>
 

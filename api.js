@@ -206,6 +206,17 @@ async function loadRevenueData() {
   }
 }
 
+// تحميل تنبيهات ميتا (account_alerts، جودة الرقم، جودة/حالة القالب)
+async function loadMetaAlerts(limit = 20) {
+  try {
+    const data = await apiRequest(`/stats/meta-alerts?limit=${limit}`);
+    return (data.success && data.data) ? data.data : [];
+  } catch (error) {
+    console.error('خطأ في تحميل تنبيهات ميتا:', error);
+    return [];
+  }
+}
+
 // تحميل webhooks WhatsApp
 async function loadWhatsAppWebhooks(limit = 10) {
   try {

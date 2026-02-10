@@ -66,6 +66,23 @@
               <p class="text-body-sm text-muted-foreground">رسالة واتساب</p>
             </div>
           </div>
+
+          <!-- سكور استخدام واجهة ميتا (X-App-Usage) — مع تنبيه عند الارتفاع -->
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm" id="meta-usage-card">
+            <div class="p-6 flex flex-row items-center justify-between space-y-0 pb-2">
+              <h3 class="tracking-tight text-body-md font-medium">سكور استخدام ميتا</h3>
+              <span id="meta-usage-badge" class="hidden"></span>
+              <i data-lucide="activity" class="h-4 w-4 text-muted-foreground"></i>
+            </div>
+            <div class="p-6 pt-0">
+              <div class="flex items-baseline gap-2 flex-wrap">
+                <span class="text-heading-xl font-bold" id="meta-usage-max">—</span>
+                <span class="text-body-sm text-muted-foreground">% (أعلى نسبة)</span>
+              </div>
+              <p class="text-body-sm text-muted-foreground mt-1" id="meta-usage-detail">call_count, total_cputime, total_time — تُحدَّث مع كل إرسال</p>
+              <p class="text-body-xs text-muted-foreground mt-2" id="meta-usage-hint">≥70%: تأخير 150ms • ≥90%: تأخير 450ms لتجنب 429</p>
+            </div>
+          </div>
         </div>
 
         <!-- Tables Grid -->
@@ -146,6 +163,17 @@
                   <i data-lucide="chevron-left" class="h-4 w-4"></i>
                 </button>
               </div>
+            </div>
+          </div>
+
+          <!-- تنبيهات وأحداث ميتا (account_alerts، جودة، قوالب) -->
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="flex flex-col space-y-1.5 p-6 border-b">
+              <h3 class="text-heading-md font-semibold leading-none tracking-tight">تنبيهات وأحداث ميتا</h3>
+              <p class="text-body-sm text-muted-foreground">account_alerts، جودة الرقم، جودة/حالة القالب — نعرضها عند استقبالها</p>
+            </div>
+            <div class="p-6" id="meta-alerts-container">
+              <p class="text-body-sm text-muted-foreground">جاري التحميل...</p>
             </div>
           </div>
 
@@ -327,6 +355,34 @@
         tbody.innerHTML = TABLE_STATES[state](colspan, message);
       }
 
+      function metaAlertEventLabel(eventType) {
+        const labels = {
+          account_alerts: 'تنبيهات الحساب',
+          phone_number_quality_update: 'تحديث جودة الرقم',
+          message_template_quality_update: 'جودة القالب',
+          message_template_status_update: 'حالة القالب'
+        };
+        return labels[eventType] || eventType;
+      }
+
+      function renderMetaAlerts(alerts) {
+        const container = document.getElementById('meta-alerts-container');
+        if (!container) return;
+        if (!alerts || alerts.length === 0) {
+          container.innerHTML = '<p class="text-body-sm text-muted-foreground">لا توجد تنبيهات حديثة — تظهر هنا عند استقبال account_alerts أو تحديثات الجودة/القالب من ميتا.</p>';
+          return;
+        }
+        const rows = alerts.map(a => {
+          const date = a.created_at ? new Date(a.created_at).toLocaleString('ar-SA', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+          const label = metaAlertEventLabel(a.event_type);
+          return `<div class="flex items-center justify-between py-2 border-b border-border last:border-0">
+            <span class="text-body-sm font-medium">${label}</span>
+            <span class="text-body-xs text-muted-foreground">${date}</span>
+          </div>`;
+        }).join('');
+        container.innerHTML = `<div class="space-y-0">${rows}</div>`;
+      }
+
       function formatThroughputLevel(level) {
         if (!level) {
           return {
@@ -439,6 +495,53 @@
           } catch (error) {
             console.error('تعذّر تحميل أرقام واتساب:', error);
             setTableState('meta-phone-numbers-tbody', 'error', 7, 'تعذّر تحميل أرقام واتساب');
+          }
+
+          // سكور استخدام ميتا (X-App-Usage) — مع تنبيه مرئي عند ارتفاع النسبة
+          try {
+            const whatsappStats = await loadWhatsAppStats();
+            const cardEl = document.getElementById('meta-usage-card');
+            const badgeEl = document.getElementById('meta-usage-badge');
+            if (whatsappStats && whatsappStats.meta_app_usage) {
+              const u = whatsappStats.meta_app_usage;
+              const maxPct = Number(u.max_pct) || 0;
+              const maxEl = document.getElementById('meta-usage-max');
+              const detailEl = document.getElementById('meta-usage-detail');
+              if (maxEl) maxEl.textContent = maxPct > 0 ? Math.round(maxPct) : '—';
+              if (detailEl) {
+                if (u.call_count === 0 && u.total_cputime === 0 && u.total_time === 0) {
+                  detailEl.textContent = 'لم يُسجّل بعد — يحدّث مع كل إرسال إلى واتساب';
+                } else {
+                  detailEl.textContent = `call_count: ${u.call_count}% • total_cputime: ${u.total_cputime}% • total_time: ${u.total_time}%`;
+                }
+              }
+              // تنبيه عند المشكلة: قريب من الحد أو خطر
+              if (cardEl) {
+                cardEl.classList.remove('border-warning', 'border-destructive', 'bg-warning/5', 'bg-destructive/5');
+                if (badgeEl) badgeEl.classList.add('hidden'), badgeEl.innerHTML = '';
+              }
+              if (maxPct >= 90 && cardEl && badgeEl) {
+                cardEl.classList.add('border-destructive', 'bg-destructive/5');
+                badgeEl.classList.remove('hidden');
+                badgeEl.innerHTML = '<span class="inline-flex items-center rounded-full border border-destructive px-2.5 py-0.5 text-xs font-semibold bg-destructive/10 text-destructive">قريب من حد المعدل</span>';
+              } else if (maxPct >= 70 && cardEl && badgeEl) {
+                cardEl.classList.add('border-warning', 'bg-warning/5');
+                badgeEl.classList.remove('hidden');
+                badgeEl.innerHTML = '<span class="inline-flex items-center rounded-full border border-warning px-2.5 py-0.5 text-xs font-semibold bg-warning/10 text-warning">استخدام مرتفع</span>';
+              }
+            }
+          } catch (e) {
+            console.warn('تعذّر تحميل سكور ميتا:', e);
+          }
+
+          // تنبيهات ميتا (account_alerts، جودة الرقم، جودة/حالة القالب)
+          try {
+            const metaAlerts = await loadMetaAlerts(15);
+            renderMetaAlerts(metaAlerts);
+          } catch (e) {
+            console.warn('تعذّر تحميل تنبيهات ميتا:', e);
+            const container = document.getElementById('meta-alerts-container');
+            if (container) container.innerHTML = '<p class="text-body-sm text-muted-foreground">تعذّر تحميل التنبيهات.</p>';
           }
 
           // تحميل بيانات السلات المتروكة

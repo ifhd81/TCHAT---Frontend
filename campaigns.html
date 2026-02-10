@@ -2907,27 +2907,32 @@
       const checkBtn = document.getElementById('check-recipients-btn');
       const resultsDiv = document.getElementById('smart-send-results');
 
-      // جمع أرقام الهواتف من المستقبلين
-      let phoneNumbers = [];
       const source = document.getElementById('recipients-source').value;
+      let body = {};
 
-      if (source === 'manual') {
-        const manualText = document.getElementById('manual-recipients').value;
-        const lines = manualText.split('\n').filter(line => line.trim());
-        phoneNumbers = lines.map(line => {
-          const parts = line.split(',');
-          return parts[0].trim();
-        }).filter(phone => phone);
-      } else if (source === 'database') {
-        // استخدام المستقبلين من قاعدة البيانات
-        if (window.parsedRecipients && window.parsedRecipients.length > 0) {
-          phoneNumbers = window.parsedRecipients.map(r => r.phone_number);
+      if (source === 'database') {
+        // فحص كل العملاء المسجلين على السيرفر (العدد الحقيقي 82415 أو حسب الدولة)
+        const dialCodeEl = document.getElementById('target-country-dial-code');
+        const dialCode = (dialCodeEl && dialCodeEl.value) ? dialCodeEl.value.trim() : '';
+        body = { source: 'database', dial_code: dialCode };
+      } else {
+        // مصدر يدوي أو CSV: إرسال الأرقام المدخلة
+        let phoneNumbers = [];
+        if (source === 'manual') {
+          const manualText = document.getElementById('manual-recipients').value;
+          const lines = manualText.split('\n').filter(line => line.trim());
+          phoneNumbers = lines.map(line => {
+            const parts = line.split(',');
+            return parts[0].trim();
+          }).filter(phone => phone);
+        } else if (selectedRecipients && selectedRecipients.length > 0) {
+          phoneNumbers = selectedRecipients.map(r => r.phone_number).filter(phone => phone);
         }
-      }
-
-      if (phoneNumbers.length === 0) {
-        showToast('لا توجد أرقام للفحص. يرجى إضافة مستقبلين أولاً', 'warning');
-        return;
+        if (phoneNumbers.length === 0) {
+          showToast('لا توجد أرقام للفحص. يرجى إضافة مستقبلين أولاً', 'warning');
+          return;
+        }
+        body = { phone_numbers: phoneNumbers };
       }
 
       // تعطيل الزر وإظهار رسالة التحميل
@@ -2942,9 +2947,7 @@
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           },
-          body: JSON.stringify({
-            phone_numbers: phoneNumbers
-          })
+          body: JSON.stringify(body)
         });
 
         const result = await response.json();

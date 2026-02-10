@@ -836,9 +836,17 @@
               </span>
             </td>
             <td class="px-4 py-4 text-center">
-              <span class="inline-flex items-center rounded-full border border-input px-3 py-1 text-xs font-semibold ${statusClass}">
-                ${statusText}
-              </span>
+              <div class="flex flex-col items-center gap-1">
+                <span class="inline-flex items-center rounded-full border border-input px-3 py-1 text-xs font-semibold ${statusClass}">
+                  ${statusText}
+                </span>
+                ${campaign.status === 'running' && campaign.is_stuck ? `
+                  <span class="inline-flex items-center gap-1 rounded-md bg-warning/15 px-2 py-0.5 text-xs text-warning" title="الحملة متوقفة عن التقدم (مثلاً بعد تحديث السيرفر). اضغط استئناف للمتابعة.">
+                    <i data-lucide="alert-circle" class="h-3 w-3"></i>
+                    متعطلة مؤقتاً
+                  </span>
+                ` : ''}
+              </div>
             </td>
             <td class="px-4 py-4 text-center">
               <div class="text-body-md font-medium number">${totalR}</div>
@@ -866,6 +874,11 @@
                 ${campaign.status === 'draft' ? `
                   <button onclick="startCampaign(${campaign.id})" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary p-0 text-primary-foreground transition hover:bg-primary/90" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="بدء الحملة">
                     <i data-lucide="play" class="h-3 w-3"></i>
+                  </button>
+                ` : ''}
+                ${campaign.status === 'running' && campaign.is_stuck ? `
+                  <button onclick="resumeCampaign(${campaign.id})" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary p-0 text-primary-foreground transition hover:bg-primary/90" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="استئناف الحملة">
+                    <i data-lucide="play-circle" class="h-3 w-3"></i>
                   </button>
                 ` : ''}
                 ${campaign.status === 'running' || campaign.status === 'completed' ? `
@@ -2338,9 +2351,21 @@
                   
                   <div>
                     <label class="text-body-sm font-semibold text-muted-foreground block mb-1">الحالة</label>
-                    <span class="inline-flex items-center rounded-full border px-3 py-1 text-body-sm font-semibold ${getStatusBadgeClass(campaign.status)}">
-                      ${getStatusText(campaign.status)}
-                    </span>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="inline-flex items-center rounded-full border px-3 py-1 text-body-sm font-semibold ${getStatusBadgeClass(campaign.status)}">
+                        ${getStatusText(campaign.status)}
+                      </span>
+                      ${campaign.status === 'running' && campaign.is_stuck ? `
+                        <span class="inline-flex items-center gap-1 rounded-md bg-warning/15 px-2 py-1 text-body-sm text-warning" title="الحملة متوقفة عن التقدم (مثلاً بعد تحديث السيرفر).">
+                          <i data-lucide="alert-circle" class="h-3.5 w-3.5"></i>
+                          متعطلة مؤقتاً
+                        </span>
+                        <button type="button" onclick="resumeCampaign(${campaign.id})" class="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-body-sm font-medium text-primary-foreground hover:bg-primary/90">
+                          <i data-lucide="play-circle" class="h-3.5 w-3.5"></i>
+                          استئناف الحملة
+                        </button>
+                      ` : ''}
+                    </div>
                   </div>
                   
                   <div>
@@ -2646,6 +2671,42 @@
       } catch (error) {
         console.error('خطأ في بدء الحملة:', error);
         showToast('تعذر بدء الحملة. تحقق من الاتصال', 'error');
+      }
+    }
+
+    // استئناف حملة متعطلة
+    async function resumeCampaign(campaignId) {
+      const ok = await safeConfirmModal({
+        title: 'استئناف الحملة',
+        message: 'الحملة متوقفة عن التقدم (مثلاً بعد تحديث السيرفر). هل تريد استئناف الإرسال من حيث توقف؟',
+        confirmText: 'استئناف',
+        cancelText: 'إلغاء'
+      });
+      if (!ok) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/resume`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showToast('تم استئناف الحملة بنجاح', 'success');
+          refreshCampaigns();
+          const modal = document.getElementById('campaign-details-modal');
+          if (modal && modal.dataset.currentCampaignId == campaignId) {
+            viewCampaignDetails(campaignId);
+          }
+        } else {
+          showToast('فشل في استئناف الحملة: ' + (result.message || result.error || 'خطأ غير معروف'), 'error');
+        }
+      } catch (error) {
+        console.error('خطأ في استئناف الحملة:', error);
+        showToast('تعذر استئناف الحملة. تحقق من الاتصال', 'error');
       }
     }
 

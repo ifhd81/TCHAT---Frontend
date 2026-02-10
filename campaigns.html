@@ -245,7 +245,7 @@
             <div class="space-y-2">
               <label class="text-body-sm font-medium">وصف الحملة</label>
               <textarea id="campaign-description" placeholder="وصف مختصر للحملة" rows="3"
-                class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
+                class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y"></textarea>
             </div>
           </div>
 
@@ -1266,6 +1266,13 @@
         const count = (json.count != null) ? json.count : (json.data && json.data.count != null ? json.data.count : 0);
         databaseCustomersCount = count;
         updateSourceCount('database', count);
+        // إعادة تحميل قائمة المعاينة حسب الدولة المستهدفة ليعرض الأرقام الصحيحة فقط
+        const customers = await loadCustomers(500, dialCode || '');
+        selectedRecipients = customers.map(customer => ({
+          customer_id: customer.id,
+          phone_number: customer.mobile || customer.phone,
+          customer_name: customer.name
+        })).filter(r => r.phone_number);
         updateRecipientsPreview();
         updateBatchPreview();
       } catch (e) {
@@ -1558,8 +1565,8 @@
           databaseCustomersCount = totalCount;
           updateSourceCount('database', totalCount);
 
-          // تحميل عينة للمعاينة فقط (الـ API يحدّ بـ 200)
-          const customers = await loadCustomers(500);
+          // تحميل عينة للمعاينة فقط مع فلتر الدولة المستهدفة (الـ API يحدّ بـ 500)
+          const customers = await loadCustomers(500, dialCode);
           selectedRecipients = customers.map(customer => ({
             customer_id: customer.id,
             phone_number: customer.mobile || customer.phone,

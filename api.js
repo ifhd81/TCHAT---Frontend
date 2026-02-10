@@ -221,10 +221,14 @@ async function loadAbandonedCarts(limit = 20) {
   }
 }
 
-// تحميل قائمة العملاء
-async function loadCustomers(limit = 50) {
+// تحميل قائمة العملاء. اختياري: dialCode لفلترة حسب مفتاح الدولة (مثل 968 لعُمان).
+async function loadCustomers(limit = 50, dialCode = '') {
   try {
-    const data = await apiRequest(`/customers?limit=${limit}`);
+    let url = `/customers?limit=${limit}`;
+    if (dialCode && String(dialCode).trim()) {
+      url += `&dial_code=${encodeURIComponent(String(dialCode).trim())}`;
+    }
+    const data = await apiRequest(url);
     console.log('Customers Response:', data);
     if (data.success && Array.isArray(data.data)) {
       return data.data;

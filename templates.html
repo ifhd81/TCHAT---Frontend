@@ -672,6 +672,7 @@
     let buttonsCount = 0;
     let buttonsList = [];
     let uploadedMediaHandle = null; // لحفظ handle الملف المرفوع
+    let uploadedHeaderMediaUrl = null; // رابط R2 لصورة الرأس (يُحفظ مع القالب لاستخدامه في الحملات دون إعادة رفع)
     let headerImagePreviewDataUrl = null; // معاينة محلية للصورة لظهورها في المعاينة الحية
 
     // ============ دوال التحقق من اسم القالب ============
@@ -846,6 +847,11 @@
         }
         if (result.success && result.data?.handle) {
           uploadedMediaHandle = result.data.handle;
+          if (headerType === 'IMAGE' && result.data?.url) {
+            uploadedHeaderMediaUrl = result.data.url;
+          } else {
+            uploadedHeaderMediaUrl = null;
+          }
           // المعاينة المحلية تبقى من reader.readAsDataURL؛ نحدّث المعاينة الحية
           updateLivePreview();
           const statusEl = document.getElementById('upload-status');
@@ -863,7 +869,8 @@
       } catch (error) {
         console.error('❌ خطأ في رفع الملف:', error);
         uploadedMediaHandle = null;
-          headerImagePreviewDataUrl = null;
+        uploadedHeaderMediaUrl = null;
+        headerImagePreviewDataUrl = null;
           
           // عرض خطأ الرفع
         const statusEl = document.getElementById('upload-status');
@@ -920,6 +927,7 @@
       document.getElementById('header-media-preview').classList.add('hidden');
       document.getElementById('header-media-placeholder').classList.remove('hidden');
       uploadedMediaHandle = null;
+      uploadedHeaderMediaUrl = null;
       headerImagePreviewDataUrl = null;
       
       buttonsCount = 0;
@@ -967,6 +975,7 @@
       if (headerType !== 'IMAGE') {
         headerImagePreviewDataUrl = null;
         uploadedMediaHandle = null;
+        uploadedHeaderMediaUrl = null;
       }
       
       // إخفاء جميع الحاويات أولاً
@@ -1499,6 +1508,20 @@
         });
 
         if (response.success) {
+          if (headerType === 'IMAGE' && uploadedHeaderMediaUrl) {
+            try {
+              await apiRequest('/templates/header-url', {
+                method: 'POST',
+                body: JSON.stringify({
+                  template_name: name,
+                  template_language: language,
+                  header_media_url: uploadedHeaderMediaUrl
+                })
+              });
+            } catch (e) {
+              console.warn('حفظ رابط صورة الرأس للقالب:', e);
+            }
+          }
           showToast(`تم إنشاء القالب "${name}" بنجاح! الحالة: قيد المراجعة. سيتم مراجعته من Meta خلال 24 ساعة تقريباً.`, 'success');
           closeCreateModal();
           loadTemplates();

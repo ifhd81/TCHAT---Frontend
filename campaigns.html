@@ -1675,8 +1675,15 @@
         return;
       }
 
+      // عدد المستقبلين الفعلي (بعد الإرسال الذكي إن وُجدت نتيجة فحص)
+      let previewRecipientCount = selectedRecipients.length;
+      if (isSmartSend && smartSendFilteredRecipients && smartSendFilteredRecipients.length > 0) {
+        const allowedSet = new Set(smartSendFilteredRecipients);
+        previewRecipientCount = selectedRecipients.filter(r => allowedSet.has(r.phone_number)).length;
+      }
+
       // حساب عدد الدفعات والمدة (batchInterval بالدقائق)
-      const totalBatches = sendType === 'all' ? 1 : Math.ceil(selectedRecipients.length / batchSize);
+      const totalBatches = sendType === 'all' ? 1 : Math.ceil(previewRecipientCount / batchSize);
       const totalDurationMinutes = sendType === 'all' ? 0 : (totalBatches - 1) * batchInterval;
       const totalDurationLabel = totalDurationMinutes < 60 ? (totalDurationMinutes + ' دقيقة') : (totalDurationMinutes / 60) + ' ساعة';
 
@@ -1714,7 +1721,7 @@
                 </div>
                 <div class="flex justify-between items-center py-2 border-b border-border">
                   <span class="text-muted-foreground">عدد المستقبلين</span>
-                  <span class="font-semibold number">${selectedRecipients.length}</span>
+                  <span class="font-semibold number">${previewRecipientCount}</span>
                 </div>
                 <div class="flex justify-between items-center py-2 border-b border-border">
                   <span class="text-muted-foreground">نوع الإرسال</span>
@@ -1807,6 +1814,20 @@
       try {
         const isSmartSend = document.getElementById('enable-smart-send').checked;
 
+        // عند تفعيل الإرسال الذكي ووجود نتيجة "فحص الأرقام الآن"، نرسل القائمة المصفاة فقط
+        let recipientsToSend = selectedRecipients;
+        if (!useAllDatabase && isSmartSend && smartSendFilteredRecipients && smartSendFilteredRecipients.length > 0) {
+          const allowedSet = new Set(smartSendFilteredRecipients);
+          recipientsToSend = selectedRecipients.filter(r => allowedSet.has(r.phone_number));
+          if (recipientsToSend.length === 0) {
+            showToast('لا يوجد مستقبلون مسموح لهم بعد فحص الإرسال الذكي. أضف أرقاماً أو أعد فحص الأرقام.', 'warning');
+            createBtn.disabled = false;
+            createBtn.innerHTML = '<i data-lucide="send" class="h-4 w-4"></i><span>إنشاء الحملة</span>';
+            lucide.createIcons();
+            return;
+          }
+        }
+
         const headerImageUrlEl = document.getElementById('create-campaign-header-image-url');
         const headerImageUrl = (headerImageUrlEl && headerImageUrlEl.value) ? headerImageUrlEl.value.trim() : '';
         const targetDialCodeEl = document.getElementById('target-country-dial-code');
@@ -1818,13 +1839,13 @@
           template_language: 'ar',
           whatsapp_phone_number_id: whatsappPhoneNumberID,
           header_image_url: headerImageUrl,
-          batch_size: useAllDatabase ? (sendType === 'all' ? databaseCustomersCount : batchSize) : (sendType === 'all' ? selectedRecipients.length : batchSize),
+          batch_size: useAllDatabase ? (sendType === 'all' ? databaseCustomersCount : batchSize) : (sendType === 'all' ? recipientsToSend.length : batchSize),
           batch_interval_hours: sendType === 'all' ? 0 : (batchInterval >= 60 ? batchInterval / 60 : 0),
           batch_interval_minutes: sendType === 'all' ? 0 : batchInterval,
           is_smart_send: isSmartSend,
           use_all_database: useAllDatabase,
           target_country_dial_code: targetCountryDialCode,
-          recipients: useAllDatabase ? [] : selectedRecipients
+          recipients: useAllDatabase ? [] : recipientsToSend
         };
 
         const response = await fetch(`${API_BASE_URL}/campaigns`, {

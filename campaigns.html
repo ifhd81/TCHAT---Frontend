@@ -1820,8 +1820,9 @@
 
       try {
         const isSmartSend = document.getElementById('enable-smart-send').checked;
+        // is_smart_send يُرسل للباك اند الذي يطبّق الفلتر ويضيف للم campaign فقط الأرقام المسموح بها (لا يُرسل للكامل)
 
-        // عند تفعيل الإرسال الذكي ووجود نتيجة "فحص الأرقام الآن"، نرسل القائمة المصفاة فقط
+        // عند تفعيل الإرسال الذكي ووجود نتيجة "فحص الأرقام الآن" (مصدر يدوي/CSV)، نرسل القائمة المصفاة فقط
         let recipientsToSend = selectedRecipients;
         if (!useAllDatabase && isSmartSend && smartSendFilteredRecipients && smartSendFilteredRecipients.length > 0) {
           const allowedSet = new Set(smartSendFilteredRecipients);

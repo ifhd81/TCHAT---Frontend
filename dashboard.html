@@ -81,6 +81,7 @@
               </div>
               <p class="text-body-sm text-muted-foreground mt-1" id="meta-usage-detail">call_count, total_cputime, total_time — تُحدَّث مع كل إرسال</p>
               <p class="text-body-xs text-muted-foreground mt-2" id="meta-usage-hint">≥70%: تأخير 150ms • ≥90%: تأخير 450ms لتجنب 429</p>
+              <p class="text-body-xs mt-2 hidden" id="meta-usage-regain"><span id="meta-usage-regain-text"></span></p>
             </div>
           </div>
         </div>
@@ -505,14 +506,26 @@
             if (whatsappStats && whatsappStats.meta_app_usage) {
               const u = whatsappStats.meta_app_usage;
               const maxPct = Number(u.max_pct) || 0;
+              const regainMin = Number(u.estimated_time_to_regain_access) || 0;
               const maxEl = document.getElementById('meta-usage-max');
               const detailEl = document.getElementById('meta-usage-detail');
+              const regainEl = document.getElementById('meta-usage-regain');
+              const regainTextEl = document.getElementById('meta-usage-regain-text');
               if (maxEl) maxEl.textContent = maxPct > 0 ? Math.round(maxPct) : '—';
               if (detailEl) {
                 if (u.call_count === 0 && u.total_cputime === 0 && u.total_time === 0) {
                   detailEl.textContent = 'لم يُسجّل بعد — يحدّث مع كل إرسال إلى واتساب';
                 } else {
                   detailEl.textContent = `call_count: ${u.call_count}% • total_cputime: ${u.total_cputime}% • total_time: ${u.total_time}%`;
+                }
+              }
+              if (regainEl && regainTextEl) {
+                if (regainMin > 0) {
+                  regainTextEl.textContent = `ستستعيد الوصول بعد ${regainMin} دقيقة (estimated_time_to_regain_access)`;
+                  regainEl.classList.remove('hidden');
+                  regainEl.classList.add('text-warning');
+                } else {
+                  regainEl.classList.add('hidden');
                 }
               }
               // تنبيه عند المشكلة: قريب من الحد أو خطر

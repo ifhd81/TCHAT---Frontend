@@ -82,14 +82,19 @@
                 <i data-lucide="activity" class="h-4 w-4 text-white/80"></i>
               </div>
             </div>
-            <div class="p-6 pt-0">
+            <div class="p-6 pt-0 space-y-3">
               <div class="flex items-baseline gap-2 flex-wrap">
                 <span class="text-heading-xl font-bold text-white" id="meta-usage-max">—</span>
                 <span class="text-body-sm text-white/90">% (أعلى نسبة)</span>
               </div>
-              <p class="text-body-sm text-white/90 mt-1" id="meta-usage-detail">استهلاك عدد الطلبات، وقت المعالج، الوقت الإجمالي — تُحدَّث مع كل إرسال</p>
-              <p class="text-body-xs text-white/80 mt-2" id="meta-usage-hint">≥70%: تأخير 150ms • ≥90%: تأخير 450ms لتجنب 429</p>
-              <p class="text-body-xs mt-2 hidden text-white/90" id="meta-usage-regain"><span id="meta-usage-regain-text"></span></p>
+              <ul class="text-body-sm text-white/90 space-y-1 list-none p-0 m-0" id="meta-usage-detail" aria-label="تفاصيل الاستهلاك">
+                <li>لم يُسجّل بعد — يحدّث مع كل إرسال إلى واتساب</li>
+              </ul>
+              <div class="text-body-xs text-white/80 space-y-0.5" id="meta-usage-hint">
+                <p class="m-0">عند 70% أو أكثر: تأخير 150 مللي ثانية بين الطلبات</p>
+                <p class="m-0">عند 90% أو أكثر: تأخير 450 مللي ثانية لتجنب خطأ 429</p>
+              </div>
+              <p class="text-body-xs mt-1 hidden text-white/90" id="meta-usage-regain"><span id="meta-usage-regain-text"></span></p>
             </div>
           </div>
           <!-- تنبيهات وأحداث ميتا -->
@@ -507,32 +512,61 @@
         if (maxEl) maxEl.textContent = maxPct > 0 ? Math.round(maxPct) : '—';
         if (detailEl) {
           if (u.call_count === 0 && u.total_cputime === 0 && u.total_time === 0) {
-            detailEl.textContent = 'لم يُسجّل بعد — يحدّث مع كل إرسال إلى واتساب';
+            detailEl.innerHTML = '<li>لم يُسجّل بعد — يحدّث مع كل إرسال إلى واتساب</li>';
           } else {
-            detailEl.textContent = `استهلاك عدد الطلبات: ${u.call_count}% • استهلاك وقت المعالج: ${u.total_cputime}% • استهلاك الوقت الإجمالي: ${u.total_time}%`;
+            detailEl.innerHTML = `
+              <li>استهلاك عدد الطلبات: ${u.call_count}%</li>
+              <li>استهلاك وقت المعالج: ${u.total_cputime}%</li>
+              <li>استهلاك الوقت الإجمالي: ${u.total_time}%</li>`;
           }
         }
         if (regainEl && regainTextEl) {
           if (regainMin > 0) {
-            regainTextEl.textContent = `ستستعيد الوصول بعد ${regainMin} دقيقة (estimated_time_to_regain_access)`;
+            regainTextEl.textContent = `ستستعيد الوصول بعد ${regainMin} دقيقة`;
+            regainTextEl.removeAttribute('class');
             regainEl.classList.remove('hidden');
-            regainEl.classList.add('text-warning');
+            regainEl.classList.remove('text-warning', 'text-red-800');
+            regainEl.classList.add('text-white/90');
           } else {
             regainEl.classList.add('hidden');
           }
         }
         if (cardEl) {
-          cardEl.classList.remove('border-warning', 'border-destructive', 'bg-warning/5', 'bg-destructive/5');
+          cardEl.classList.remove('border-warning', 'border-orange-600', 'bg-orange-500', 'border-red-700', 'bg-red-600', 'border', 'bg-red-50', 'bg-orange-50');
+          cardEl.classList.add('border-blue-700', 'bg-blue-600');
+          cardEl.querySelectorAll('.text-red-900, .text-orange-900, .text-red-700, .text-orange-700, svg, li').forEach(el => {
+            el.classList.remove('text-red-900', 'text-orange-900', 'text-red-700', 'text-orange-700');
+            el.classList.add('text-white', 'text-white/90');
+          });
+          cardEl.querySelectorAll('i').forEach(el => { el.classList.add('text-white/80'); });
           if (badgeEl) badgeEl.classList.add('hidden'), badgeEl.innerHTML = '';
         }
         if (maxPct >= 90 && cardEl && badgeEl) {
-          cardEl.classList.add('border-destructive', 'bg-destructive/5');
+          cardEl.classList.remove('border-blue-700', 'bg-blue-600', 'border');
+          cardEl.classList.add('bg-red-50');
+          cardEl.querySelectorAll('h3, [id^="meta-usage"], p, span.text-body-sm, span.text-body-xs, li').forEach(el => {
+            el.classList.remove('text-white', 'text-white/90', 'text-white/80');
+            el.classList.add('text-red-900');
+          });
+          cardEl.querySelectorAll('button, i, svg').forEach(el => {
+            el.classList.remove('text-white', 'text-white/90', 'text-white/80');
+            el.classList.add('text-red-700');
+          });
           badgeEl.classList.remove('hidden');
-          badgeEl.innerHTML = '<span class="inline-flex items-center rounded-full border border-destructive px-2.5 py-0.5 text-xs font-semibold bg-destructive/10 text-destructive">قريب من حد المعدل</span>';
+          badgeEl.innerHTML = '<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-red-100 text-red-800">قريب من حد المعدل</span>';
         } else if (maxPct >= 70 && cardEl && badgeEl) {
-          cardEl.classList.add('border-warning', 'bg-warning/5');
+          cardEl.classList.remove('border-blue-700', 'bg-blue-600', 'border');
+          cardEl.classList.add('bg-orange-50');
+          cardEl.querySelectorAll('h3, [id^="meta-usage"], p, span.text-body-sm, span.text-body-xs, li').forEach(el => {
+            el.classList.remove('text-white', 'text-white/90', 'text-white/80');
+            el.classList.add('text-orange-900');
+          });
+          cardEl.querySelectorAll('button, i, svg').forEach(el => {
+            el.classList.remove('text-white', 'text-white/90', 'text-white/80');
+            el.classList.add('text-orange-700');
+          });
           badgeEl.classList.remove('hidden');
-          badgeEl.innerHTML = '<span class="inline-flex items-center rounded-full border border-warning px-2.5 py-0.5 text-xs font-semibold bg-warning/10 text-warning">استخدام مرتفع</span>';
+          badgeEl.innerHTML = '<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-orange-100 text-orange-800">استخدام مرتفع</span>';
         }
       }
 

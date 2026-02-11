@@ -790,6 +790,7 @@
     }
 
     function renderCampaigns() {
+      window.__campaignsList = campaigns || [];
       const tbody = document.getElementById('campaigns-table-body');
 
       if (!campaigns.length) {
@@ -841,7 +842,7 @@
                   ${statusText}
                 </span>
                 ${campaign.status === 'running' && campaign.is_stuck ? `
-                  <span class="inline-flex items-center gap-1 rounded-md bg-warning/15 px-2 py-0.5 text-xs text-warning" title="الحملة متوقفة عن التقدم (مثلاً بعد تحديث السيرفر). اضغط استئناف للمتابعة.">
+                  <span class="inline-flex items-center gap-1 rounded-md bg-warning/15 px-2 py-0.5 text-xs text-warning" title="${(campaign.stuck_reason || 'الحملة متوقفة عن التقدم.').replace(/"/g, '&quot;')} اضغط استئناف للمتابعة.">
                     <i data-lucide="alert-circle" class="h-3 w-3"></i>
                     متعطلة مؤقتاً
                   </span>
@@ -1924,6 +1925,7 @@
         const result = await response.json();
 
         if (result.success) {
+          window.__campaignDetails = result.campaign;
           renderCampaignDetails(result.campaign, result.recipients || [], result.batches || [], result.actual_sent_count, result.total_recipients_count);
           const refreshBtn = document.getElementById('batch-refresh-btn');
           if (refreshBtn) refreshBtn.onclick = () => refreshCampaignProgress(campaignId);
@@ -1958,6 +1960,7 @@
         });
         const result = await res.json();
         if (!result.success) throw new Error(result.error || 'فشل التحديث');
+        if (result.campaign) window.__campaignDetails = result.campaign;
         const batches = result.batches || [];
         const actualSentCount = result.actual_sent_count != null ? result.actual_sent_count : 0;
         const totalR = (result.total_recipients_count != null && result.total_recipients_count >= 0) ? result.total_recipients_count : (result.campaign?.total_recipients || 0);
@@ -2356,7 +2359,7 @@
                         ${getStatusText(campaign.status)}
                       </span>
                       ${campaign.status === 'running' && campaign.is_stuck ? `
-                        <span class="inline-flex items-center gap-1 rounded-md bg-warning/15 px-2 py-1 text-body-sm text-warning" title="الحملة متوقفة عن التقدم (مثلاً بعد تحديث السيرفر).">
+                        <span class="inline-flex items-center gap-1 rounded-md bg-warning/15 px-2 py-1 text-body-sm text-warning" title="${(campaign.stuck_reason || 'الحملة متوقفة عن التقدم.').replace(/"/g, '&quot;')}">
                           <i data-lucide="alert-circle" class="h-3.5 w-3.5"></i>
                           متعطلة مؤقتاً
                         </span>
@@ -2366,6 +2369,9 @@
                         </button>
                       ` : ''}
                     </div>
+                    ${campaign.status === 'running' && campaign.is_stuck && campaign.stuck_reason ? `
+                      <p class="mt-2 text-body-sm text-muted-foreground border border-warning/30 rounded-md bg-warning/5 px-3 py-2" role="status">${(campaign.stuck_reason || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')}</p>
+                    ` : ''}
                   </div>
                   
                   <div>
@@ -2676,9 +2682,11 @@
 
     // استئناف حملة متعطلة
     async function resumeCampaign(campaignId) {
+      const campaign = (window.__campaignsList || []).find(c => c.id === campaignId) || (window.__campaignDetails && window.__campaignDetails.id === campaignId ? window.__campaignDetails : null);
+      const stuckReason = campaign && campaign.stuck_reason ? campaign.stuck_reason : 'الحملة متوقفة عن التقدم (مثلاً بعد تحديث السيرفر).';
       const ok = await safeConfirmModal({
         title: 'استئناف الحملة',
-        message: 'الحملة متوقفة عن التقدم (مثلاً بعد تحديث السيرفر). هل تريد استئناف الإرسال من حيث توقف؟',
+        message: stuckReason + ' هل تريد استئناف الإرسال من حيث توقف؟',
         confirmText: 'استئناف',
         cancelText: 'إلغاء'
       });

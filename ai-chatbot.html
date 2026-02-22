@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,9 +14,25 @@
       background: linear-gradient(90deg, transparent, #10b981, transparent);
       animation: toggle-spinner-linear 1s ease-in-out infinite;
     }
+
     @keyframes toggle-spinner-linear {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(350%); }
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(350%);
+      }
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
     }
   </style>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
@@ -24,181 +41,202 @@
   <script src="./components/header.js"></script>
   <script src="./components/confirm-modal.js"></script>
 </head>
+
 <body class="rtl min-h-screen bg-background" style="font-family: 'LamaSans', sans-serif;">
-  
+
   <div class="min-h-screen">
-    
+
     <!-- Header Container -->
     <div id="header-container"></div>
 
-  <!-- Main Content -->
-  <main class="container mx-auto px-4 py-8">
-    
-    <!-- Page Header -->
-    <section class="mb-8 flex items-center justify-between">
-      <div>
-        <h1 class="text-heading-lg font-bold text-foreground">الشات بوت الذكي</h1>
-        <p class="text-body-sm text-muted-foreground">الرد التلقائي على رسائل العملاء باستخدام الذكاء الاصطناعي</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <!-- زر التفعيل/التعطيل (أخضر + سبينر خطي عند التحميل) -->
-        <button 
-          id="toggle-btn"
-          type="button"
-          onclick="toggleChatbot()"
-          class="relative flex h-[28px] min-w-[72px] flex-col items-stretch justify-center overflow-hidden rounded-full border border-border bg-card px-3 shadow-sm transition-colors duration-200 hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 disabled:pointer-events-none disabled:opacity-80"
-        >
-          <span class="flex items-center gap-2">
-            <span id="status-dot" class="h-2 w-2 shrink-0 rounded-full bg-muted-foreground transition-colors duration-200"></span>
-            <span id="status-text" class="text-[11px] font-medium text-muted-foreground leading-none pt-0.5">معطل</span>
-          </span>
-          <span id="toggle-spinner" class="absolute bottom-0 left-0 right-0 h-0.5 overflow-hidden bg-emerald-100 opacity-0 transition-opacity duration-200" aria-hidden="true">
-            <span class="toggle-spinner-bar"></span>
-          </span>
-        </button>
-      </div>
-    </section>
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
 
-    <!-- Status Card -->
-    <section class="mb-8">
-      <div id="status-card" class="rounded-xl border bg-card p-6 shadow-sm">
-        <div class="flex items-center gap-4">
-          <div id="status-icon" class="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-            <i data-lucide="bot" class="h-7 w-7 text-muted-foreground"></i>
-          </div>
-          <div>
-            <h2 id="status-title" class="text-heading-md font-semibold">الشات بوت معطل</h2>
-            <p id="status-desc" class="text-body-sm text-muted-foreground">قم بتفعيل الشات بوت للرد التلقائي على رسائل العملاء</p>
-          </div>
+      <!-- Page Header -->
+      <section class="mb-8 flex items-center justify-between">
+        <div>
+          <h1 class="text-heading-lg font-bold text-foreground">الشات بوت الذكي</h1>
+          <p class="text-body-sm text-muted-foreground">الرد التلقائي على رسائل العملاء باستخدام الذكاء الاصطناعي</p>
         </div>
-      </div>
-    </section>
-
-    <!-- Main Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      
-      <!-- Settings Card -->
-      <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
-        <div class="border-b border-border p-6">
-          <div class="flex items-center gap-3">
-            <i data-lucide="settings" class="h-5 w-5 text-muted-foreground"></i>
-            <h2 class="text-heading-md font-semibold">الإعدادات</h2>
-          </div>
-        </div>
-        <div class="p-6 space-y-6">
-          
-          <!-- AI Provider -->
-          <div>
-            <label class="block text-body-sm font-medium mb-2">مزود الذكاء الاصطناعي</label>
-            <select id="ai-provider" onchange="updateModel()" class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
-              <option value="anthropic">Anthropic (Claude)</option>
-              <option value="openai">OpenAI (GPT)</option>
-            </select>
-          </div>
-
-          <!-- AI Model -->
-          <div>
-            <label class="block text-body-sm font-medium mb-2">النموذج</label>
-            <select id="ai-model" class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
-              <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5 (موصى به)</option>
-              <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (أسرع وأرخص)</option>
-              <option value="claude-opus-4-5-20251101">Claude Opus 4.5 (الأذكى)</option>
-            </select>
-          </div>
-
-          <!-- Phone Numbers Selection -->
-          <div>
-            <label class="block text-body-sm font-medium mb-2">أرقام الواتساب المفعل عليها</label>
-            <div class="space-y-2">
-              <label class="flex items-center gap-3 cursor-pointer">
-                <input type="radio" name="phone-mode" value="all" id="phone-all" onchange="togglePhoneInput()" class="h-4 w-4 text-primary focus:ring-primary" checked>
-                <span class="text-body-sm">جميع الأرقام المربوطة</span>
-              </label>
-              <label class="flex items-center gap-3 cursor-pointer">
-                <input type="radio" name="phone-mode" value="specific" id="phone-specific" onchange="togglePhoneInput()" class="h-4 w-4 text-primary focus:ring-primary">
-                <span class="text-body-sm">أرقام محددة</span>
-              </label>
-            </div>
-            <div id="phone-input-container" class="mt-3 hidden">
-              <div id="phones-list" class="space-y-2 p-3 border rounded-md bg-muted/30">
-                <p class="text-body-sm text-muted-foreground">جاري تحميل الأرقام...</p>
-              </div>
-              <p class="text-caption text-muted-foreground mt-1">اختر الأرقام التي تريد تفعيل AI Chatbot عليها</p>
-            </div>
-          </div>
-
-          <!-- Reply Mode -->
-          <div>
-            <label class="block text-body-sm font-medium mb-2">وضع الرد</label>
-            <div class="space-y-2">
-              <label class="flex items-center gap-3 cursor-pointer">
-                <input type="radio" name="reply-mode" value="false" id="reply-outside" class="h-4 w-4 text-primary focus:ring-primary" checked>
-                <span class="text-body-sm">الرد فقط خارج أوقات العمل</span>
-              </label>
-              <label class="flex items-center gap-3 cursor-pointer">
-                <input type="radio" name="reply-mode" value="true" id="reply-all" class="h-4 w-4 text-primary focus:ring-primary">
-                <span class="text-body-sm">الرد على جميع الرسائل</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Working Hours -->
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-body-sm font-medium mb-2">بداية العمل</label>
-              <input type="time" id="working-start" value="09:00" class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
-            </div>
-            <div>
-              <label class="block text-body-sm font-medium mb-2">نهاية العمل</label>
-              <input type="time" id="working-end" value="23:00" class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
-            </div>
-          </div>
-
-          <!-- Max Tokens -->
-          <div>
-            <label class="block text-body-sm font-medium mb-2">الحد الأقصى للرد (tokens)</label>
-            <input type="number" id="max-tokens" value="500" min="100" max="2000" class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
-          </div>
-
-          <!-- Temperature -->
-          <div>
-            <label class="block text-body-sm font-medium mb-2">درجة الإبداع: <span id="temp-value">0.7</span></label>
-            <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7" onchange="document.getElementById('temp-value').textContent = this.value" class="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer">
-            <div class="flex justify-between text-caption text-muted-foreground mt-1">
-              <span>دقيق</span>
-              <span>إبداعي</span>
-            </div>
-          </div>
-
-          <!-- Excluded Keywords -->
-          <div>
-            <label class="block text-body-sm font-medium mb-2">كلمات مستثناة (مفصولة بفاصلة)</label>
-            <input type="text" id="excluded-keywords" placeholder="مثال: مدير, شكوى, مشكلة" class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
-            <p class="text-caption text-muted-foreground mt-1">لن يرد البوت على الرسائل التي تحتوي هذه الكلمات</p>
-          </div>
-
-          <!-- Save Button -->
-          <button onclick="saveSettings()" class="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90">
-            <i data-lucide="save" class="h-4 w-4"></i>
-            <span>حفظ الإعدادات</span>
+        <div class="flex items-center gap-3">
+          <!-- زر التفعيل/التعطيل (أخضر + سبينر خطي عند التحميل) -->
+          <button id="toggle-btn" type="button" onclick="toggleChatbot()"
+            class="relative flex h-[28px] min-w-[72px] flex-col items-stretch justify-center overflow-hidden rounded-full border border-border bg-card px-3 shadow-sm transition-colors duration-200 hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 disabled:pointer-events-none disabled:opacity-80">
+            <span class="flex items-center gap-2">
+              <span id="status-dot"
+                class="h-2 w-2 shrink-0 rounded-full bg-muted-foreground transition-colors duration-200"></span>
+              <span id="status-text"
+                class="text-[11px] font-medium text-muted-foreground leading-none pt-0.5">معطل</span>
+            </span>
+            <span id="toggle-spinner"
+              class="absolute bottom-0 left-0 right-0 h-0.5 overflow-hidden bg-emerald-100 opacity-0 transition-opacity duration-200"
+              aria-hidden="true">
+              <span class="toggle-spinner-bar"></span>
+            </span>
           </button>
         </div>
-      </div>
+      </section>
 
-      <!-- Store Context Card -->
-      <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
-        <div class="border-b border-border p-6">
-          <div class="flex items-center gap-3">
-            <i data-lucide="file-text" class="h-5 w-5 text-muted-foreground"></i>
-            <h2 class="text-heading-md font-semibold">معلومات المتجر (السياق)</h2>
+      <!-- Status Card -->
+      <section class="mb-8">
+        <div id="status-card" class="rounded-xl border bg-card p-6 shadow-sm">
+          <div class="flex items-center gap-4">
+            <div id="status-icon" class="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+              <i data-lucide="bot" class="h-7 w-7 text-muted-foreground"></i>
+            </div>
+            <div>
+              <h2 id="status-title" class="text-heading-md font-semibold">الشات بوت معطل</h2>
+              <p id="status-desc" class="text-body-sm text-muted-foreground">قم بتفعيل الشات بوت للرد التلقائي على رسائل
+                العملاء</p>
+            </div>
           </div>
         </div>
-        <div class="p-6">
-          <p class="text-body-sm text-muted-foreground mb-4">أدخل المعلومات التي يجب أن يعرفها البوت عن متجرك للرد على الأسئلة</p>
-          <textarea 
-            id="store-context" 
-            rows="12"
-            placeholder="مثال:
+      </section>
+
+      <!-- Main Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Settings Card -->
+        <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div class="border-b border-border p-6">
+            <div class="flex items-center gap-3">
+              <i data-lucide="settings" class="h-5 w-5 text-muted-foreground"></i>
+              <h2 class="text-heading-md font-semibold">الإعدادات</h2>
+            </div>
+          </div>
+          <div class="p-6 space-y-6">
+
+            <!-- AI Provider -->
+            <div>
+              <label class="block text-body-sm font-medium mb-2">مزود الذكاء الاصطناعي</label>
+              <select id="ai-provider" onchange="updateModel()"
+                class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="anthropic">Anthropic (Claude)</option>
+                <option value="openai">OpenAI (GPT)</option>
+              </select>
+            </div>
+
+            <!-- AI Model -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-body-sm font-medium">النموذج</label>
+                <button type="button" onclick="refreshModels()" id="refresh-models-btn"
+                  class="inline-flex items-center gap-1 text-caption text-primary hover:text-primary/80 transition-colors"
+                  title="تحديث قائمة النماذج">
+                  <i data-lucide="refresh-cw" id="refresh-models-icon" class="h-3.5 w-3.5"></i>
+                  <span>تحديث النماذج</span>
+                </button>
+              </div>
+              <select id="ai-model"
+                class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5 (موصى به)</option>
+                <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (أسرع وأرخص)</option>
+                <option value="claude-opus-4-5-20251101">Claude Opus 4.5 (الأذكى)</option>
+              </select>
+            </div>
+
+            <!-- Phone Numbers Selection -->
+            <div>
+              <label class="block text-body-sm font-medium mb-2">أرقام الواتساب المفعل عليها</label>
+              <div class="space-y-2">
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="radio" name="phone-mode" value="all" id="phone-all" onchange="togglePhoneInput()"
+                    class="h-4 w-4 text-primary focus:ring-primary" checked>
+                  <span class="text-body-sm">جميع الأرقام المربوطة</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="radio" name="phone-mode" value="specific" id="phone-specific"
+                    onchange="togglePhoneInput()" class="h-4 w-4 text-primary focus:ring-primary">
+                  <span class="text-body-sm">أرقام محددة</span>
+                </label>
+              </div>
+              <div id="phone-input-container" class="mt-3 hidden">
+                <div id="phones-list" class="space-y-2 p-3 border rounded-md bg-muted/30">
+                  <p class="text-body-sm text-muted-foreground">جاري تحميل الأرقام...</p>
+                </div>
+                <p class="text-caption text-muted-foreground mt-1">اختر الأرقام التي تريد تفعيل AI Chatbot عليها</p>
+              </div>
+            </div>
+
+            <!-- Reply Mode -->
+            <div>
+              <label class="block text-body-sm font-medium mb-2">وضع الرد</label>
+              <div class="space-y-2">
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="radio" name="reply-mode" value="false" id="reply-outside"
+                    class="h-4 w-4 text-primary focus:ring-primary" checked>
+                  <span class="text-body-sm">الرد فقط خارج أوقات العمل</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="radio" name="reply-mode" value="true" id="reply-all"
+                    class="h-4 w-4 text-primary focus:ring-primary">
+                  <span class="text-body-sm">الرد على جميع الرسائل</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Working Hours -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-body-sm font-medium mb-2">بداية العمل</label>
+                <input type="time" id="working-start" value="09:00"
+                  class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
+              </div>
+              <div>
+                <label class="block text-body-sm font-medium mb-2">نهاية العمل</label>
+                <input type="time" id="working-end" value="23:00"
+                  class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
+              </div>
+            </div>
+
+            <!-- Max Tokens -->
+            <div>
+              <label class="block text-body-sm font-medium mb-2">الحد الأقصى للرد (tokens)</label>
+              <input type="number" id="max-tokens" value="500" min="100" max="2000"
+                class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
+            </div>
+
+            <!-- Temperature -->
+            <div>
+              <label class="block text-body-sm font-medium mb-2">درجة الإبداع: <span id="temp-value">0.7</span></label>
+              <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7"
+                onchange="document.getElementById('temp-value').textContent = this.value"
+                class="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer">
+              <div class="flex justify-between text-caption text-muted-foreground mt-1">
+                <span>دقيق</span>
+                <span>إبداعي</span>
+              </div>
+            </div>
+
+            <!-- Excluded Keywords -->
+            <div>
+              <label class="block text-body-sm font-medium mb-2">كلمات مستثناة (مفصولة بفاصلة)</label>
+              <input type="text" id="excluded-keywords" placeholder="مثال: مدير, شكوى, مشكلة"
+                class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary">
+              <p class="text-caption text-muted-foreground mt-1">لن يرد البوت على الرسائل التي تحتوي هذه الكلمات</p>
+            </div>
+
+            <!-- Save Button -->
+            <button onclick="saveSettings()"
+              class="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90">
+              <i data-lucide="save" class="h-4 w-4"></i>
+              <span>حفظ الإعدادات</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Store Context Card -->
+        <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div class="border-b border-border p-6">
+            <div class="flex items-center gap-3">
+              <i data-lucide="file-text" class="h-5 w-5 text-muted-foreground"></i>
+              <h2 class="text-heading-md font-semibold">معلومات المتجر (السياق)</h2>
+            </div>
+          </div>
+          <div class="p-6">
+            <p class="text-body-sm text-muted-foreground mb-4">أدخل المعلومات التي يجب أن يعرفها البوت عن متجرك للرد على
+              الأسئلة</p>
+            <textarea id="store-context" rows="12" placeholder="مثال:
 أنت مساعد ذكي لمتجر [اسم المتجر].
 معلومات المتجر:
 - التوصيل: 2-3 أيام للرياض، 4-5 أيام لباقي المناطق
@@ -208,72 +246,70 @@
 - رقم الدعم: 966500000000
 
 رد بشكل مختصر وودود باللغة العربية."
-            class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary resize-y min-h-[180px]"
-          ></textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- Test Section -->
-    <section class="mt-6">
-      <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
-        <div class="border-b border-border p-6">
-          <div class="flex items-center gap-3">
-            <i data-lucide="flask-conical" class="h-5 w-5 text-muted-foreground"></i>
-            <h2 class="text-heading-md font-semibold">اختبار الشات بوت</h2>
+              class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary resize-y min-h-[180px]"></textarea>
           </div>
         </div>
-        <div class="p-6">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Test Input -->
-            <div>
-              <label class="block text-body-sm font-medium mb-2">اكتب رسالة للاختبار</label>
-              <textarea 
-                id="test-message" 
-                rows="3"
-                placeholder="مثال: كم سعر التوصيل للرياض؟"
-                class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-              ></textarea>
-              <button onclick="testBot()" id="test-btn" class="mt-3 inline-flex items-center gap-2 rounded-md bg-secondary px-4 py-2 text-button-md font-semibold text-secondary-foreground shadow-sm transition hover:bg-secondary/80">
-                <i data-lucide="send" class="h-4 w-4"></i>
-                <span>اختبار</span>
-              </button>
+      </div>
+
+      <!-- Test Section -->
+      <section class="mt-6">
+        <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div class="border-b border-border p-6">
+            <div class="flex items-center gap-3">
+              <i data-lucide="flask-conical" class="h-5 w-5 text-muted-foreground"></i>
+              <h2 class="text-heading-md font-semibold">اختبار الشات بوت</h2>
             </div>
-            <!-- Test Result -->
-            <div>
-              <label class="block text-body-sm font-medium mb-2">رد البوت</label>
-              <div id="test-result" class="min-h-[100px] rounded-md border border-input bg-muted/50 px-3 py-2 text-body-sm">
-                <span class="text-muted-foreground">سيظهر رد البوت هنا...</span>
+          </div>
+          <div class="p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Test Input -->
+              <div>
+                <label class="block text-body-sm font-medium mb-2">اكتب رسالة للاختبار</label>
+                <textarea id="test-message" rows="3" placeholder="مثال: كم سعر التوصيل للرياض؟"
+                  class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"></textarea>
+                <button onclick="testBot()" id="test-btn"
+                  class="mt-3 inline-flex items-center gap-2 rounded-md bg-secondary px-4 py-2 text-button-md font-semibold text-secondary-foreground shadow-sm transition hover:bg-secondary/80">
+                  <i data-lucide="send" class="h-4 w-4"></i>
+                  <span>اختبار</span>
+                </button>
+              </div>
+              <!-- Test Result -->
+              <div>
+                <label class="block text-body-sm font-medium mb-2">رد البوت</label>
+                <div id="test-result"
+                  class="min-h-[100px] rounded-md border border-input bg-muted/50 px-3 py-2 text-body-sm">
+                  <span class="text-muted-foreground">سيظهر رد البوت هنا...</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Logs Section -->
-    <section class="mt-6">
-      <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
-        <div class="border-b border-border p-6">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <i data-lucide="history" class="h-5 w-5 text-muted-foreground"></i>
-              <h2 class="text-heading-md font-semibold">سجل الردود التلقائية</h2>
+      <!-- Logs Section -->
+      <section class="mt-6">
+        <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div class="border-b border-border p-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <i data-lucide="history" class="h-5 w-5 text-muted-foreground"></i>
+                <h2 class="text-heading-md font-semibold">سجل الردود التلقائية</h2>
+              </div>
+              <button onclick="loadLogs()"
+                class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
+                <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+              </button>
             </div>
-            <button onclick="loadLogs()" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:text-foreground">
-              <i data-lucide="refresh-cw" class="h-4 w-4"></i>
-            </button>
+          </div>
+          <div class="p-6">
+            <div id="logs-container" class="space-y-3">
+              <p class="text-body-sm text-muted-foreground text-center py-8">جاري التحميل...</p>
+            </div>
           </div>
         </div>
-        <div class="p-6">
-          <div id="logs-container" class="space-y-3">
-            <p class="text-body-sm text-muted-foreground text-center py-8">جاري التحميل...</p>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
 
-  </main>
+    </main>
   </div>
 
   <script>
@@ -287,10 +323,10 @@
     let currentSettings = null;
 
     // تهيئة الصفحة
-    document.addEventListener('DOMContentLoaded', async function() {
+    document.addEventListener('DOMContentLoaded', async function () {
       renderHeader('header-container', { activePage: 'ai-chatbot' });
       lucide.createIcons();
-      
+
       try {
         await loadSettings();
         await loadLogs();
@@ -308,7 +344,7 @@
         if (settings) {
           currentSettings = settings;
           isEnabled = settings.is_enabled;
-          
+
           // تحديث الواجهة
           document.getElementById('ai-provider').value = settings.ai_provider || 'anthropic';
           updateModel();
@@ -320,7 +356,7 @@
           document.getElementById('working-start').value = settings.working_hours_start || '09:00';
           document.getElementById('working-end').value = settings.working_hours_end || '23:00';
           document.getElementById('excluded-keywords').value = settings.excluded_keywords || '';
-          
+
           // أرقام الهواتف المفعل عليها
           if (settings.enabled_phone_numbers && settings.enabled_phone_numbers.trim() !== '') {
             document.getElementById('phone-specific').checked = true;
@@ -331,14 +367,14 @@
             document.getElementById('phone-all').checked = true;
             document.getElementById('phone-input-container').classList.add('hidden');
           }
-          
+
           // وضع الرد
           if (settings.reply_to_all) {
             document.getElementById('reply-all').checked = true;
           } else {
             document.getElementById('reply-outside').checked = true;
           }
-          
+
           updateStatusUI();
         }
       } catch (error) {
@@ -350,7 +386,7 @@
     function togglePhoneInput() {
       const phoneAll = document.getElementById('phone-all').checked;
       const container = document.getElementById('phone-input-container');
-      
+
       if (phoneAll) {
         container.classList.add('hidden');
       } else {
@@ -363,19 +399,19 @@
     let availablePhones = [];
     async function loadAvailablePhones() {
       const container = document.getElementById('phones-list');
-      
+
       try {
         const phones = await loadMetaPhoneNumbers();
         availablePhones = phones;
-        
+
         if (!phones || phones.length === 0) {
           container.innerHTML = '<p class="text-body-sm text-muted-foreground">لا توجد أرقام مربوطة</p>';
           return;
         }
-        
+
         // الأرقام المحددة مسبقاً
         const enabledPhones = currentSettings?.enabled_phone_numbers?.split(',').map(p => p.trim()) || [];
-        
+
         container.innerHTML = phones.map(phone => {
           const phoneNumber = phone.display_phone_number?.replace(/\D/g, '') || phone.id;
           // تنظيف وتنسيق رقم الهاتف - إزالة الفراغات والرموز
@@ -383,7 +419,7 @@
           displayNumber = '+' + displayNumber.replace(/[\s\+\-\(\)]/g, '');
           const verifiedName = phone.verified_name || '';
           const isChecked = enabledPhones.includes(phoneNumber) ? 'checked' : '';
-          
+
           return `
             <label class="flex items-center gap-3 p-2 rounded hover:bg-muted/50 cursor-pointer">
               <input type="checkbox" name="enabled-phone" value="${phoneNumber}" ${isChecked}
@@ -395,7 +431,7 @@
             </label>
           `;
         }).join('');
-        
+
       } catch (error) {
         console.error('خطأ في تحميل الأرقام:', error);
         container.innerHTML = '<p class="text-body-sm text-destructive">حدث خطأ في تحميل الأرقام</p>';
@@ -408,23 +444,66 @@
       return Array.from(checkboxes).map(cb => cb.value).join(',');
     }
 
-    // تحديث خيارات النماذج
+    // النماذج الافتراضية (تُستخدم كـ fallback)
+    const defaultModels = {
+      anthropic: [
+        { id: 'claude-sonnet-4-5-20250929', name: 'Claude Sonnet 4.5 (موصى به)' },
+        { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5 (أسرع وأرخص)' },
+        { id: 'claude-opus-4-5-20251101', name: 'Claude Opus 4.5 (الأذكى)' },
+      ],
+      openai: [
+        { id: 'gpt-5.2', name: 'GPT-5.2 (الأحدث)' },
+        { id: 'gpt-5-mini', name: 'GPT-5 Mini (مجاني)' },
+        { id: 'gpt-4o', name: 'GPT-4o (متوازن)' },
+      ]
+    };
+
+    // تحديث خيارات النماذج (يُظهر الافتراضية فوراً)
     function updateModel() {
       const provider = document.getElementById('ai-provider').value;
+      const models = defaultModels[provider] || defaultModels.openai;
+      renderModelOptions(models);
+    }
+
+    // عرض النماذج في الـ select
+    function renderModelOptions(models) {
       const modelSelect = document.getElementById('ai-model');
-      
-      if (provider === 'anthropic') {
-        modelSelect.innerHTML = `
-          <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5 (موصى به)</option>
-          <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (أسرع وأرخص)</option>
-          <option value="claude-opus-4-5-20251101">Claude Opus 4.5 (الأذكى)</option>
-        `;
-      } else {
-        modelSelect.innerHTML = `
-          <option value="gpt-5.2">GPT-5.2 (الأحدث)</option>
-          <option value="gpt-5-mini">GPT-5 Mini (أرخص)</option>
-          <option value="gpt-4o">GPT-4o</option>
-        `;
+      const currentValue = modelSelect.value;
+      modelSelect.innerHTML = models.map(m =>
+        `<option value="${m.id}">${m.name}</option>`
+      ).join('');
+      // إعادة تحديد النموذج السابق إن وُجد
+      if (models.some(m => m.id === currentValue)) {
+        modelSelect.value = currentValue;
+      }
+    }
+
+    // جلب النماذج من الـ API (زر تحديث النماذج)
+    async function refreshModels() {
+      const provider = document.getElementById('ai-provider').value;
+      const btn = document.getElementById('refresh-models-btn');
+      const icon = document.getElementById('refresh-models-icon');
+
+      // تدوير الأيقونة أثناء التحميل
+      if (btn) btn.disabled = true;
+      if (icon) icon.style.animation = 'spin 1s linear infinite';
+
+      try {
+        const models = await fetchAIModels(provider);
+        if (models && models.length > 0) {
+          renderModelOptions(models);
+          showToast(`تم تحديث ${models.length} نموذج من ${provider === 'openai' ? 'OpenAI' : 'Anthropic'}`, 'success');
+        } else {
+          showToast('لم يتم العثور على نماذج، تم استخدام القائمة الافتراضية', 'warning');
+          updateModel(); // fallback
+        }
+      } catch (error) {
+        console.error('خطأ في تحديث النماذج:', error);
+        showToast('خطأ في جلب النماذج - تأكد من مفتاح API', 'error');
+        updateModel(); // fallback
+      } finally {
+        if (btn) btn.disabled = false;
+        if (icon) icon.style.animation = '';
       }
     }
 
@@ -437,11 +516,11 @@
       const statusIcon = document.getElementById('status-icon');
       const statusTitle = document.getElementById('status-title');
       const statusDesc = document.getElementById('status-desc');
-      
+
       if (!toggleBtn || !statusCard) return;
-      
+
       const iconElement = statusIcon?.querySelector('i');
-      
+
       if (isEnabled) {
         toggleBtn.classList.remove('border-border', 'bg-card', 'hover:bg-muted/50');
         toggleBtn.classList.add('border-emerald-400/60', 'bg-emerald-50', 'hover:bg-emerald-100');
@@ -493,14 +572,14 @@
       const toggleBtn = document.getElementById('toggle-btn');
       const spinner = document.getElementById('toggle-spinner');
       if (!toggleBtn) return;
-      
+
       toggleBtn.disabled = true;
       if (spinner) spinner.classList.add('!opacity-100');
-      
+
       try {
         const newState = !isEnabled;
         const result = await toggleAIChatbot(newState);
-        
+
         if (result.success) {
           isEnabled = newState;
           updateStatusUI();
@@ -523,7 +602,7 @@
         // تحديد الأرقام المفعل عليها
         const phoneAll = document.getElementById('phone-all').checked;
         const enabledPhones = phoneAll ? '' : getSelectedPhones();
-        
+
         const settings = {
           is_enabled: isEnabled,
           ai_provider: document.getElementById('ai-provider').value,
@@ -537,9 +616,9 @@
           excluded_keywords: document.getElementById('excluded-keywords').value,
           enabled_phone_numbers: enabledPhones
         };
-        
+
         const result = await updateAIChatbotSettings(settings);
-        
+
         if (result.success) {
           showToast('تم حفظ الإعدادات بنجاح', 'success');
         } else {
@@ -558,16 +637,16 @@
         showToast('اكتب رسالة للاختبار', 'warning');
         return;
       }
-      
+
       const resultDiv = document.getElementById('test-result');
       const testBtn = document.getElementById('test-btn');
-      
+
       resultDiv.innerHTML = '<span class="text-muted-foreground">جاري المعالجة...</span>';
       testBtn.disabled = true;
-      
+
       try {
         const result = await testAIChatbot(message);
-        
+
         if (result.success) {
           resultDiv.innerHTML = `<p class="text-foreground">${result.answer}</p>`;
         } else {
@@ -584,15 +663,15 @@
     // تحميل السجلات
     async function loadLogs() {
       const container = document.getElementById('logs-container');
-      
+
       try {
         const logs = await loadAIChatbotLogs(20);
-        
+
         if (!logs || logs.length === 0) {
           container.innerHTML = '<p class="text-body-sm text-muted-foreground text-center py-8">لا توجد سجلات بعد</p>';
           return;
         }
-        
+
         container.innerHTML = logs.map(log => `
           <div class="border rounded-lg p-4 space-y-2">
             <div class="flex items-center justify-between">
@@ -607,7 +686,7 @@
             </div>
           </div>
         `).join('');
-        
+
       } catch (error) {
         console.error('خطأ في تحميل السجلات:', error);
         container.innerHTML = '<p class="text-body-sm text-destructive text-center py-8">حدث خطأ في تحميل السجلات</p>';
@@ -631,7 +710,7 @@
       // إنشاء عنصر الإشعار
       const toast = document.createElement('div');
       toast.className = `fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 p-4 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-y-full opacity-0`;
-      
+
       // تحديد الألوان حسب النوع
       const colors = {
         success: 'bg-green-500 text-white',
@@ -639,17 +718,17 @@
         warning: 'bg-yellow-500 text-black',
         info: 'bg-blue-500 text-white'
       };
-      
+
       toast.classList.add(...(colors[type] || colors.info).split(' '));
       toast.textContent = message;
-      
+
       document.body.appendChild(toast);
-      
+
       // إظهار الإشعار
       setTimeout(() => {
         toast.classList.remove('translate-y-full', 'opacity-0');
       }, 100);
-      
+
       // إخفاء الإشعار بعد 3 ثواني
       setTimeout(() => {
         toast.classList.add('translate-y-full', 'opacity-0');
@@ -659,4 +738,5 @@
   </script>
 
 </body>
+
 </html>

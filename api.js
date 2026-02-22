@@ -529,6 +529,21 @@ async function getAIChatbotStatus() {
   }
 }
 
+// جلب النماذج المتاحة من المزود
+async function fetchAIModels(provider) {
+  try {
+    const data = await apiRequest(`/ai-chatbot/models?provider=${encodeURIComponent(provider)}`);
+    console.log('AI Models Response:', data);
+    if (data.success && data.models) {
+      return data.models;
+    }
+    return null;
+  } catch (error) {
+    console.error('خطأ في جلب النماذج:', error);
+    return null;
+  }
+}
+
 // =============================================================================
 
 // تسجيل الخروج

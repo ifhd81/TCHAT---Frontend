@@ -585,11 +585,13 @@
           updateStatusUI();
           showToast(result.message, 'success');
         } else {
-          showToast(result.message || 'حدث خطأ', 'error');
+          const msg = result.error || result.message || 'حدث خطأ';
+          showToast(msg, 'error');
         }
       } catch (error) {
         console.error('خطأ في تغيير حالة البوت:', error);
-        showToast('حدث خطأ في تغيير الحالة', 'error');
+        const msg = (error && error.message) ? error.message : 'حدث خطأ في تغيير الحالة';
+        showToast(msg, 'error');
       } finally {
         toggleBtn.disabled = false;
         if (spinner) spinner.classList.remove('!opacity-100');

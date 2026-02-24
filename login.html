@@ -66,13 +66,14 @@
               </button>
             </form>
 
-            <p class="text-center text-body-sm text-muted-foreground">© 2025 TCHAT - جميع الحقوق محفوظة</p>
+            <p class="text-center text-body-sm text-muted-foreground">© <span id="copyright-year"></span> TCHAT - جميع الحقوق محفوظة</p>
           </div>
         </div>
       </div>
     </main>
 
     <script>
+      document.getElementById('copyright-year').textContent = new Date().getFullYear();
       const passwordInput = document.getElementById('password');
       const togglePasswordBtn = document.getElementById('toggle-password');
       const submitBtn = document.querySelector('button[type="submit"]');

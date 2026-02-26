@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TCHAT - Zapier</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="./config.js"></script>
+  <script src="./api.js"></script>
+  <script src="./components/header.js"></script>
+</head>
+<body class="rtl min-h-screen bg-background" style="font-family: 'LamaSans', sans-serif;">
+
+  <div class="min-h-screen">
+    <div id="header-container"></div>
+
+    <main class="container mx-auto px-4 py-6">
+      <!-- Page Header -->
+      <div class="mb-6">
+        <h1 class="text-heading-xl font-bold mb-2">Zapier</h1>
+        <p class="text-body-md text-muted-foreground">ربط نماذجك ومصادر الليدز مع TCHAT عبر Webhook — حفظ العميل وإرسال قالب واتساب تلقائياً</p>
+      </div>
+
+      <!-- Webhook URL Card -->
+      <div class="rounded-lg border bg-card text-card-foreground shadow-sm mb-6">
+        <div class="p-6 border-b border-border">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="link" class="h-5 w-5 text-primary"></i>
+            <h2 class="text-heading-md font-semibold">رابط الويب هوك</h2>
+          </div>
+          <p class="text-body-sm text-muted-foreground mb-4">استخدم هذا الرابط في Zapier (Webhooks by Zapier) أو أي أتمتة خارجية. يجب إرسال طلب POST مع الرأس X-API-Key.</p>
+          <div class="flex flex-wrap items-center gap-3">
+            <input type="text" id="webhook-url" readonly
+              class="flex-1 min-w-[200px] rounded-md border border-input bg-muted/50 px-3 py-2 text-body-sm font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              dir="ltr" />
+            <button type="button" onclick="copyWebhookUrl()"
+              class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground transition hover:bg-primary/90">
+              <i data-lucide="copy" class="h-4 w-4"></i>
+              <span>نسخ الرابط</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Auth & Body -->
+      <div class="grid gap-6 md:grid-cols-2">
+        <!-- Authentication -->
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+          <div class="p-6 border-b border-border">
+            <div class="flex items-center gap-2">
+              <i data-lucide="key" class="h-5 w-5 text-primary"></i>
+              <h2 class="text-heading-md font-semibold">المصادقة</h2>
+            </div>
+          </div>
+          <div class="p-6 space-y-3">
+            <p class="text-body-sm text-muted-foreground">أضف الرأس التالي في كل طلب:</p>
+            <div class="rounded-md bg-muted/60 p-3 font-mono text-body-xs" dir="ltr" style="word-break: break-all;">
+              X-API-Key: <span id="api-key-placeholder" class="text-muted-foreground">قيمة ZAPIER_WEBHOOK_SECRET من إعدادات السيرفر</span>
+            </div>
+            <p class="text-body-xs text-muted-foreground">القيمة تُعرّف في متغير البيئة <code class="rounded bg-muted px-1">ZAPIER_WEBHOOK_SECRET</code> على السيرفر. لا تشاركها علناً.</p>
+          </div>
+        </div>
+
+        <!-- Request Body -->
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+          <div class="p-6 border-b border-border">
+            <div class="flex items-center gap-2">
+              <i data-lucide="code-2" class="h-5 w-5 text-primary"></i>
+              <h2 class="text-heading-md font-semibold">جسم الطلب (JSON)</h2>
+            </div>
+          </div>
+          <div class="p-6 space-y-3">
+            <p class="text-body-sm text-muted-foreground">أرسل JSON بالحقول التالية. الحقل الإلزامي هو <strong>mobile</strong>.</p>
+            <pre id="body-example" class="rounded-md bg-muted/60 p-4 text-body-xs overflow-x-auto" dir="ltr" style="white-space: pre-wrap; word-break: break-word;">{
+  "name": "اسم العميل",
+  "email": "email@example.com",
+  "mobile": "966501234567",
+  "gender": "male",
+  "country": "السعودية",
+  "city": "الرياض",
+  "source": "zapier"
+}</pre>
+            <button type="button" onclick="copyBodyExample()"
+              class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground">
+              <i data-lucide="copy" class="h-4 w-4"></i>
+              <span>نسخ مثال JSON</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- cURL Example -->
+      <div class="rounded-lg border bg-card text-card-foreground shadow-sm mt-6">
+        <div class="p-6 border-b border-border">
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div class="flex items-center gap-2">
+              <i data-lucide="terminal" class="h-5 w-5 text-primary"></i>
+              <h2 class="text-heading-md font-semibold">مثال cURL</h2>
+            </div>
+            <button type="button" onclick="copyCurlExample()"
+              class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground">
+              <i data-lucide="copy" class="h-4 w-4"></i>
+              <span>نسخ cURL</span>
+            </button>
+          </div>
+        </div>
+        <div class="p-6">
+          <pre id="curl-example" class="rounded-md bg-muted/60 p-4 text-body-xs overflow-x-auto font-mono" dir="ltr" style="white-space: pre-wrap; word-break: break-all;"></pre>
+        </div>
+      </div>
+
+      <!-- Behavior -->
+      <div class="rounded-lg border bg-card text-card-foreground shadow-sm mt-6">
+        <div class="p-6 border-b border-border">
+          <div class="flex items-center gap-2">
+            <i data-lucide="info" class="h-5 w-5 text-primary"></i>
+            <h2 class="text-heading-md font-semibold">سلوك الويب هوك</h2>
+          </div>
+        </div>
+        <div class="p-6 space-y-2 text-body-sm text-muted-foreground">
+          <ul class="list-disc list-inside space-y-1">
+            <li>يتم التحقق من الرأس <code class="rounded bg-muted px-1">X-API-Key</code> مقابل <code class="rounded bg-muted px-1">ZAPIER_WEBHOOK_SECRET</code>. عند عدم التطابق يُرجع 401.</li>
+            <li>إذا وُجد عميل بنفس الجوال (معرّف داخلي <code class="rounded bg-muted px-1">zapier_&lt;mobile&gt;</code>) يُرجع 200 مع <code class="rounded bg-muted px-1">"note": "already exists"</code> دون إنشاء سجل جديد.</li>
+            <li>عند إنشاء عميل جديد يُحفظ في جدول العملاء ثم يُرسل له قالب واتساب <strong>new_lead</strong> (إن كان القالب مفعّلاً).</li>
+            <li>الاستجابة الناجحة: <code class="rounded bg-muted px-1">{"success": true, "customer_id": عدد}</code></li>
+          </ul>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    if (!localStorage.getItem('tchat_logged_in')) {
+      window.location.href = './login.html';
+    }
+
+    function getWebhookUrl() {
+      const base = (typeof API_BASE_URL !== 'undefined' && API_BASE_URL) ? API_BASE_URL : '/api/v1';
+      const origin = typeof window !== 'undefined' && window.location && window.location.origin ? window.location.origin : '';
+      if (base.startsWith('http')) return base + '/webhook/zapier';
+      return (origin || 'https://your-api-domain.com') + base + '/webhook/zapier';
+    }
+
+    function getCurlBody() {
+      return JSON.stringify({
+        name: 'اسم العميل',
+        email: 'email@example.com',
+        mobile: '966501234567',
+        gender: 'male',
+        country: 'السعودية',
+        city: 'الرياض',
+        source: 'zapier'
+      }, null, 2);
+    }
+
+    function updateCurlExample() {
+      const url = getWebhookUrl();
+      const body = getCurlBody();
+      const el = document.getElementById('curl-example');
+      if (el) el.textContent = `curl -X POST "${url}" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: YOUR_ZAPIER_WEBHOOK_SECRET" \\
+  -d '${body.replace(/'/g, "'\\''")}'`;
+    }
+
+    function copyWebhookUrl() {
+      const input = document.getElementById('webhook-url');
+      if (input && input.value) {
+        input.select();
+        input.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(input.value).then(function() {
+          if (typeof showToast === 'function') showToast('تم نسخ رابط الويب هوك', 'success');
+          else alert('تم النسخ');
+        });
+      }
+    }
+
+    function copyBodyExample() {
+      const pre = document.getElementById('body-example');
+      if (pre) {
+        const text = pre.textContent || pre.innerText || '';
+        navigator.clipboard.writeText(text).then(function() {
+          if (typeof showToast === 'function') showToast('تم نسخ مثال JSON', 'success');
+          else alert('تم النسخ');
+        });
+      }
+    }
+
+    function copyCurlExample() {
+      const pre = document.getElementById('curl-example');
+      if (pre) {
+        const text = pre.textContent || pre.innerText || '';
+        navigator.clipboard.writeText(text).then(function() {
+          if (typeof showToast === 'function') showToast('تم نسخ أمر cURL', 'success');
+          else alert('تم النسخ');
+        });
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      renderHeader('header-container', { activePage: 'zapier' });
+      lucide.createIcons();
+
+      const url = getWebhookUrl();
+      const urlInput = document.getElementById('webhook-url');
+      if (urlInput) urlInput.value = url;
+
+      updateCurlExample();
+      if (typeof checkUnreadConversations === 'function') checkUnreadConversations();
+    });
+  </script>
+</body>
+</html>

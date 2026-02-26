@@ -4,7 +4,7 @@
 /**
  * إنشاء مكون الهيدر
  * @param {Object} options - خيارات الهيدر
- * @param {string} options.activePage - الصفحة النشطة حالياً (customers, templates, campaigns, chats, automations, webhooks)
+ * @param {string} options.activePage - الصفحة النشطة حالياً (customers, templates, campaigns, chats, automations, webhooks, zapier)
  * @returns {string} - HTML الهيدر
  */
 function createHeader(options = {}) {
@@ -99,6 +99,15 @@ function createHeader(options = {}) {
             <i data-lucide="bot" class="h-4 w-4"></i>
             <span>الشات بوت</span>
           </a>
+
+          <!-- Zapier -->
+          <a
+            href="./zapier.html"
+            class="${getLinkClasses('zapier')}"
+          >
+            <i data-lucide="zap" class="h-4 w-4"></i>
+            <span>Zapier</span>
+          </a>
         </nav>
 
         <!-- زر الخروج وزر القائمة (على اليسار في RTL) -->
@@ -192,6 +201,15 @@ function createHeader(options = {}) {
           >
             <i data-lucide="bot" class="h-5 w-5"></i>
             <span>الشات بوت</span>
+          </a>
+
+          <!-- Zapier -->
+          <a
+            href="./zapier.html"
+            class="${getMobileLinkClasses('zapier')}"
+          >
+            <i data-lucide="zap" class="h-5 w-5"></i>
+            <span>Zapier</span>
           </a>
 
           <!-- فاصل -->
@@ -341,6 +359,7 @@ function getActivePageFromURL() {
     'automations': 'automations',
     'webhooks': 'webhooks',
     'ai-chatbot': 'ai-chatbot',
+    'zapier': 'zapier',
     'dashboard': 'dashboard',
     'index': 'dashboard'
   };

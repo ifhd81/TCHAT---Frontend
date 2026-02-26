@@ -38,6 +38,7 @@ export default defineConfig(({ mode }) => {
         webhooks: resolve(__dirname, 'webhooks.html'),
         automations: resolve(__dirname, 'automations.html'),
         'ai-chatbot': resolve(__dirname, 'ai-chatbot.html'),
+        zapier: resolve(__dirname, 'zapier.html'),
       },
       output: {
         manualChunks: undefined

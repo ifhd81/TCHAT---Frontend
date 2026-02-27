@@ -39,7 +39,7 @@
           <span>حذف الكل</span>
         </button>
         <button onclick="showCreateCampaignModal()"
-          class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90">
+          class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary-hover">
           <i data-lucide="plus" class="h-4 w-4"></i>
           <span>حملة جديدة</span>
         </button>
@@ -403,7 +403,7 @@
                       class="font-semibold text-foreground">10 أيام</span> لتجنب الإزعاج وتحسين معدل التفاعل.
                   </p>
                   <button onclick="runSmartSendCheck()" id="check-recipients-btn"
-                    class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50">
+                    class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary-hover disabled:opacity-50">
                     <i data-lucide="scan-search" class="h-4 w-4"></i>
                     <span>فحص الأرقام الآن</span>
                   </button>
@@ -457,7 +457,7 @@
               <span>معاينة</span>
             </button>
             <button onclick="createCampaign()" id="create-campaign-btn"
-              class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50">
+              class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary-hover disabled:opacity-50">
               <i data-lucide="send" class="h-4 w-4"></i>
               <span>إنشاء الحملة</span>
             </button>
@@ -566,7 +566,7 @@
             <span>إغلاق</span>
           </button>
           <button onclick="sendTestMessage()" id="test-send-btn"
-            class="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50">
+            class="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary-hover disabled:opacity-50">
             <i data-lucide="send" class="h-4 w-4"></i>
             <span>إرسال الآن</span>
           </button>
@@ -873,12 +873,12 @@
                   <i data-lucide="eye" class="h-3 w-3"></i>
                 </button>
                 ${campaign.status === 'draft' ? `
-                  <button onclick="startCampaign(${campaign.id})" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary p-0 text-primary-foreground transition hover:bg-primary/90" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="بدء الحملة">
+                  <button onclick="startCampaign(${campaign.id})" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary p-0 text-primary-foreground transition hover:bg-primary-hover" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="بدء الحملة">
                     <i data-lucide="play" class="h-3 w-3"></i>
                   </button>
                 ` : ''}
                 ${campaign.status === 'running' && campaign.is_stuck ? `
-                  <button onclick="resumeCampaign(${campaign.id})" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary p-0 text-primary-foreground transition hover:bg-primary/90" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="استئناف الحملة">
+                  <button onclick="resumeCampaign(${campaign.id})" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary p-0 text-primary-foreground transition hover:bg-primary-hover" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="استئناف الحملة">
                     <i data-lucide="play-circle" class="h-3 w-3"></i>
                   </button>
                 ` : ''}
@@ -1772,7 +1772,7 @@
               <button onclick="document.getElementById('campaign-preview-overlay').remove()" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium transition hover:bg-accent">
                 إغلاق
               </button>
-              <button onclick="document.getElementById('campaign-preview-overlay').remove(); createCampaign();" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90">
+              <button onclick="document.getElementById('campaign-preview-overlay').remove(); createCampaign();" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary-hover">
                 <i data-lucide="send" class="h-4 w-4"></i>
                 إنشاء الحملة
               </button>
@@ -2363,7 +2363,7 @@
                           <i data-lucide="alert-circle" class="h-3.5 w-3.5"></i>
                           متعطلة مؤقتاً
                         </span>
-                        <button type="button" onclick="resumeCampaign(${campaign.id})" class="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-body-sm font-medium text-primary-foreground hover:bg-primary/90">
+                        <button type="button" onclick="resumeCampaign(${campaign.id})" class="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-body-sm font-medium text-primary-foreground hover:bg-primary-hover">
                           <i data-lucide="play-circle" class="h-3.5 w-3.5"></i>
                           استئناف الحملة
                         </button>
@@ -2625,7 +2625,7 @@
                           <i data-lucide="users-x" class="h-8 w-8 mx-auto"></i>
                           <p>لا توجد مستقبلين في هذه الحملة</p>
                           <p class="text-body-xs">قد تكون الحملة أُنشئت بدون إضافة مستقبلين</p>
-                          <button onclick="addRecipientsToExistingCampaign(${campaign.id})" class="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-body-sm font-medium text-primary-foreground transition hover:bg-primary/90">
+                          <button onclick="addRecipientsToExistingCampaign(${campaign.id})" class="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-body-sm font-medium text-primary-foreground transition hover:bg-primary-hover">
                             <i data-lucide="user-plus" class="h-4 w-4"></i>
                             <span>إضافة مستقبلين</span>
                           </button>

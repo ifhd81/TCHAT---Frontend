@@ -88,7 +88,7 @@
             onkeypress="handleKeyPress(event)"
             oninput="handleTyping()"
           />
-          <button onclick="sendMessage()" id="send-button" class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50">
+          <button onclick="sendMessage()" id="send-button" class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground transition hover:bg-primary-hover disabled:opacity-50">
             <i data-lucide="send" class="h-4 w-4"></i>
           </button>
         </div>
@@ -116,7 +116,7 @@
           </div>
           
           <!-- Select Template Button -->
-          <button onclick="showTemplateModal()" class="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-body-md font-medium text-primary-foreground transition hover:bg-primary/90">
+          <button onclick="showTemplateModal()" class="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-body-md font-medium text-primary-foreground transition hover:bg-primary-hover">
             <i data-lucide="file-text" class="h-5 w-5"></i>
             إختر قالب
           </button>
@@ -202,7 +202,7 @@
           <i data-lucide="arrow-right" class="h-4 w-4"></i>
           رجوع
         </button>
-        <button onclick="sendSelectedTemplate()" id="send-template-btn" class="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground transition hover:bg-primary/90">
+        <button onclick="sendSelectedTemplate()" id="send-template-btn" class="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground transition hover:bg-primary-hover">
           <i data-lucide="send" class="h-4 w-4"></i>
           إرسال القالب
         </button>
@@ -1322,7 +1322,7 @@
                   <div class="flex items-center gap-3">
                     <button 
                       onclick="toggleAudio('${mediaId}')" 
-                      class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition"
+                      class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary-hover transition"
                     >
                       <i data-lucide="play" class="h-4 w-4" id="play-icon-${mediaId}"></i>
                     </button>
@@ -1433,7 +1433,8 @@
           const lat = coords[0] || '';
           const lng = coords[1] || '';
           const googleMapsUrl = lat && lng ? `https://www.google.com/maps?q=${lat},${lng}` : '';
-          const staticMapUrl = lat && lng ? `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=15&size=400x200&markers=color:red%7C${lat},${lng}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8` : '';
+          // واجهة Google Static Maps تقبل hex فقط؛ القيمة المعادلة لـ oklch(63% 0.24 25)
+const staticMapUrl = lat && lng ? `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=15&size=400x200&markers=color:0xEF4444%7C${lat},${lng}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8` : '';
           
           if (lat && lng) {
             return `
@@ -1457,7 +1458,7 @@
                     href="${googleMapsUrl}" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground px-4 py-2 text-body-sm font-medium hover:bg-primary/90 transition"
+                    class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground px-4 py-2 text-body-sm font-medium hover:bg-primary-hover transition"
                   >
                     <i data-lucide="navigation" class="h-4 w-4"></i>
                     <span>فتح في الخرائط</span>
@@ -1845,7 +1846,7 @@
                 <i data-lucide="shopping-cart" class="h-4 w-4"></i>
                 <span>السلات المتروكة</span>
               </button>
-              <button onclick="markAsRead()" class="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-body-sm font-medium text-primary-foreground transition hover:bg-primary/90">
+              <button onclick="markAsRead()" class="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-body-sm font-medium text-primary-foreground transition hover:bg-primary-hover">
                 <i data-lucide="check-circle" class="h-4 w-4"></i>
                 <span>وضع علامة مقروء</span>
               </button>

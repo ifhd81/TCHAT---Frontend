@@ -11,7 +11,7 @@
       display: block;
       height: 100%;
       width: 40%;
-      background: linear-gradient(90deg, transparent, #10b981, transparent);
+      background: linear-gradient(90deg, transparent, oklch(71% 0.17 166), transparent);
       animation: toggle-spinner-linear 1s ease-in-out infinite;
     }
 
@@ -218,7 +218,7 @@
 
             <!-- Save Button -->
             <button onclick="saveSettings()"
-              class="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90">
+              class="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-button-md font-semibold text-primary-foreground shadow-sm transition hover:bg-primary-hover">
               <i data-lucide="save" class="h-4 w-4"></i>
               <span>حفظ الإعدادات</span>
             </button>

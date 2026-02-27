@@ -25,7 +25,7 @@
           <button type="button" id="tchat-confirm-cancel" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
             إلغاء
           </button>
-          <button type="button" id="tchat-confirm-submit" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground transition hover:bg-primary/90">
+          <button type="button" id="tchat-confirm-submit" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground transition hover:bg-primary-hover">
             موافق
           </button>
         </div>
@@ -56,7 +56,7 @@
           <button type="button" id="tchat-prompt-cancel" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
             إلغاء
           </button>
-          <button type="button" id="tchat-prompt-submit" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground transition hover:bg-primary/90">
+          <button type="button" id="tchat-prompt-submit" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground transition hover:bg-primary-hover">
             موافق
           </button>
         </div>
@@ -114,7 +114,7 @@
     } else {
       iconSpan.className = 'flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10';
       iconSpan.innerHTML = '<i data-lucide="help-circle" class="h-5 w-5 text-primary"></i>';
-      submitBtn.className = 'inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground transition hover:bg-primary/90';
+      submitBtn.className = 'inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground transition hover:bg-primary-hover';
     }
 
     if (typeof lucide !== 'undefined') lucide.createIcons();

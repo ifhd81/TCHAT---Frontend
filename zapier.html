@@ -122,7 +122,7 @@
           <ul class="list-disc list-inside space-y-1">
             <li>يتم التحقق من الرأس <code class="rounded bg-muted px-1">X-API-Key</code> مقابل <code class="rounded bg-muted px-1">ZAPIER_WEBHOOK_SECRET</code>. عند عدم التطابق يُرجع 401.</li>
             <li>إذا وُجد عميل بنفس الجوال (معرّف داخلي <code class="rounded bg-muted px-1">zapier_&lt;mobile&gt;</code>) يُرجع 200 مع <code class="rounded bg-muted px-1">"note": "already exists"</code> دون إنشاء سجل جديد.</li>
-            <li>عند إنشاء عميل جديد يُحفظ في جدول العملاء ثم يُرسل له قالب واتساب <strong>new_lead</strong> (إن كان القالب مفعّلاً).</li>
+            <li>عند إنشاء عميل جديد يُحفظ في جدول العملاء ثم يُرسل له قالب واتساب <strong>inquiry_received</strong> (إن كان القالب مفعّلاً).</li>
             <li>الاستجابة الناجحة: <code class="rounded bg-muted px-1">{"success": true, "customer_id": عدد}</code></li>
           </ul>
         </div>

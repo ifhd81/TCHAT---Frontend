@@ -1972,7 +1972,7 @@
         const formatDate = (d) => {
           if (d == null || d === undefined || d === '') return '-';
           const dt = new Date(d);
-          return isNaN(dt.getTime()) ? '-' : dt.toLocaleString('ar-SA', { dateStyle: 'short', timeStyle: 'short', numberingSystem: 'latn' });
+          return isNaN(dt.getTime()) ? '-' : dt.toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
         };
         const formatBatchStatus = (s) => ({ pending: 'معلّقة', processing: 'جاري التشغيل', completed: 'تمت', failed: 'فشلت' }[s] || s);
         const formatBatchStatusClass = (s) => ({ pending: 'bg-muted text-muted-foreground', processing: 'bg-primary/20 text-primary', completed: 'bg-success/20 text-success', failed: 'bg-destructive/20 text-destructive' }[s] || 'bg-muted');
@@ -2288,7 +2288,7 @@
         if (d == null || d === undefined || d === '') return '-';
         const dt = new Date(d);
         if (isNaN(dt.getTime())) return '-';
-        return dt.toLocaleString('ar-SA', { dateStyle: 'short', timeStyle: 'short', numberingSystem: 'latn' });
+        return dt.toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
       }
       function formatNum(n) {
         if (n == null || n === '') return '0';
@@ -3351,9 +3351,9 @@
       const content = document.getElementById('message-details-content');
 
       // تحويل التواريخ (أرقام غربية 1234567890)
-      const createdAt = new Date(message.created_at).toLocaleString('ar-SA', { numberingSystem: 'latn' });
+      const createdAt = new Date(message.created_at).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
       const timestampReceived = message.timestamp_received ?
-        new Date(message.timestamp_received * 1000).toLocaleString('ar-SA', { numberingSystem: 'latn' }) : 'غير محدد';
+        new Date(message.timestamp_received * 1000).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }) : 'غير محدد';
 
       // تحديد نوع المصدر
       let sourceTypeText = '';

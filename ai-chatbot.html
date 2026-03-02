@@ -698,7 +698,7 @@
     // تنسيق التاريخ (أرقام إنجليزية 0-9)
     function formatDate(dateString) {
       const date = new Date(dateString);
-      return date.toLocaleString('ar-SA-u-nu-latn', {
+      return date.toLocaleString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',

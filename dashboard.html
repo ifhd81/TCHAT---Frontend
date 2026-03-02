@@ -331,6 +331,30 @@
       </div>
     </div>
 
+    <!-- Meta Alert Payload Modal (نفس هوية modal تفاصيل السلة) -->
+    <div id="meta-alert-modal" class="fixed inset-0 z-50 hidden items-center justify-center">
+      <div class="modal-backdrop" aria-hidden="true" onclick="closeMetaAlertModal()"></div>
+      <div class="relative w-full max-w-2xl mx-4 bg-card rounded-lg shadow-xl border animate-in fade-in-0 zoom-in-95 max-h-[90vh] flex flex-col overflow-hidden">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-6 border-b">
+          <h3 class="text-heading-md font-semibold" id="meta-alert-modal-title">ما وصل من ميتا</h3>
+          <button onclick="closeMetaAlertModal()" class="rounded-md p-2 hover:bg-muted transition-colors">
+            <i data-lucide="x" class="h-4 w-4 text-muted-foreground"></i>
+          </button>
+        </div>
+        <!-- Content -->
+        <div class="p-6 overflow-auto min-h-0 flex-1">
+          <pre id="meta-alert-modal-payload" class="text-body-sm font-mono bg-muted/50 rounded-lg p-4 overflow-x-auto whitespace-pre-wrap break-words border border-border" dir="ltr"></pre>
+        </div>
+        <!-- Footer -->
+        <div class="flex justify-end gap-2 p-6 border-t">
+          <button onclick="closeMetaAlertModal()" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4">
+            إغلاق
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script>
       const TABLE_STATES = {
         loading: (colspan, message = 'جاري التحميل...') => `
@@ -405,23 +429,61 @@
         return titles[eventType] || '';
       }
 
+      let lastMetaAlerts = [];
+
+      function openMetaAlertDetail(index) {
+        const alert = lastMetaAlerts[index];
+        if (!alert) return;
+        const modal = document.getElementById('meta-alert-modal');
+        const titleEl = document.getElementById('meta-alert-modal-title');
+        const payloadEl = document.getElementById('meta-alert-modal-payload');
+        if (!modal || !titleEl || !payloadEl) return;
+        const date = alert.created_at ? new Date(alert.created_at).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+        const label = metaAlertEventLabel(alert.event_type);
+        titleEl.textContent = `${label} — ${date}`;
+        try {
+          const raw = alert.payload;
+          const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+          payloadEl.textContent = JSON.stringify(parsed, null, 2);
+        } catch (_) {
+          payloadEl.textContent = typeof alert.payload === 'string' ? alert.payload : JSON.stringify(alert.payload || {});
+        }
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+
+      function closeMetaAlertModal() {
+        const modal = document.getElementById('meta-alert-modal');
+        if (modal) {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }
+      }
+
       function renderMetaAlerts(alerts) {
         const container = document.getElementById('meta-alerts-container');
         if (!container) return;
+        lastMetaAlerts = alerts || [];
         if (!alerts || alerts.length === 0) {
           container.innerHTML = '<p class="text-body-sm text-muted-foreground">لا توجد تنبيهات حديثة — تظهر هنا عند استقبال أي حدث من ميتا (تنبيهات، جودة، قوالب، تحديثات الحساب، إلخ).</p>';
           return;
         }
-        const rows = alerts.map(a => {
+        const rows = alerts.map((a, i) => {
           const date = a.created_at ? new Date(a.created_at).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }) : '—';
           const label = metaAlertEventLabel(a.event_type);
           const labelTitle = metaAlertEventTitle(a.event_type);
-          return `<div class="flex items-center justify-between py-2 border-b border-border last:border-0">
-            <span class="text-body-sm font-medium"${labelTitle ? ` title="${labelTitle}"` : ''}>${label}</span>
+          return `<div class="flex items-center justify-between py-2 border-b border-border last:border-0 cursor-pointer rounded-md px-2 -mx-2 hover:bg-muted/60 transition-colors" data-meta-alert-index="${i}" role="button" tabindex="0" title="انقر لعرض ما وصل من ميتا"${labelTitle ? ` data-label-title="${labelTitle.replace(/"/g, '&quot;')}"` : ''}>
+            <span class="text-body-sm font-medium">${label}</span>
             <span class="text-body-xs text-muted-foreground" dir="ltr">${date}</span>
           </div>`;
         }).join('');
         container.innerHTML = `<div class="space-y-0">${rows}</div>`;
+        container.querySelectorAll('[data-meta-alert-index]').forEach(el => {
+          const idx = parseInt(el.getAttribute('data-meta-alert-index'), 10);
+          el.addEventListener('click', () => openMetaAlertDetail(idx));
+          el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openMetaAlertDetail(idx); } });
+        });
       }
 
       function formatThroughputLevel(level) {
@@ -1043,10 +1105,15 @@
         }
       });
 
-      // إغلاق الـ modal بمفتاح Escape
+      // إغلاق الـ modals بمفتاح Escape
       document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
-          closeCartModal();
+          const metaModal = document.getElementById('meta-alert-modal');
+          if (metaModal && !metaModal.classList.contains('hidden')) {
+            closeMetaAlertModal();
+          } else {
+            closeCartModal();
+          }
         }
       });
 

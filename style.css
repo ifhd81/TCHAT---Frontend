@@ -59,6 +59,13 @@
   animation: pop-in 0.2s ease-out;
 }
 
+/* خلفية سوداء شفافة لنافذة تفاصيل الرسالة */
+.message-details-backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
 /* Animation للاهتزاز عند خطأ تسجيل الدخول */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }

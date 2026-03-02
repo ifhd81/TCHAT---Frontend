@@ -132,8 +132,9 @@
   </main>
 
   <!-- نافذة تفاصيل الرسالة -->
-  <div id="message-details-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] hidden">
-    <div class="bg-background rounded-lg shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden">
+  <div id="message-details-modal" class="fixed inset-0 flex items-center justify-center z-[9999] hidden">
+    <div class="message-details-backdrop" aria-hidden="true" onclick="closeMessageDetails()"></div>
+    <div class="relative bg-background rounded-lg shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden">
       <div class="flex items-center justify-between p-6 border-b border-border">
         <h2 class="text-heading-lg font-semibold">تفاصيل الرسالة</h2>
         <button onclick="closeMessageDetails()" class="text-muted-foreground hover:text-foreground transition-colors">

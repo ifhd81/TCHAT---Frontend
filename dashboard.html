@@ -223,7 +223,8 @@
     </div>
 
     <!-- Cart Details Modal -->
-    <div id="cart-details-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div id="cart-details-modal" class="fixed inset-0 z-50 hidden items-center justify-center">
+      <div class="modal-backdrop" aria-hidden="true" onclick="closeCartModal()"></div>
       <div class="relative w-full max-w-lg mx-4 bg-card rounded-lg shadow-xl border animate-in fade-in-0 zoom-in-95">
         <!-- Header -->
         <div class="flex items-center justify-between p-6 border-b">

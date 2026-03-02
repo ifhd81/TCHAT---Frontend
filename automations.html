@@ -107,8 +107,9 @@
   </div>
 
   <!-- Modal: Edit Abandoned Cart Settings -->
-  <div id="edit-abandoned-cart-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
-    <div class="w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+  <div id="edit-abandoned-cart-modal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="modal-backdrop" aria-hidden="true" onclick="hideEditAbandonedCartModal()"></div>
+    <div class="relative w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
       <div class="rounded-xl border bg-card shadow-lg">
         
         <!-- Modal Header -->
@@ -295,8 +296,9 @@
   </div>
 
   <!-- Modal: Create New Automation -->
-  <div id="create-automation-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
-    <div class="w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+  <div id="create-automation-modal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="modal-backdrop" aria-hidden="true" onclick="hideCreateAutomationModal()"></div>
+    <div class="relative w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
       <div class="rounded-xl border bg-card shadow-lg">
         
         <!-- Modal Header -->

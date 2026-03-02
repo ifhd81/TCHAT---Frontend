@@ -148,9 +148,9 @@
   </div>
 
   <!-- Create Campaign Modal -->
-  <div id="create-campaign-modal"
-    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
-    <div class="w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+  <div id="create-campaign-modal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="modal-backdrop" aria-hidden="true" onclick="hideCreateCampaignModal()"></div>
+    <div class="relative w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
       <div class="rounded-xl border bg-card shadow-lg">
 
         <!-- Modal Header -->
@@ -470,8 +470,9 @@
   </div>
 
   <!-- Test Send Modal -->
-  <div id="test-send-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
-    <div class="w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+  <div id="test-send-modal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="modal-backdrop" aria-hidden="true" onclick="hideTestSendModal()"></div>
+    <div class="relative w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
       <div class="rounded-xl border bg-card shadow-lg">
 
         <!-- Modal Header -->
@@ -578,9 +579,9 @@
   </div>
 
   <!-- Campaign Details Modal -->
-  <div id="campaign-details-modal"
-    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
-    <div class="w-full max-w-6xl mx-4 max-h-[90vh] overflow-y-auto">
+  <div id="campaign-details-modal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="modal-backdrop" aria-hidden="true" onclick="hideCampaignDetailsModal()"></div>
+    <div class="relative w-full max-w-6xl mx-4 max-h-[90vh] overflow-y-auto">
       <div class="rounded-xl border bg-card shadow-lg">
 
         <!-- Modal Header -->
@@ -605,9 +606,9 @@
   </div>
 
   <!-- مودال تأكيد حذف الحملة -->
-  <div id="confirm-delete-campaign-modal"
-    class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/50 backdrop-blur-sm" aria-modal="true">
-    <div class="mx-4 w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg">
+  <div id="confirm-delete-campaign-modal" class="fixed inset-0 z-[60] hidden items-center justify-center" aria-modal="true">
+    <div class="modal-backdrop" aria-hidden="true" onclick="hideConfirmDeleteCampaignModal()"></div>
+    <div class="relative mx-4 w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg">
       <div class="flex items-center gap-3 text-destructive mb-4">
         <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10">
           <i data-lucide="alert-triangle" class="h-5 w-5 text-destructive"></i>
@@ -1719,8 +1720,9 @@
 
       // عرض المعاينة
       const previewHTML = `
-        <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm" id="campaign-preview-overlay" onclick="if(event.target === this) this.remove()">
-          <div class="w-full max-w-lg mx-4 bg-card rounded-xl border shadow-lg">
+        <div class="fixed inset-0 z-[60] flex items-center justify-center" id="campaign-preview-overlay">
+          <div class="modal-backdrop" onclick="document.getElementById('campaign-preview-overlay').remove()"></div>
+          <div class="relative w-full max-w-lg mx-4 bg-card rounded-xl border shadow-lg">
             <div class="flex items-center justify-between border-b border-border p-4">
               <h3 class="text-heading-md font-bold">معاينة الحملة</h3>
               <button onclick="document.getElementById('campaign-preview-overlay').remove()" class="text-muted-foreground hover:text-foreground">

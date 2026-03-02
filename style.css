@@ -59,11 +59,14 @@
   animation: pop-in 0.2s ease-out;
 }
 
-/* خلفية سوداء شفافة لنافذة تفاصيل الرسالة */
-.message-details-backdrop {
+/* خلفية سوداء شفافة مع بلور للنوافذ المنبثقة */
+.message-details-backdrop,
+.modal-backdrop {
   position: absolute;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 /* Animation للاهتزاز عند خطأ تسجيل الدخول */

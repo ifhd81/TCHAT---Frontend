@@ -158,8 +158,9 @@
   </div>
 
   <!-- Modal for Webhook Details -->
-  <div id="webhook-modal" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 hidden" onclick="if(event.target === this) closeWebhookModal()">
-    <div class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl max-h-[90vh] overflow-auto rounded-lg border bg-card p-6 shadow-lg">
+  <div id="webhook-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+    <div class="modal-backdrop" aria-hidden="true" onclick="closeWebhookModal()"></div>
+    <div class="relative w-full max-w-3xl max-h-[90vh] overflow-auto rounded-lg border bg-card p-6 shadow-lg mx-4">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-heading-lg font-semibold">تفاصيل الويب هوك</h3>
         <button onclick="closeWebhookModal()" class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent">
@@ -174,8 +175,9 @@
   </div>
 
   <!-- Modal for Delete Confirmation -->
-  <div id="delete-confirm-modal" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 hidden" onclick="if(event.target === this) closeDeleteConfirmModal()">
-    <div class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
+  <div id="delete-confirm-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+    <div class="modal-backdrop" aria-hidden="true" onclick="closeDeleteConfirmModal()"></div>
+    <div class="relative w-full max-w-md rounded-lg border bg-card p-6 shadow-lg mx-4">
       <div class="flex items-center gap-3 mb-4">
         <div class="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
           <i data-lucide="alert-triangle" class="h-5 w-5 text-destructive"></i>

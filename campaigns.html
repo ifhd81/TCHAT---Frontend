@@ -3980,6 +3980,19 @@
         if (!forceNoVariables && smartComponents && smartComponents.length > 0) {
           requestBody.template_components = smartComponents;
           console.log('📤 إرسال مع متغيرات:', smartComponents.length, 'مكون');
+          // إذا وُجدت صورة رأس محلياً (من اختيار المستخدم)، نرسلها كـ base64 لتجنب 404 على السيرفر (Railway قرص مؤقت)
+          if (window._testSendHeaderFile && requestBody.template_components) {
+            const hasHeaderImage = requestBody.template_components.some(c => c.type === 'header' && c.parameters && c.parameters.some(p => p.image && (p.image.link || p.image.id)));
+            if (hasHeaderImage) {
+              try {
+                requestBody.header_image_base64 = await readFileAsBase64(window._testSendHeaderFile);
+                requestBody.header_image_mime = window._testSendHeaderFile.type || 'image/jpeg';
+                console.log('📤 إرسال صورة الرأس مضمّنة (base64) لتجنب 404');
+              } catch (e) {
+                console.warn('قراءة صورة الرأس كـ base64 فشلت:', e);
+              }
+            }
+          }
         } else {
           console.log('📤 إرسال بدون متغيرات');
         }
@@ -4310,6 +4323,7 @@
 
     // عرض نتيجة التحليل الذكي ومحتوى القالب
     function updateTemplateAnalysis(templateName) {
+      window._testSendHeaderFile = null; // مسح صورة الرأس المحفوظة عند تغيير القالب
       const analysisDiv = document.getElementById('template-analysis-result');
       const variablesContainer = document.getElementById('template-variables-container');
 
@@ -4454,6 +4468,7 @@
       lucide.createIcons();
 
       // رفع صورة الرأس: عند اختيار ملف نرفعه ثم نملأ الرابط في الحقل المخفي
+      // نخزّن الملف في _testSendHeaderFile لاستخدامه كـ base64 عند الإرسال التجريبي (تجنب 404 على Railway)
       const fileInput = document.getElementById('header-image-file-input');
       if (fileInput) {
         fileInput.addEventListener('change', async function () {
@@ -4462,11 +4477,13 @@
           const previewDiv = document.getElementById('header-image-preview');
           const previewImg = document.getElementById('header-image-preview-img');
           if (!file) {
+            window._testSendHeaderFile = null;
             if (hiddenInput) { hiddenInput.value = ''; }
             if (previewDiv) { previewDiv.classList.add('hidden'); }
             updatePreviewRealtime();
             return;
           }
+          window._testSendHeaderFile = file;
           if (!file.type.match(/^image\/(jpeg|png|jpg)$/)) {
             showToast('الملف يجب أن يكون صورة (JPEG أو PNG)', 'error');
             return;
@@ -4510,6 +4527,20 @@
     // تحديث المعاينة في الوقت الفعلي
     function updatePreviewRealtime() {
       renderTemplatePreview();
+    }
+
+    // قراءة ملف كـ base64 (لإرسال صورة الرأس مضمّنة وتجنب 404 على السيرفر)
+    function readFileAsBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = reader.result;
+          const base64 = dataUrl.indexOf('base64,') >= 0 ? dataUrl.split('base64,')[1] : dataUrl;
+          resolve(base64 || '');
+        };
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
     }
 
     // الحصول على قيم المتغيرات المدخلة

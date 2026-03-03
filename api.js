@@ -247,23 +247,23 @@ async function loadAbandonedCarts(limit = 20) {
   }
 }
 
-// تحميل قائمة العملاء. اختياري: dialCode لفلترة حسب مفتاح الدولة (مثل 968 لعُمان).
-async function loadCustomers(limit = 50, dialCode = '') {
+// تحميل قائمة العملاء مع pagination. يُرجع { data: [...], total: number }.
+// limit و offset للصفحة، dialCode لفلترة مفتاح الدولة (مثل 968 لعُمان).
+async function loadCustomers(limit = 50, offset = 0, dialCode = '') {
   try {
-    let url = `/customers?limit=${limit}`;
+    let url = `/customers?limit=${limit}&offset=${offset}`;
     if (dialCode && String(dialCode).trim()) {
       url += `&dial_code=${encodeURIComponent(String(dialCode).trim())}`;
     }
-    const data = await apiRequest(url);
-    console.log('Customers Response:', data);
-    if (data.success && Array.isArray(data.data)) {
-      return data.data;
+    const res = await apiRequest(url);
+    if (res.success && Array.isArray(res.data)) {
+      return { data: res.data, total: typeof res.total === 'number' ? res.total : res.data.length };
     }
-    console.error('فشل في جلب العملاء:', data);
-    return [];
+    console.error('فشل في جلب العملاء:', res);
+    return { data: [], total: 0 };
   } catch (error) {
     console.error('خطأ في تحميل العملاء:', error);
-    return [];
+    return { data: [], total: 0 };
   }
 }
 

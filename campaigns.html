@@ -1284,7 +1284,7 @@
         databaseCustomersCount = count;
         updateSourceCount('database', count);
         // إعادة تحميل قائمة المعاينة حسب الدولة المستهدفة ليعرض الأرقام الصحيحة فقط
-        const customers = await loadCustomers(500, dialCode || '');
+        const { data: customers } = await loadCustomers(500, 0, dialCode || '');
         selectedRecipients = customers.map(customer => ({
           customer_id: customer.id,
           phone_number: customer.mobile || customer.phone,
@@ -1583,7 +1583,7 @@
           updateSourceCount('database', totalCount);
 
           // تحميل عينة للمعاينة فقط مع فلتر الدولة المستهدفة (الـ API يحدّ بـ 500)
-          const customers = await loadCustomers(500, dialCode);
+          const { data: customers } = await loadCustomers(500, 0, dialCode);
           selectedRecipients = customers.map(customer => ({
             customer_id: customer.id,
             phone_number: customer.mobile || customer.phone,

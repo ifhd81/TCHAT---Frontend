@@ -1712,7 +1712,7 @@ const staticMapUrl = lat && lng ? `https://maps.googleapis.com/maps/api/staticma
       detailsContent.innerHTML = '<div class="p-4 text-center text-body-sm text-muted-foreground">جاري تحميل تفاصيل العميل...</div>';
       
       try {
-        const customers = await loadCustomers(200);
+        const { data: customers } = await loadCustomers(200, 0);
         const customer = customers.find(c => c.id === customerId);
         
         if (!customer) {

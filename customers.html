@@ -65,6 +65,7 @@
               <option value="25">25</option>
               <option value="50" selected>50</option>
               <option value="100">100</option>
+              <option value="200">200</option>
             </select>
           </div>
           <div class="whitespace-nowrap">صفحة <span id="current-page">1</span> من <span id="total-pages">1</span></div>
@@ -89,6 +90,7 @@
     }
 
     let allCustomers = [];
+    let totalCustomers = 0;
     let currentPage = 1;
     let limit = 50;
 
@@ -115,17 +117,12 @@
     };
 
     function updatePaginationInfo() {
-      const total = allCustomers.length;
-      const totalPages = Math.max(1, Math.ceil(total / limit));
+      const totalPages = Math.max(1, Math.ceil(totalCustomers / limit));
       currentPage = Math.min(currentPage, totalPages);
-
-      const startIndex = (currentPage - 1) * limit;
-      const endIndex = Math.min(startIndex + limit, total);
 
       document.getElementById('current-page').textContent = totalPages ? currentPage : 0;
       document.getElementById('total-pages').textContent = totalPages;
-
-      document.getElementById('customers-total').textContent = new Intl.NumberFormat('en-US').format(total);
+      document.getElementById('customers-total').textContent = new Intl.NumberFormat('en-US').format(totalCustomers);
 
       document.getElementById('prev-page').disabled = currentPage <= 1;
       document.getElementById('next-page').disabled = currentPage >= totalPages;
@@ -140,11 +137,7 @@
         return;
       }
 
-      const startIndex = (currentPage - 1) * limit;
-      const endIndex = Math.min(startIndex + limit, allCustomers.length);
-      const pageCustomers = allCustomers.slice(startIndex, endIndex);
-
-      tbody.innerHTML = pageCustomers.map((customer) => {
+      tbody.innerHTML = allCustomers.map((customer) => {
         const email = customer.email || 'غير محدد';
         const phone = formatNumber(customer.mobile || customer.phone);
         const createdAgo = timeAgo(customer.created_at);
@@ -179,19 +172,18 @@
       lucide.createIcons();
     }
 
-    function renderCustomers(customers) {
-      allCustomers = customers;
-      currentPage = 1;
-      renderCustomersPage();
-    }
-
-    async function loadAndRenderCustomers(newLimit = 50) {
+    async function loadAndRenderCustomers(newLimit, page = 1) {
       const tbody = document.getElementById('customers-table-body');
       tbody.innerHTML = '<tr><td colspan="4" class="h-24 text-center text-body-sm text-muted-foreground">جاري التحميل...</td></tr>';
 
-      limit = newLimit;
-      const customers = await loadCustomers(200);
-      renderCustomers(customers);
+      if (newLimit != null) limit = newLimit;
+      const offset = (page - 1) * limit;
+      const { data, total } = await loadCustomers(limit, offset);
+      allCustomers = data;
+      totalCustomers = total;
+      currentPage = page;
+      updatePaginationInfo();
+      renderCustomersPage();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -204,25 +196,23 @@
       const nextBtn = document.getElementById('next-page');
 
       limitSelect.addEventListener('change', () => {
-        loadAndRenderCustomers(Number(limitSelect.value));
+        loadAndRenderCustomers(Number(limitSelect.value), 1);
       });
 
       prevBtn.addEventListener('click', () => {
         if (currentPage > 1) {
-          currentPage--;
-          renderCustomersPage();
+          loadAndRenderCustomers(null, currentPage - 1);
         }
       });
 
       nextBtn.addEventListener('click', () => {
-        const totalPages = Math.ceil(allCustomers.length / limit);
+        const totalPages = Math.ceil(totalCustomers / limit);
         if (currentPage < totalPages) {
-          currentPage++;
-          renderCustomersPage();
+          loadAndRenderCustomers(null, currentPage + 1);
         }
       });
 
-      loadAndRenderCustomers(Number(limitSelect.value));
+      loadAndRenderCustomers(Number(limitSelect.value), 1);
     });
 
     // دالة logout موجودة في api.js

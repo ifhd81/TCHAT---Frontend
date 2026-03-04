@@ -217,6 +217,63 @@ async function loadMetaAlerts(limit = 20) {
   }
 }
 
+// حالة تنبيه مشكلة الدفع من ميتا (للإشعار الأحمر في أعلى الصفحات)
+async function getMetaPaymentAlert() {
+  try {
+    const data = await apiRequest('/settings/meta-payment-alert');
+    return (data.success && data.active) ? { active: true, triggered_at: data.triggered_at } : { active: false };
+  } catch (error) {
+    console.error('خطأ في جلب تنبيه الدفع ميتا:', error);
+    return { active: false };
+  }
+}
+
+// إلغاء تنبيه مشكلة الدفع (بعد حل المشكلة في Meta Business)
+async function clearMetaPaymentAlert() {
+  try {
+    const data = await apiRequest('/settings/meta-payment-alert/clear', { method: 'POST' });
+    if (data.success && typeof renderMetaPaymentAlertBanner === 'function') {
+      renderMetaPaymentAlertBanner({ active: false });
+    }
+    return data.success === true;
+  } catch (error) {
+    console.error('خطأ في إلغاء تنبيه الدفع ميتا:', error);
+    return false;
+  }
+}
+
+// تحميل قوالب ميتا (للقائمة في مودال اختبار الدفع وغيره)
+async function loadMetaTemplates(limit = 50) {
+  try {
+    const data = await apiRequest(`/meta/templates?limit=${limit}`);
+    if (data.success && Array.isArray(data.data)) {
+      return data.data;
+    }
+    return [];
+  } catch (error) {
+    console.error('خطأ في تحميل القوالب:', error);
+    return [];
+  }
+}
+
+// إرسال رسالة تجريبية للتحقق من حل مشكلة الدفع — عند وصول webhook (تسليم) يُلغى التنبيه تلقائياً
+async function sendMetaPaymentTestAlert(phoneNumber, templateName, templateLanguage) {
+  try {
+    const data = await apiRequest('/settings/meta-payment-alert/send-test', {
+      method: 'POST',
+      body: JSON.stringify({
+        phone_number: phoneNumber,
+        template_name: templateName,
+        template_language: templateLanguage || 'ar'
+      })
+    });
+    return data;
+  } catch (error) {
+    console.error('خطأ في إرسال اختبار الدفع:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 // تحميل webhooks WhatsApp
 async function loadWhatsAppWebhooks(limit = 10) {
   try {

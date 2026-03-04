@@ -25,6 +25,46 @@ function createHeader(options = {}) {
   const getMobileLinkClasses = (page) => activePage === page ? mobileActiveClasses : mobileInactiveClasses;
 
   return `
+    <!-- تنبيه مشكلة الدفع من ميتا (يُعرض في أعلى كل الصفحات عند التفعيل) -->
+    <div id="meta-payment-alert-banner" class="hidden bg-red-600 text-white text-center py-2 px-4 text-body-sm font-medium flex items-center justify-center gap-3 flex-wrap" role="alert">
+      <span class="flex items-center gap-2">
+        <i data-lucide="alert-triangle" class="h-4 w-4 shrink-0"></i>
+        <span>لديك مشكلة في الدفع في ميتا. يرجى التحقق من بطاقة الائتمان أو طريقة الدفع في Meta Business.</span>
+      </span>
+      <button type="button" id="meta-payment-alert-dismiss" class="bg-red-700 hover:bg-red-800 text-white border border-red-500 rounded px-3 py-1 text-body-sm font-medium transition-colors">
+        تم حل مشكلة الدفع
+      </button>
+    </div>
+    <!-- مودال إرسال تجريبي للتحقق من حل مشكلة الدفع -->
+    <div id="meta-payment-test-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50" aria-hidden="true">
+      <div class="bg-background rounded-xl shadow-lg border w-full max-w-md mx-4" role="dialog" aria-labelledby="meta-payment-test-modal-title">
+        <div class="p-6 border-b">
+          <h2 id="meta-payment-test-modal-title" class="text-heading-md font-bold">إرسال تجريبي للتحقق من حل مشكلة الدفع</h2>
+          <p class="text-body-sm text-muted-foreground mt-1">أضف الرقم واختر القالب. عند استلام ميتا (تسليم = تم الحل، فشل = لا تزال هناك مشكلة) سيتم تحديث التنبيه تلقائياً.</p>
+        </div>
+        <div class="p-6 space-y-4">
+          <div>
+            <label for="meta-payment-test-phone" class="block text-body-sm font-medium mb-1">رقم الهاتف لإرسال التجربة</label>
+            <input type="tel" id="meta-payment-test-phone" class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm" placeholder="966501234567" dir="ltr" />
+          </div>
+          <div>
+            <label for="meta-payment-test-template" class="block text-body-sm font-medium mb-1">اختيار القالب</label>
+            <select id="meta-payment-test-template" class="w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm">
+              <option value="">جاري التحميل...</option>
+            </select>
+          </div>
+          <div id="meta-payment-test-message" class="hidden text-body-sm rounded-lg border p-3"></div>
+        </div>
+        <div class="p-6 border-t flex justify-end gap-2">
+          <button type="button" id="meta-payment-test-cancel" class="px-4 py-2 rounded-md border border-input bg-background text-body-sm font-medium hover:bg-accent">
+            إلغاء
+          </button>
+          <button type="button" id="meta-payment-test-send" class="px-4 py-2 rounded-md bg-primary text-primary-foreground text-body-sm font-medium hover:bg-primary/90">
+            إرسال التجربة
+          </button>
+        </div>
+      </div>
+    </div>
     <header class="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div class="container mx-auto flex h-16 items-center justify-between px-4">
         <!-- الشعار (على اليمين في RTL) -->
@@ -274,6 +314,124 @@ function closeMobileMenu() {
  * @param {string} containerId - معرف العنصر الذي سيحتوي الهيدر (افتراضي: 'header-container')
  * @param {Object} options - خيارات الهيدر
  */
+function renderMetaPaymentAlertBanner(state) {
+  const banner = document.getElementById('meta-payment-alert-banner');
+  if (!banner) return;
+  if (state && state.active) {
+    banner.classList.remove('hidden');
+    banner.classList.add('flex');
+  } else {
+    banner.classList.add('hidden');
+    banner.classList.remove('flex');
+  }
+}
+
+function closeMetaPaymentTestModal() {
+  const modal = document.getElementById('meta-payment-test-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+async function openMetaPaymentTestModal() {
+  const modal = document.getElementById('meta-payment-test-modal');
+  const select = document.getElementById('meta-payment-test-template');
+  const msgEl = document.getElementById('meta-payment-test-message');
+  if (!modal || !select) return;
+  msgEl && msgEl.classList.add('hidden');
+  select.innerHTML = '<option value="">جاري التحميل...</option>';
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+  if (typeof loadMetaTemplates === 'function') {
+    try {
+      const templates = await loadMetaTemplates(100);
+      const approved = (templates || []).filter(function (t) { return t.status === 'APPROVED'; });
+      select.innerHTML = '<option value="">اختر القالب</option>' + approved.map(function (t) {
+        return '<option value="' + (t.name || '').replace(/"/g, '&quot;') + '">' + (t.name || '') + '</option>';
+      }).join('');
+    } catch (e) {
+      select.innerHTML = '<option value="">فشل تحميل القوالب</option>';
+    }
+  }
+}
+
+function sendMetaPaymentTestModal() {
+  const phoneEl = document.getElementById('meta-payment-test-phone');
+  const templateEl = document.getElementById('meta-payment-test-template');
+  const msgEl = document.getElementById('meta-payment-test-message');
+  const sendBtn = document.getElementById('meta-payment-test-send');
+  if (!phoneEl || !templateEl || typeof sendMetaPaymentTestAlert !== 'function') return;
+  const phone = (phoneEl.value || '').trim().replace(/[\s\-+]/g, '');
+  const templateName = (templateEl.value || '').trim();
+  if (!phone) {
+    if (msgEl) {
+      msgEl.textContent = 'يرجى إدخال رقم الهاتف';
+      msgEl.classList.remove('hidden');
+      msgEl.className = 'text-body-sm rounded-lg border p-3 text-destructive';
+    }
+    return;
+  }
+  if (!/^\d{10,15}$/.test(phone)) {
+    if (msgEl) {
+      msgEl.textContent = 'رقم الهاتف غير صحيح (10–15 رقماً)';
+      msgEl.classList.remove('hidden');
+      msgEl.className = 'text-body-sm rounded-lg border p-3 text-destructive';
+    }
+    return;
+  }
+  if (!templateName) {
+    if (msgEl) {
+      msgEl.textContent = 'يرجى اختيار القالب';
+      msgEl.classList.remove('hidden');
+      msgEl.className = 'text-body-sm rounded-lg border p-3 text-destructive';
+    }
+    return;
+  }
+  if (sendBtn) {
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'جاري الإرسال...';
+  }
+  if (msgEl) msgEl.classList.add('hidden');
+  sendMetaPaymentTestAlert(phone, templateName, 'ar').then(function (data) {
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'إرسال التجربة';
+    }
+    if (data.success) {
+      if (msgEl) {
+        msgEl.textContent = 'تم إرسال الرسالة التجريبية. عند استلام ميتا (تسليم أو فشل) سيتم تحديث حالة التنبيه تلقائياً.';
+        msgEl.classList.remove('hidden');
+        msgEl.className = 'text-body-sm rounded-lg border p-3 text-green-700 bg-green-50';
+      }
+      if (typeof showToast === 'function') {
+        showToast('تم الإرسال — سنحدّث الحالة عند وصول الرد من ميتا', 'success');
+      }
+      setTimeout(closeMetaPaymentTestModal, 2500);
+    } else {
+      if (msgEl) {
+        msgEl.textContent = data.error || data.message || 'فشل الإرسال';
+        msgEl.classList.remove('hidden');
+        msgEl.className = 'text-body-sm rounded-lg border p-3 text-destructive';
+      }
+      if (typeof showToast === 'function') {
+        showToast(data.error || 'فشل الإرسال', 'error');
+      }
+    }
+  }).catch(function () {
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'إرسال التجربة';
+    }
+    if (msgEl) {
+      msgEl.textContent = 'حدث خطأ أثناء الإرسال';
+      msgEl.classList.remove('hidden');
+      msgEl.className = 'text-body-sm rounded-lg border p-3 text-destructive';
+    }
+  });
+}
+
 function renderHeader(containerId = 'header-container', options = {}) {
   const container = document.getElementById(containerId);
   if (container) {
@@ -281,6 +439,40 @@ function renderHeader(containerId = 'header-container', options = {}) {
     // إعادة تهيئة أيقونات Lucide
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
+    }
+    // تحميل وعرض تنبيه مشكلة الدفع من ميتا (شريط أحمر في الأعلى)
+    if (typeof getMetaPaymentAlert === 'function') {
+      getMetaPaymentAlert().then(function (state) {
+        renderMetaPaymentAlertBanner(state);
+      });
+    }
+    // زر "تم حل مشكلة الدفع" — يفتح مودال إرسال تجريبي (إخفاء التنبيه يتم تلقائياً عند وصول webhook تسليم من ميتا)
+    const dismissBtn = document.getElementById('meta-payment-alert-dismiss');
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', function () {
+        if (typeof openMetaPaymentTestModal === 'function') {
+          openMetaPaymentTestModal();
+        }
+      });
+    }
+    // إغلاق مودال اختبار الدفع
+    const testModal = document.getElementById('meta-payment-test-modal');
+    const testCancel = document.getElementById('meta-payment-test-cancel');
+    if (testModal) {
+      testModal.addEventListener('click', function (e) {
+        if (e.target === testModal) closeMetaPaymentTestModal();
+      });
+    }
+    if (testCancel) {
+      testCancel.addEventListener('click', closeMetaPaymentTestModal);
+    }
+    const testSendBtn = document.getElementById('meta-payment-test-send');
+    if (testSendBtn) {
+      testSendBtn.addEventListener('click', function () {
+        if (typeof sendMetaPaymentTestModal === 'function') {
+          sendMetaPaymentTestModal();
+        }
+      });
     }
     // تحديث مؤشر المحادثات غير المقروءة (النقطة الحمراء) في كل الصفحات
     if (typeof checkUnreadConversations === 'function') {
@@ -397,6 +589,10 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     createHeader,
     renderHeader,
+    renderMetaPaymentAlertBanner,
+    openMetaPaymentTestModal,
+    closeMetaPaymentTestModal,
+    sendMetaPaymentTestModal,
     insertHeader,
     updateUnreadIndicator,
     getActivePageFromURL,

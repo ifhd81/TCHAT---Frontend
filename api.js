@@ -267,6 +267,19 @@ async function loadCustomers(limit = 50, offset = 0, dialCode = '') {
   }
 }
 
+// تحميل عميل واحد بالمعرف (أسرع من جلب القائمة عند عرض تفاصيل عميل في المحادثات)
+async function loadCustomerById(customerId) {
+  if (!customerId || customerId === 0) return null;
+  try {
+    const res = await apiRequest(`/customers/${customerId}`);
+    if (res.success && res.data) return res.data;
+    return null;
+  } catch (error) {
+    console.error('خطأ في تحميل العميل:', error);
+    return null;
+  }
+}
+
 // تحميل قائمة المحادثات مع دعم الـ pagination (كل صفحة ١٠٠)
 // limit: عدد المحادثات في الصفحة (افتراضي ١٠٠)، offset: التخطي للصفحة التالية
 // يُرجع: { data: [...], pagination: { limit, offset, has_more } }

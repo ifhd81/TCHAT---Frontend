@@ -570,8 +570,11 @@
       document.getElementById('template-alert-area').classList.add('hidden');
       // بعد تحميل الرسائل، updateInputArea ستُظهر إما واجهة القوالب (نافذة مغلقة) أو خانة الإرسال العادية
 
-      // تحميل وعرض الرسائل مع مؤشر التحميل
-      await loadAndRenderMessages(conversationId, true);
+      // تحميل الرسائل وتفاصيل العميل بالتوازي لسرعة الاستجابة (لا ننتظر تفاصيل العميل لعرض الرسائل)
+      await Promise.all([
+        loadAndRenderMessages(conversationId, true),
+        loadAndDisplayCustomerDetails(conversation.customer_id, conversation.phone_number)
+      ]);
       
       // وضع علامة مقروء تلقائياً عند فتح المحادثة
       if (!conversation.is_read) {
@@ -593,9 +596,6 @@
       
       // إعادة رسم القائمة لإزالة العداد الأحمر
       renderConversations();
-      
-      // عرض تفاصيل العميل
-      await loadAndDisplayCustomerDetails(conversation.customer_id, conversation.phone_number);
     }
 
     let currentMessages = [];
@@ -1708,12 +1708,11 @@ const staticMapUrl = lat && lng ? `https://maps.googleapis.com/maps/api/staticma
         return;
       }
 
-      // تحميل تفاصيل العميل
+      // تحميل تفاصيل العميل (طلب واحد بالمعرف بدلاً من جلب 200 عميل)
       detailsContent.innerHTML = '<div class="p-4 text-center text-body-sm text-muted-foreground">جاري تحميل تفاصيل العميل...</div>';
       
       try {
-        const { data: customers } = await loadCustomers(200, 0);
-        const customer = customers.find(c => c.id === customerId);
+        const customer = await loadCustomerById(customerId);
         
         if (!customer) {
           // عرض بيانات أساسية إذا لم يتم العثور على العميل

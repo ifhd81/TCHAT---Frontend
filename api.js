@@ -336,17 +336,39 @@ async function checkUnreadConversations() {
   }
 }
 
-// تشغيل صوت الإشعار
+// تشغيل صوت تنبيه احتياطي (عند غياب ملف MP3) باستخدام Web Audio API
+function playFallbackNotificationBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 800;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.2);
+  } catch (e) {
+    console.warn('تعذر تشغيل الصوت الاحتياطي:', e);
+  }
+}
+
+// تشغيل صوت الإشعار (ملف MP3 أو صوت احتياطي)
 function playNotificationSound() {
   try {
     const audio = new Audio('./message-sound-sounds.mp3');
-    audio.volume = 0.5; // تعيين مستوى الصوت إلى 50%
-    audio.play().catch(error => {
-      console.error('خطأ في تشغيل صوت الإشعار:', error);
-    });
-    console.log('🔔 تم تشغيل صوت إشعار محادثة جديدة');
+    audio.volume = 0.5;
+    audio.play()
+      .then(() => console.log('🔔 تم تشغيل صوت إشعار محادثة جديدة'))
+      .catch((error) => {
+        console.warn('لم يتم العثور على ملف الصوت، استخدام الصوت الاحتياطي:', error?.message || error);
+        playFallbackNotificationBeep();
+      });
   } catch (error) {
-    console.error('خطأ في تشغيل صوت الإشعار:', error);
+    console.warn('خطأ في تشغيل صوت الإشعار، استخدام الصوت الاحتياطي:', error);
+    playFallbackNotificationBeep();
   }
 }
 

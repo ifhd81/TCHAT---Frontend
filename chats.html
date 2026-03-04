@@ -156,7 +156,7 @@
 
   </main>
 
-  <!-- صوت التنبيه للرسائل الجديدة -->
+  <!-- صوت التنبيه للرسائل الجديدة (يُستخدم الصوت الاحتياطي من api.js عند غياب الملف) -->
   <audio id="message-sound" preload="auto">
     <source src="./message-sound-sounds.mp3" type="audio/mpeg">
   </audio>
@@ -1889,41 +1889,27 @@ const staticMapUrl = lat && lng ? `https://maps.googleapis.com/maps/api/staticma
       const audio = document.getElementById('message-sound');
       
       if (!audio) {
-        console.error('❌ عنصر الصوت غير موجود!');
-        showToast('خطأ: ملف الصوت غير موجود', 'error');
+        if (typeof playFallbackNotificationBeep === 'function') playFallbackNotificationBeep();
         return;
       }
       
-      console.log('🔍 حالة الصوت:', {
-        audioEnabled,
-        readyState: audio.readyState,
-        src: audio.src,
-        volume: audio.volume
-      });
-      
       if (!audioEnabled) {
-        console.log('⚠️ الصوت غير مفعّل - تفعيله الآن...');
         enableAudio();
-        // إعادة المحاولة بعد ثانية
         setTimeout(() => playNotificationSound(), 1000);
         return;
       }
       
-      console.log('🔔 محاولة تشغيل صوت التنبيه...');
       audio.currentTime = 0;
       audio.volume = 1.0;
       
       const playPromise = audio.play();
-      
       if (playPromise !== undefined) {
         playPromise
-          .then(() => {
-            console.log('✅ تم تشغيل الصوت بنجاح!');
-          })
+          .then(() => console.log('✅ تم تشغيل الصوت بنجاح!'))
           .catch(error => {
-            console.error('🔇 فشل تشغيل الصوت:', error);
-            showToast('خطأ في تشغيل الصوت: ' + error.message, 'error');
-            audioEnabled = false;
+            console.warn('🔇 فشل تشغيل ملف الصوت، استخدام الصوت الاحتياطي:', error?.message || error);
+            if (typeof playFallbackNotificationBeep === 'function') playFallbackNotificationBeep();
+            audioEnabled = true; // تجنب إعادة المحاولة بشكل متكرر
           });
       }
     }

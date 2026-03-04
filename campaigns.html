@@ -792,6 +792,44 @@
       }
     }
 
+    // تحديث بيانات الحملات في الخلفية (ريال تايم) دون إعادة تعيين الصفحة أو إظهار "جاري التحميل"
+    let realtimeRefreshTimer = null;
+    let detailsRealtimeTimer = null; // تحديث تفاصيل الحملة عند فتح المودال
+    const REALTIME_REFRESH_INTERVAL_MS = 5000; // كل 5 ثوانٍ (ريال تايم للتقدم)
+
+    async function refreshCampaignsRealtime() {
+      if (document.hidden) return; // لا تحديث عندما التبويب غير مرئي
+      try {
+        const fresh = await loadCampaigns(50, true); // true = منع الكاش (ريال تايم)
+        if (Array.isArray(fresh) && fresh.length >= 0) {
+          campaigns = fresh;
+          renderCampaigns();
+          if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        }
+      } catch (e) {
+        console.warn('تحديث التقدم (ريال تايم):', e);
+      }
+    }
+
+    function startRealtimeRefresh() {
+      if (realtimeRefreshTimer) return;
+      realtimeRefreshTimer = setInterval(refreshCampaignsRealtime, REALTIME_REFRESH_INTERVAL_MS);
+      // أول تحديث بعد ثانيتين لظهور التقدم بسرعة
+      setTimeout(refreshCampaignsRealtime, 2000);
+    }
+
+    function stopRealtimeRefresh() {
+      if (realtimeRefreshTimer) {
+        clearInterval(realtimeRefreshTimer);
+        realtimeRefreshTimer = null;
+      }
+    }
+
+    function onCampaignsPageVisibilityChange() {
+      if (document.hidden) stopRealtimeRefresh();
+      else startRealtimeRefresh();
+    }
+
     function renderCampaigns() {
       window.__campaignsList = campaigns || [];
       const tbody = document.getElementById('campaigns-table-body');
@@ -1934,6 +1972,15 @@
           const refreshBtn = document.getElementById('batch-refresh-btn');
           if (refreshBtn) refreshBtn.onclick = () => refreshCampaignProgress(campaignId);
 
+          // ريال تايم: تحديث تفاصيل الحملة كل 5 ثوانٍ أثناء فتح المودال
+          if (detailsRealtimeTimer) clearInterval(detailsRealtimeTimer);
+          detailsRealtimeTimer = setInterval(() => {
+            const modal = document.getElementById('campaign-details-modal');
+            if (modal && !modal.classList.contains('hidden') && modal.dataset.currentCampaignId == campaignId) {
+              refreshCampaignProgress(campaignId, true);
+            }
+          }, REALTIME_REFRESH_INTERVAL_MS);
+
           // تحميل أنواع أخطاء ميتا وأسباب الفشل إذا كانت هناك رسائل فاشلة
           if (result.campaign.failed_count > 0) {
             setTimeout(() => loadMetaErrors(campaignId), 300);
@@ -1948,18 +1995,21 @@
       }
     }
 
-    // تحديث أرقام الدفعات والتقدم فقط (بدون إعادة تحميل المودال)
-    async function refreshCampaignProgress(campaignId) {
+    // تحديث أرقام الدفعات والتقدم فقط (بدون إعادة تحميل المودال). silent=true للتحديث التلقائي (ريال تايم) دون لمس زر التحديث
+    async function refreshCampaignProgress(campaignId, silent = false) {
       const btn = document.getElementById('batch-refresh-btn');
       const tbody = document.getElementById('batch-activity-tbody');
       const progressEl = document.getElementById('campaign-progress-content');
-      if (!btn || !tbody || !progressEl) return;
-      const origHtml = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = '<i data-lucide="loader-2" class="h-3.5 w-3.5 animate-spin"></i>';
-      if (typeof lucide !== 'undefined') lucide.createIcons();
+      if (!tbody || !progressEl) return;
+      const origHtml = btn ? btn.innerHTML : '';
+      if (!silent && btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="h-3.5 w-3.5 animate-spin"></i>';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+      const url = `${API_BASE_URL}/campaigns/${campaignId}${silent ? '?_=' + Date.now() : ''}`;
       try {
-        const res = await fetch(`${API_BASE_URL}/campaigns/${campaignId}`, {
+        const res = await fetch(url, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token')}` }
         });
         const result = await res.json();
@@ -1999,11 +2049,13 @@
           </div>
         `;
       } catch (e) {
-        console.error('تحديث التقدم:', e);
+        if (!silent) console.error('تحديث التقدم:', e);
       } finally {
-        btn.disabled = false;
-        btn.innerHTML = origHtml;
-        if (typeof lucide !== 'undefined') lucide.createIcons();
+        if (!silent && btn) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
       }
     }
 
@@ -2675,6 +2727,10 @@
     }
 
     function hideCampaignDetailsModal() {
+      if (detailsRealtimeTimer) {
+        clearInterval(detailsRealtimeTimer);
+        detailsRealtimeTimer = null;
+      }
       document.getElementById('campaign-details-modal').classList.add('hidden');
       document.getElementById('campaign-details-modal').classList.remove('flex');
     }
@@ -3147,10 +3203,12 @@
       }
     }
 
-    // دوال API للحملات
-    async function loadCampaigns(limit = 50) {
+    // دوال API للحملات — cacheBust: true يمنع كاش المتصفح عند التحديث الريال تايم
+    async function loadCampaigns(limit = 50, cacheBust = false) {
       try {
-        const data = await apiRequest(`/campaigns?limit=${limit}`);
+        let url = `/campaigns?limit=${limit}`;
+        if (cacheBust) url += '&_=' + Date.now();
+        const data = await apiRequest(url);
         if (data.success) {
           return Array.isArray(data.data) ? data.data : [];
         }
@@ -3183,6 +3241,8 @@
 
       lucide.createIcons();
       loadAndRenderCampaigns();
+      startRealtimeRefresh();
+      document.addEventListener('visibilitychange', onCampaignsPageVisibilityChange);
 
       // تأكيد الحذف: عرض مودال التأكيد بدل confirm()
       document.getElementById('campaigns-table-body').addEventListener('click', function (e) {

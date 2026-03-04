@@ -282,7 +282,14 @@ function renderHeader(containerId = 'header-container', options = {}) {
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
-    
+    // تحديث مؤشر المحادثات غير المقروءة (النقطة الحمراء) في كل الصفحات
+    if (typeof checkUnreadConversations === 'function') {
+      checkUnreadConversations();
+      if (!window._unreadCheckIntervalStarted) {
+        window._unreadCheckIntervalStarted = true;
+        setInterval(checkUnreadConversations, 60000);
+      }
+    }
     // إغلاق القائمة عند تغيير حجم الشاشة إلى سطح المكتب
     window.addEventListener('resize', function() {
       if (window.innerWidth >= 768) {

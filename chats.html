@@ -267,6 +267,8 @@
     
     // تحميل آخر عدد رسائل محفوظ من localStorage
     let conversationLastCounts = JSON.parse(localStorage.getItem('tchat_conversation_counts') || '{}');
+    // رسائل فشل إرسالها (لزر إعادة الإرسال): tempId -> { conversationId, text } أو { conversationId, isTemplate, ... }
+    let pendingFailedMessages = {};
 
     const timeAgo = (value) => {
       if (!value) return '-';
@@ -1000,21 +1002,29 @@
       const conversation = conversations.find(c => c.id === currentConversationId);
       if (!conversation) return;
       
+      const templateContent = getTemplateDisplayContent(selectedTemplate);
+      const tempId = 'tpl_' + Date.now();
+      closeTemplatePreview();
+      // إظهار الرسالة في المحادثة فوراً بحالة "جاري الإرسال"
+      addMessageToUI({
+        content: templateContent,
+        direction: 'outgoing',
+        created_at: new Date().toISOString(),
+        status: 'sending',
+        message_type: 'template',
+        tempId
+      });
+
       const sendBtn = document.getElementById('send-template-btn');
       sendBtn.disabled = true;
       sendBtn.innerHTML = '<i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i> جاري الإرسال...';
-      lucide.createIcons();
-      
-      // استخراج محتوى القالب للعرض
-      const templateContent = getTemplateDisplayContent(selectedTemplate);
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
       
       try {
-        // الحصول على اسم العميل من المحادثة
         const customerName = conversation.customer_name && conversation.customer_name !== '.' 
           ? conversation.customer_name 
           : '';
         
-        // إرسال القالب باستخدام apiRequest مع محتوى القالب واسم العميل
         const result = await apiRequest('/whatsapp/send', {
           method: 'POST',
           body: JSON.stringify({
@@ -1023,40 +1033,41 @@
             template_name: selectedTemplate.name,
             template_language: selectedTemplate.language || 'ar',
             template_content: templateContent,
-            customer_name: customerName // إرسال اسم العميل لاستبدال {{1}}
+            customer_name: customerName
           })
         });
         
-        // تجاهل إذا انتهت الجلسة (تم التوجيه تلقائياً)
         if (result.error === 'Session expired') return;
         
         if (result.success) {
-          // تتبع أن الإرسال من طرفنا (لتجنب تشغيل صوت التنبيه عند التحديث التلقائي)
           lastOutgoingConversationId = currentConversationId;
           lastOutgoingAt = Date.now();
-          // إغلاق المعاينة
-          closeTemplatePreview();
-          
-          // إضافة الرسالة محلياً مع المحتوى الفعلي
-          addMessageToUI({
-            content: templateContent,
-            direction: 'outgoing',
-            created_at: new Date().toISOString(),
-            status: 'sent',
-            message_type: 'template'
-          });
-          
-          // تحديث المحادثة
-          setTimeout(() => {
-            refreshConversations();
-          }, 2000);
-          
+          markPendingMessageSent(tempId);
+          setTimeout(() => refreshConversations(), 2000);
           showToast('تم إرسال القالب بنجاح', 'success');
         } else {
+          pendingFailedMessages[tempId] = {
+            conversationId: currentConversationId,
+            isTemplate: true,
+            template_name: selectedTemplate.name,
+            template_language: selectedTemplate.language || 'ar',
+            template_content: templateContent,
+            customer_name: conversation.customer_name && conversation.customer_name !== '.' ? conversation.customer_name : ''
+          };
+          markPendingMessageFailed(tempId, result.message || 'خطأ غير معروف');
           showToast('فشل في إرسال القالب: ' + (result.message || 'خطأ غير معروف'), 'error');
         }
       } catch (error) {
         console.error('خطأ في إرسال القالب:', error);
+        pendingFailedMessages[tempId] = {
+          conversationId: currentConversationId,
+          isTemplate: true,
+          template_name: selectedTemplate.name,
+          template_language: selectedTemplate.language || 'ar',
+          template_content: templateContent,
+          customer_name: conversation.customer_name && conversation.customer_name !== '.' ? conversation.customer_name : ''
+        };
+        markPendingMessageFailed(tempId, 'تعذر الإرسال. تحقق من الاتصال.');
         showToast('تعذر إرسال القالب. تحقق من الاتصال.', 'error');
       } finally {
         sendBtn.disabled = false;
@@ -1123,12 +1134,22 @@
       const conversation = conversations.find(c => c.id === currentConversationId);
       if (!conversation) return;
 
-      // تعطيل الإرسال أثناء المعالجة
+      const tempId = 'msg_' + Date.now();
+      messageInput.value = ''; // إفراغ الحقل فوراً
+      // إظهار الرسالة في المحادثة مباشرة بحالة "جاري الإرسال"
+      addMessageToUI({
+        content: messageText,
+        direction: 'outgoing',
+        created_at: new Date().toISOString(),
+        status: 'sending',
+        tempId
+      });
+
       sendButton.disabled = true;
       sendButton.innerHTML = '<i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i>';
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
       
       try {
-        // إرسال الرسالة عبر WhatsApp API باستخدام apiRequest
         const result = await apiRequest('/whatsapp/send', {
           method: 'POST',
           body: JSON.stringify({
@@ -1138,39 +1159,131 @@
           })
         });
         
-        // تجاهل إذا انتهت الجلسة (تم التوجيه تلقائياً)
         if (result.error === 'Session expired') return;
         
         if (result.success) {
-          // تتبع أن الإرسال من طرفنا (لتجنب تشغيل صوت التنبيه عند التحديث التلقائي)
           lastOutgoingConversationId = currentConversationId;
           lastOutgoingAt = Date.now();
-          // إضافة الرسالة محلياً في الواجهة
-          addMessageToUI({
-            content: messageText,
-            direction: 'outgoing',
-            created_at: new Date().toISOString(),
-            status: 'sent'
-          });
-          
-          messageInput.value = '';
-          
-          // تحديث المحادثة فوراً بعد الإرسال
-          setTimeout(() => {
-            console.log('🔄 تحديث بعد إرسال الرسالة');
-            refreshConversations();
-          }, 2000);
+          markPendingMessageSent(tempId);
+          setTimeout(() => refreshConversations(), 2000);
         } else {
+          pendingFailedMessages[tempId] = { conversationId: currentConversationId, text: messageText };
+          markPendingMessageFailed(tempId, result.message || 'خطأ غير معروف');
           showToast('فشل في إرسال الرسالة: ' + (result.message || 'خطأ غير معروف'), 'error');
         }
       } catch (error) {
         console.error('خطأ في إرسال الرسالة:', error);
+        pendingFailedMessages[tempId] = { conversationId: currentConversationId, text: messageText };
+        markPendingMessageFailed(tempId, 'تعذر الإرسال. تحقق من الاتصال.');
         showToast('تعذر إرسال الرسالة. تحقق من الاتصال.', 'error');
       } finally {
-        // إعادة تفعيل الزر
         sendButton.disabled = false;
         sendButton.innerHTML = '<i data-lucide="send" class="h-4 w-4"></i>';
         lucide.createIcons();
+      }
+    }
+
+    function markPendingMessageSent(tempId) {
+      const wrap = document.querySelector(`[data-temp-id="${tempId}"]`);
+      if (!wrap) return;
+      wrap.removeAttribute('data-temp-id');
+      const statusRow = wrap.querySelector('.message-status-row');
+      if (statusRow) {
+        const icon = statusRow.querySelector('i[data-lucide]');
+        if (icon) {
+          icon.outerHTML = '<i data-lucide="check" class="inline h-3 w-3 ml-1"></i>';
+          if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        }
+      }
+    }
+
+    function removePendingMessage(tempId) {
+      const wrap = document.querySelector(`[data-temp-id="${tempId}"]`);
+      if (wrap) wrap.remove();
+      delete pendingFailedMessages[tempId];
+    }
+
+    function markPendingMessageFailed(tempId, errorMessage) {
+      const wrap = document.querySelector(`[data-temp-id="${tempId}"]`);
+      if (!wrap) return;
+      const statusRow = wrap.querySelector('.message-status-row');
+      if (!statusRow) return;
+      const time = statusRow.getAttribute('data-time') || '';
+      const errShort = (errorMessage || 'فشل الإرسال').toString().slice(0, 80);
+      statusRow.innerHTML = `
+        <span>${time}</span>
+        <i data-lucide="alert-circle" class="inline h-3 w-3 ml-1 text-destructive"></i>
+        <span class="text-destructive text-body-sm">فشل الإرسال</span>
+        <button type="button" onclick="retrySendMessage('${tempId.replace(/'/g, "\\'")}')" class="mr-2 px-2 py-1 rounded bg-primary text-primary-foreground text-body-sm hover:opacity-90">
+          إعادة الإرسال
+        </button>
+      `;
+      statusRow.setAttribute('data-time', time);
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    }
+
+    async function retrySendMessage(tempId) {
+      const payload = pendingFailedMessages[tempId];
+      if (!payload) return;
+      const conversation = conversations.find(c => c.id === payload.conversationId);
+      if (!conversation) {
+        showToast('المحادثة غير متوفرة', 'error');
+        return;
+      }
+      const wrap = document.querySelector(`[data-temp-id="${tempId}"]`);
+      if (!wrap) return;
+      const statusRow = wrap.querySelector('.message-status-row');
+      if (statusRow) {
+        const time = statusRow.getAttribute('data-time') || '';
+        statusRow.innerHTML = `<span data-time="${time}">${time}</span><i data-lucide="loader-2" class="inline h-3 w-3 ml-1 animate-spin"></i>`;
+        statusRow.setAttribute('data-time', time);
+        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+      }
+      try {
+        if (payload.isTemplate) {
+          const result = await apiRequest('/whatsapp/send', {
+            method: 'POST',
+            body: JSON.stringify({
+              to: conversation.phone_number,
+              type: 'template',
+              template_name: payload.template_name,
+              template_language: payload.template_language || 'ar',
+              template_content: payload.template_content,
+              customer_name: payload.customer_name || ''
+            })
+          });
+          if (result.error === 'Session expired') return;
+          if (result.success) {
+            lastOutgoingConversationId = payload.conversationId;
+            lastOutgoingAt = Date.now();
+            markPendingMessageSent(tempId);
+            delete pendingFailedMessages[tempId];
+            setTimeout(() => refreshConversations(), 2000);
+            showToast('تم إرسال القالب بنجاح', 'success');
+          } else {
+            markPendingMessageFailed(tempId, result.message || 'خطأ غير معروف');
+            showToast('فشل في إرسال القالب: ' + (result.message || 'خطأ غير معروف'), 'error');
+          }
+        } else {
+          const result = await apiRequest('/whatsapp/send', {
+            method: 'POST',
+            body: JSON.stringify({ to: conversation.phone_number, message: payload.text, type: 'text' })
+          });
+          if (result.error === 'Session expired') return;
+          if (result.success) {
+            lastOutgoingConversationId = payload.conversationId;
+            lastOutgoingAt = Date.now();
+            markPendingMessageSent(tempId);
+            delete pendingFailedMessages[tempId];
+            setTimeout(() => refreshConversations(), 2000);
+          } else {
+            markPendingMessageFailed(tempId, result.message || 'خطأ غير معروف');
+            showToast('فشل في إرسال الرسالة: ' + (result.message || 'خطأ غير معروف'), 'error');
+          }
+        }
+      } catch (error) {
+        markPendingMessageFailed(tempId, 'تعذر الإرسال. تحقق من الاتصال.');
+        showToast('تعذر الإرسال. تحقق من الاتصال.', 'error');
       }
     }
 
@@ -1183,8 +1296,12 @@
         hour12: true
       });
       
+      const statusIcon = !isIncoming && message.status === 'sending'
+        ? `<i data-lucide="loader-2" class="inline h-3 w-3 ml-1 animate-spin"></i>`
+        : !isIncoming ? `<i data-lucide="check" class="inline h-3 w-3 ml-1"></i>` : '';
+      const tempIdAttr = message.tempId ? ` data-temp-id="${message.tempId}"` : '';
       const messageHTML = `
-        <div class="flex ${isIncoming ? 'justify-start' : 'justify-end'}">
+        <div class="flex ${isIncoming ? 'justify-start' : 'justify-end'}"${tempIdAttr}>
           <div class="max-w-[70%] ${isIncoming ? 'order-2' : 'order-1'}">
             <div class="rounded-2xl px-4 py-3 ${isIncoming 
               ? 'bg-muted text-foreground' 
@@ -1192,9 +1309,9 @@
             }">
               ${renderMessageContent(message)}
             </div>
-            <div class="mt-1 px-2 text-body-sm text-muted-foreground ${isIncoming ? 'text-right' : 'text-left'}">
+            <div class="mt-1 px-2 text-body-sm text-muted-foreground ${isIncoming ? 'text-right' : 'text-left'} message-status-row" data-time="${messageTime}">
               ${messageTime}
-              ${!isIncoming ? `<i data-lucide="check" class="inline h-3 w-3 ml-1"></i>` : ''}
+              ${statusIcon}
             </div>
           </div>
         </div>

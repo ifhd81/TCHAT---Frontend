@@ -260,6 +260,8 @@
     let audioEnabled = false; // لتتبع تفعيل الصوت
     let is24HourWindowClosed = false; // تتبع حالة نافذة الـ 24 ساعة
     let lastIncomingMessageTime = null; // وقت آخر رسالة واردة
+    let lastOutgoingConversationId = null; // آخر محادثة أرسلنا منها (لتجنب تشغيل الصوت عند إرسالنا)
+    let lastOutgoingAt = 0;
     let availableTemplates = []; // القوالب المتاحة
     let selectedTemplate = null; // القالب المختار
     
@@ -396,8 +398,14 @@
           for (const newConv of newConversations) {
             const oldConv = conversations.find(c => c.id === newConv.id);
             if (oldConv && newConv.last_message_at !== oldConv.last_message_at && !newConv.is_read) {
-              console.log('💬 رسالة جديدة في محادثة:', newConv.customer_name);
-              shouldPlaySound = true;
+              // لا تشغّل الصوت إذا آخر رسالة كانت من طرفنا (أرسلنا من هذه المحادثة مؤخراً)
+              const weJustSentHere = newConv.id === lastOutgoingConversationId && (Date.now() - lastOutgoingAt) < 20000;
+              if (!weJustSentHere) {
+                console.log('💬 رسالة جديدة في محادثة:', newConv.customer_name);
+                shouldPlaySound = true;
+              } else {
+                lastOutgoingConversationId = null; // استخدمنا التتبع، امسحه
+              }
               break;
             }
           }
@@ -1023,6 +1031,9 @@
         if (result.error === 'Session expired') return;
         
         if (result.success) {
+          // تتبع أن الإرسال من طرفنا (لتجنب تشغيل صوت التنبيه عند التحديث التلقائي)
+          lastOutgoingConversationId = currentConversationId;
+          lastOutgoingAt = Date.now();
           // إغلاق المعاينة
           closeTemplatePreview();
           
@@ -1131,6 +1142,9 @@
         if (result.error === 'Session expired') return;
         
         if (result.success) {
+          // تتبع أن الإرسال من طرفنا (لتجنب تشغيل صوت التنبيه عند التحديث التلقائي)
+          lastOutgoingConversationId = currentConversationId;
+          lastOutgoingAt = Date.now();
           // إضافة الرسالة محلياً في الواجهة
           addMessageToUI({
             content: messageText,

@@ -918,17 +918,22 @@
                     <i data-lucide="play" class="h-3 w-3"></i>
                   </button>
                 ` : ''}
-                ${campaign.status === 'running' && campaign.is_stuck ? `
+                ${campaign.status === 'running' && !campaign.is_stuck ? `
+                  <button onclick="pauseCampaign(${campaign.id})" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-warning p-0 text-warning-foreground transition hover:bg-warning/90" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="إيقاف مؤقت">
+                    <i data-lucide="pause" class="h-3 w-3"></i>
+                  </button>
+                ` : ''}
+                ${(campaign.status === 'paused') || (campaign.status === 'running' && campaign.is_stuck) ? `
                   <button onclick="resumeCampaign(${campaign.id})" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary p-0 text-primary-foreground transition hover:bg-primary-hover" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="استئناف الحملة">
                     <i data-lucide="play-circle" class="h-3 w-3"></i>
                   </button>
                 ` : ''}
-                ${campaign.status === 'running' || campaign.status === 'completed' ? `
+                ${['running', 'completed', 'paused', 'failed'].includes(campaign.status) ? `
                   <button onclick="resendCampaign(${campaign.id})" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-warning p-0 text-warning-foreground transition hover:bg-warning/90" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="إعادة الإرسال">
                     <i data-lucide="repeat" class="h-3 w-3"></i>
                   </button>
                 ` : ''}
-                <button type="button" class="btn-delete-campaign inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-destructive p-0 text-destructive-foreground transition hover:bg-destructive/90" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="حذف الحملة" data-campaign-id="${campaign.id}" data-campaign-name="${(campaign.name || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">
+                <button type="button" class="btn-delete-campaign inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-destructive p-0 text-destructive-foreground transition hover:bg-destructive/90" style="min-width:32px;min-height:32px;max-width:32px;max-height:32px" title="${campaign.status === 'running' ? 'لا يمكن حذف حملة جارية' : 'حذف الحملة'}" data-campaign-id="${campaign.id}" data-campaign-name="${(campaign.name || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">
                   <i data-lucide="trash-2" class="h-3 w-3"></i>
                 </button>
               </div>
@@ -942,11 +947,12 @@
 
     function getStatusBadgeClass(status) {
       const classes = {
-        'draft': 'bg-muted text-muted-foreground',
+        'draft':     'bg-muted text-muted-foreground',
         'scheduled': 'bg-warning/10 text-warning',
-        'running': 'bg-primary/10 text-primary',
+        'running':   'bg-primary/10 text-primary',
         'completed': 'bg-success/10 text-success',
-        'paused': 'bg-warning/10 text-warning',
+        'paused':    'bg-warning/10 text-warning',
+        'failed':    'bg-destructive/10 text-destructive',
         'cancelled': 'bg-destructive/10 text-destructive'
       };
       return classes[status] || 'bg-muted text-muted-foreground';
@@ -954,11 +960,12 @@
 
     function getStatusText(status) {
       const texts = {
-        'draft': 'مسودة',
+        'draft':     'مسودة',
         'scheduled': 'مجدولة',
-        'running': 'قيد التشغيل',
+        'running':   'قيد التشغيل',
         'completed': 'مكتملة',
-        'paused': 'متوقفة',
+        'paused':    'متوقفة مؤقتاً',
+        'failed':    'فشلت',
         'cancelled': 'ملغية',
         'pending': 'في الانتظار',
         'sent': 'أُرسِلت',
@@ -2767,13 +2774,51 @@
       }
     }
 
-    // استئناف حملة متعطلة
+    // إيقاف الحملة مؤقتاً
+    async function pauseCampaign(campaignId) {
+      const ok = await safeConfirmModal({
+        title: 'إيقاف مؤقت',
+        message: 'سيتم إيقاف الحملة مؤقتاً. الدفعة الجارية ستكتمل، والدفعات القادمة لن تبدأ حتى تستأنف الحملة.',
+        confirmText: 'إيقاف مؤقت',
+        cancelText: 'إلغاء'
+      });
+      if (!ok) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/pause`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token')}` }
+        });
+        const result = await response.json();
+        if (result.success) {
+          showToast('تم إيقاف الحملة مؤقتاً', 'success');
+          refreshCampaigns();
+          const modal = document.getElementById('campaign-details-modal');
+          if (modal && modal.dataset.currentCampaignId == campaignId) {
+            viewCampaignDetails(campaignId);
+          }
+        } else {
+          showToast('فشل في إيقاف الحملة: ' + (result.error || result.message || 'خطأ غير معروف'), 'error');
+        }
+      } catch (error) {
+        console.error('خطأ في إيقاف الحملة:', error);
+        showToast('تعذر إيقاف الحملة. تحقق من الاتصال', 'error');
+      }
+    }
+
+    // استئناف حملة متعطلة أو موقوفة مؤقتاً
     async function resumeCampaign(campaignId) {
       const campaign = (window.__campaignsList || []).find(c => c.id === campaignId) || (window.__campaignDetails && window.__campaignDetails.id === campaignId ? window.__campaignDetails : null);
-      const stuckReason = campaign && campaign.stuck_reason ? campaign.stuck_reason : 'الحملة متوقفة عن التقدم (مثلاً بعد تحديث السيرفر).';
+      let resumeMessage;
+      if (campaign && campaign.status === 'paused') {
+        resumeMessage = 'الحملة موقوفة مؤقتاً. هل تريد استئناف إرسال الدفعات القادمة؟';
+      } else {
+        const stuckReason = campaign && campaign.stuck_reason ? campaign.stuck_reason : 'الحملة متوقفة عن التقدم (مثلاً بعد تحديث السيرفر).';
+        resumeMessage = stuckReason + ' هل تريد استئناف الإرسال من حيث توقف؟';
+      }
       const ok = await safeConfirmModal({
         title: 'استئناف الحملة',
-        message: stuckReason + ' هل تريد استئناف الإرسال من حيث توقف؟',
+        message: resumeMessage,
         confirmText: 'استئناف',
         cancelText: 'إلغاء'
       });

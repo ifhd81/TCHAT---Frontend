@@ -9,18 +9,21 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, __dirname, '')
   const apiBaseUrl = env.VITE_API_URL || process.env.VITE_API_URL || 'http://localhost:3000/api/v1'
 
+  const isProduction = process.env.NODE_ENV === 'production'
   return {
   server: {
     host: true,
     allowedHosts: true, // السماح بأي مضيف (تطوير)
     port: 5173,
-    open: true
+    // تعطيل فتح المتصفح تلقائياً في السيرفر/الكونتينر (Railway) لتجنب خطأ xdg-open ENOENT
+    open: !isProduction
   },
   preview: {
     host: true,
     allowedHosts: true, // السماح بأي مضيف (tchat-frontend، wa.herksa.com، إلخ)
     port: process.env.PORT || 4173,
-    strictPort: false
+    strictPort: false,
+    open: false // عدم فتح المتصفح في السيرفر (Railway) — يتجنب خطأ xdg-open ENOENT
   },
   build: {
     outDir: 'dist',

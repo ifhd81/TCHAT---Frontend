@@ -270,6 +270,91 @@
     // رسائل فشل إرسالها (لزر إعادة الإرسال): tempId -> { conversationId, text } أو { conversationId, isTemplate, ... }
     let pendingFailedMessages = {};
 
+    // =====================================================================
+    // WebSocket للوقت الفعلي (Real-time) — بديل عن HTTP Polling
+    // =====================================================================
+    let _ws = null;
+    let _wsReconnectDelay = 2000; // مدة الانتظار قبل إعادة الاتصال (تتضاعف تدريجياً)
+    let _wsReconnectTimer = null;
+    let _wsIntentionalClose = false; // لتمييز الإغلاق المتعمد عن الانقطاع
+
+    function buildWsUrl() {
+      const base = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1');
+      const token = localStorage.getItem('access_token') || localStorage.getItem('tchat_token') || '';
+      // تحويل http → ws ، https → wss
+      const wsBase = base.replace(/^https:\/\//, 'wss://').replace(/^http:\/\//, 'ws://');
+      // إذا كان الرابط نسبياً (يبدأ بـ /) نبني الرابط الكامل
+      const origin = window.location.origin;
+      const fullBase = wsBase.startsWith('ws') ? wsBase : (origin.replace(/^https/, 'wss').replace(/^http/, 'ws') + wsBase);
+      return `${fullBase}/ws?token=${encodeURIComponent(token)}`;
+    }
+
+    function connectRealtimeWS() {
+      if (_ws && (_ws.readyState === WebSocket.OPEN || _ws.readyState === WebSocket.CONNECTING)) return;
+
+      const url = buildWsUrl();
+      console.log('🔌 WebSocket: جاري الاتصال...');
+      _wsIntentionalClose = false;
+
+      try {
+        _ws = new WebSocket(url);
+      } catch (e) {
+        console.warn('⚠️ WebSocket: فشل إنشاء الاتصال:', e);
+        scheduleWsReconnect();
+        return;
+      }
+
+      _ws.onopen = () => {
+        console.log('✅ WebSocket: متصل — الرسائل ستظهر فورياً');
+        _wsReconnectDelay = 2000; // إعادة ضبط مدة الانتظار عند النجاح
+      };
+
+      _ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'new_message') {
+            console.log('📨 WebSocket: رسالة جديدة في محادثة', data.conversation_id);
+
+            // تحديث قائمة المحادثات فوراً
+            loadAndRenderConversations(false);
+
+            // إذا كانت الرسالة في المحادثة المفتوحة حالياً → تحديث الرسائل فوراً
+            if (data.conversation_id && data.conversation_id === currentConversationId) {
+              loadAndRenderMessages(currentConversationId, false);
+            }
+          }
+        } catch (e) {
+          console.warn('⚠️ WebSocket: خطأ في تحليل الرسالة:', e);
+        }
+      };
+
+      _ws.onerror = (err) => {
+        console.warn('⚠️ WebSocket: خطأ في الاتصال', err);
+      };
+
+      _ws.onclose = (e) => {
+        if (_wsIntentionalClose) return;
+        console.log(`🔄 WebSocket: انقطع الاتصال (${e.code}) — إعادة المحاولة بعد ${_wsReconnectDelay / 1000}s`);
+        scheduleWsReconnect();
+      };
+    }
+
+    function scheduleWsReconnect() {
+      clearTimeout(_wsReconnectTimer);
+      _wsReconnectTimer = setTimeout(() => {
+        connectRealtimeWS();
+        // مضاعفة مدة الانتظار حتى 30 ثانية كحد أقصى
+        _wsReconnectDelay = Math.min(_wsReconnectDelay * 2, 30000);
+      }, _wsReconnectDelay);
+    }
+
+    function disconnectRealtimeWS() {
+      _wsIntentionalClose = true;
+      clearTimeout(_wsReconnectTimer);
+      if (_ws) { _ws.close(); _ws = null; }
+    }
+    // =====================================================================
+
     const timeAgo = (value) => {
       if (!value) return '-';
       const date = new Date(value);
@@ -1101,19 +1186,23 @@
       document.body.addEventListener('touchstart', enableAudio, { once: true });
       document.body.addEventListener('keydown', enableAudio, { once: true });
       
-      // تحديث تلقائي كل 10 ثواني للمحادثات (بدون loading indicator)
+      // ——— WebSocket للوقت الفعلي (يستبدل Polling الأساسي) ———
+      connectRealtimeWS();
+
+      // Polling احتياطي كل 30 ثانية (يُستخدم فقط إذا انقطع WebSocket)
       setInterval(() => {
-        console.log('⏰ تحديث تلقائي - كل 10 ثواني');
-        loadAndRenderConversations(false); // تحديث صامت
-      }, 10000);
-      
-      // تحديث أسرع للرسائل في المحادثة النشطة (كل 10 ثوان)
-      setInterval(() => {
-        if (currentConversationId) {
-          console.log('💬 تحديث سريع للرسائل');
-          loadAndRenderMessages(currentConversationId, false); // تحديث صامت
+        if (!_ws || _ws.readyState !== WebSocket.OPEN) {
+          console.log('⏰ Polling احتياطي - WebSocket غير متصل');
+          loadAndRenderConversations(false);
         }
-      }, 10000);
+      }, 30000);
+
+      setInterval(() => {
+        if (currentConversationId && (!_ws || _ws.readyState !== WebSocket.OPEN)) {
+          console.log('💬 Polling احتياطي للرسائل');
+          loadAndRenderMessages(currentConversationId, false);
+        }
+      }, 30000);
       
       // إغلاق modals عند النقر خارجها
       document.getElementById('template-modal').addEventListener('click', function(e) {

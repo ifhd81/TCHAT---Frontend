@@ -71,6 +71,7 @@ async function apiRequest(endpoint, options = {}) {
   const accessToken = localStorage.getItem('access_token');
   
   const defaultOptions = {
+    cache: 'no-store',
     headers: {
       'Content-Type': 'application/json',
       ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),

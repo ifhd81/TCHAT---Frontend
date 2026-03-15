@@ -515,7 +515,8 @@
           console.log('📝 تم تحديث قائمة المحادثات (مع الحفاظ على المحادثات المحمّلة)');
         } else {
           const conversationsChanged = JSON.stringify(conversations) !== JSON.stringify(newConversations);
-          if (conversationsChanged) {
+          // عند showLoading يجب دائماً استدعاء renderConversations لاستبدال رسالة التحميل (حتى لو كانت النتيجة فارغة)
+          if (conversationsChanged || showLoading) {
             conversations = newConversations;
             renderConversations();
             console.log('📝 تم تحديث قائمة المحادثات');

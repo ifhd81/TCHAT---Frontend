@@ -8,6 +8,8 @@ export default defineConfig(({ mode }) => {
   // تحميل .env من مجلد frontend — رابط الباكند من VITE_API_URL فقط (لا روابط ثابتة)
   const env = loadEnv(mode, __dirname, '')
   const apiBaseUrl = env.VITE_API_URL || process.env.VITE_API_URL || 'http://localhost:3000/api/v1'
+  const subscriptionExpiresAt = (env.VITE_SUBSCRIPTION_EXPIRES_AT || process.env.VITE_SUBSCRIPTION_EXPIRES_AT || '').trim()
+  const subscriptionRenewUrl = (env.VITE_SUBSCRIPTION_RENEW_URL || process.env.VITE_SUBSCRIPTION_RENEW_URL || '').trim()
 
   const isProduction = process.env.NODE_ENV === 'production'
   return {
@@ -68,7 +70,11 @@ export default defineConfig(({ mode }) => {
           }
           if (path === '/config.js' || path.endsWith('/config.js')) {
             res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
-            res.end(`window.API_BASE_URL=${JSON.stringify(apiBaseUrl)};\n`)
+            res.end(
+              `window.API_BASE_URL=${JSON.stringify(apiBaseUrl)};\n` +
+                `window.SUBSCRIPTION_EXPIRES_AT=${JSON.stringify(subscriptionExpiresAt)};\n` +
+                `window.SUBSCRIPTION_RENEW_URL=${JSON.stringify(subscriptionRenewUrl)};\n`
+            )
             return
           }
           next()
@@ -84,7 +90,12 @@ export default defineConfig(({ mode }) => {
           let content = readFileSync(resolve(__dirname, 'api.js'), 'utf-8');
           content = content.replace("'__VITE_API_URL__'", JSON.stringify(apiBaseUrl));
           writeFileSync(resolve(__dirname, 'dist/api.js'), content);
-          writeFileSync(resolve(__dirname, 'dist/config.js'), `window.API_BASE_URL=${JSON.stringify(apiBaseUrl)};\n`);
+          writeFileSync(
+            resolve(__dirname, 'dist/config.js'),
+            `window.API_BASE_URL=${JSON.stringify(apiBaseUrl)};\n` +
+              `window.SUBSCRIPTION_EXPIRES_AT=${JSON.stringify(subscriptionExpiresAt)};\n` +
+              `window.SUBSCRIPTION_RENEW_URL=${JSON.stringify(subscriptionRenewUrl)};\n`
+          );
           console.log('✓ api.js + config.js written with API_BASE_URL from .env:', apiBaseUrl);
         } catch (err) {
           console.error('Error writing api.js:', err);

@@ -245,9 +245,16 @@
     }
 
     // رابط الوسائط مع التوكن في query (لعمل img/video/audio في المتصفح دون إرسال رؤوس)
-    function getMediaUrl(mediaId) {
+    // fallbackUrl: الرابط المباشر من webhook (يُستخدم إذا فشل proxy الـ Meta)
+    function getMediaUrl(mediaId, fallbackUrl) {
       const t = localStorage.getItem('access_token') || localStorage.getItem('tchat_token') || '';
-      return `${typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1'}/media/${mediaId}${t ? '?token=' + encodeURIComponent(t) : ''}`;
+      const base = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1';
+      let url = `${base}/media/${mediaId}`;
+      const params = new URLSearchParams();
+      if (t) params.set('token', t);
+      if (fallbackUrl) params.set('fallback_url', fallbackUrl);
+      const qs = params.toString();
+      return qs ? `${url}?${qs}` : url;
     }
 
     const CONVERSATIONS_PAGE_SIZE = 100; // عدد المحادثات في كل صفحة
@@ -1514,10 +1521,10 @@
               ${mediaId ? `
                 <div class="rounded-lg overflow-hidden border border-border bg-muted/20">
                   <img 
-                    src="${getMediaUrl(mediaId)}" 
+                    src="${getMediaUrl(mediaId, mediaUrl)}" 
                     alt="صورة مرسلة"
                     class="w-full h-auto max-h-64 object-cover cursor-pointer"
-                    onclick="openImageModal('${getMediaUrl(mediaId)}')"
+                    onclick="openImageModal('${getMediaUrl(mediaId, mediaUrl)}')"
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
                   />
                   <div class="hidden items-center justify-center p-8 text-muted-foreground">
@@ -1566,8 +1573,8 @@
                     </div>
                   </div>
                   <audio id="audio-${mediaId}" class="hidden" preload="metadata">
-                    <source src="${getMediaUrl(mediaId)}" type="audio/ogg">
-                    <source src="${getMediaUrl(mediaId)}" type="audio/mpeg">
+                    <source src="${getMediaUrl(mediaId, mediaUrl)}" type="audio/ogg">
+                    <source src="${getMediaUrl(mediaId, mediaUrl)}" type="audio/mpeg">
                   </audio>
                 </div>
               ` : `
@@ -1589,7 +1596,7 @@
               <p class="text-body-md">${content}</p>
               ${mediaId ? `
                 <a 
-                  href="${getMediaUrl(mediaId)}" 
+                  href="${getMediaUrl(mediaId, mediaUrl)}" 
                   target="_blank"
                   class="inline-flex items-center gap-2 text-body-sm text-primary hover:text-primary/80"
                 >
@@ -1610,7 +1617,7 @@
                     class="w-full h-auto max-h-64"
                     preload="metadata"
                   >
-                    <source src="${getMediaUrl(mediaId)}" type="video/mp4">
+                    <source src="${getMediaUrl(mediaId, mediaUrl)}" type="video/mp4">
                     متصفحك لا يدعم تشغيل الفيديو
                   </video>
                 </div>
@@ -1630,10 +1637,10 @@
               ${mediaId ? `
                 <div class="rounded-lg overflow-hidden bg-transparent">
                   <img 
-                    src="${getMediaUrl(mediaId)}" 
+                    src="${getMediaUrl(mediaId, mediaUrl)}" 
                     alt="${content || 'ملصق'}"
                     class="w-32 h-32 object-contain cursor-pointer"
-                    onclick="openImageModal('${getMediaUrl(mediaId)}')"
+                    onclick="openImageModal('${getMediaUrl(mediaId, mediaUrl)}')"
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
                   />
                   <div class="hidden items-center justify-center p-4 text-muted-foreground">

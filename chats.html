@@ -1612,14 +1612,20 @@
             <div class="space-y-3">
               ${mediaId ? `
                 <div class="rounded-lg overflow-hidden border border-border bg-muted/20">
-                  <video 
-                    controls 
+                  <video
+                    controls
                     class="w-full h-auto max-h-64"
                     preload="metadata"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
                   >
                     <source src="${getMediaUrl(mediaId, mediaUrl)}" type="video/mp4">
-                    متصفحك لا يدعم تشغيل الفيديو
+                    <source src="${getMediaUrl(mediaId, mediaUrl)}" type="video/3gpp">
                   </video>
+                  <div class="hidden items-center justify-center gap-2 p-4 text-muted-foreground">
+                    <i data-lucide="video-off" class="h-5 w-5"></i>
+                    <span class="text-body-sm">تعذّر تحميل الفيديو</span>
+                    <a href="${getMediaUrl(mediaId, mediaUrl)}" target="_blank" class="text-primary hover:underline text-body-sm mr-2">تحميل</a>
+                  </div>
                 </div>
               ` : `
                 <div class="flex items-center gap-2 text-body-sm">

@@ -783,15 +783,48 @@
       }
     }
 
+    function getDateLabel(dateStr) {
+      const messageDate = new Date(dateStr);
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+
+      const isSameDay = (d1, d2) =>
+        d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate();
+
+      if (isSameDay(messageDate, today)) return 'اليوم';
+      if (isSameDay(messageDate, yesterday)) return 'أمس';
+      return messageDate.toLocaleDateString('ar-u-nu-latn', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function renderDateSeparator(label) {
+      return `
+        <div class="flex items-center justify-center my-4">
+          <div class="date-separator bg-muted text-muted-foreground text-xs font-medium px-3 py-1 rounded-full">
+            ${label}
+          </div>
+        </div>
+      `;
+    }
+
     function renderMessages(messages) {
       const messagesArea = document.getElementById('messages-area');
-      
+
       if (!messages.length) {
         messagesArea.innerHTML = '<div class="flex items-center justify-center h-full text-body-sm text-muted-foreground">لا توجد رسائل في هذه المحادثة</div>';
         return;
       }
 
+      let lastDateLabel = null;
       messagesArea.innerHTML = messages.map(message => {
+        const currentDateLabel = getDateLabel(message.created_at);
+        let separator = '';
+        if (currentDateLabel !== lastDateLabel) {
+          separator = renderDateSeparator(currentDateLabel);
+          lastDateLabel = currentDateLabel;
+        }
         const isIncoming = message.direction === 'incoming';
         const messageTime = new Date(message.created_at).toLocaleTimeString('en-US', { 
           hour: '2-digit', 
@@ -813,12 +846,13 @@
         }
         
         return `
+          ${separator}
           <div class="flex ${isIncoming ? 'justify-start' : 'justify-end'}">
             <div class="max-w-[70%] ${isIncoming ? 'order-2' : 'order-1'}">
-              <div class="rounded-2xl px-4 py-3 ${isIncoming 
-                ? 'bg-muted text-foreground' 
+              <div class="rounded-2xl px-4 py-3 ${isIncoming
+                ? 'bg-muted text-foreground'
                 : 'bg-primary text-primary-foreground'
-              } cursor-pointer hover:opacity-90 transition-opacity" 
+              } cursor-pointer hover:opacity-90 transition-opacity"
               onclick="showMessageDetails(${message.id})">
                 ${renderMessageContent(message)}
                 ${sourceBadge ? `<div class="mt-2">${sourceBadge}</div>` : ''}
@@ -1412,21 +1446,37 @@
     function addMessageToUI(message) {
       const messagesArea = document.getElementById('messages-area');
       const isIncoming = message.direction === 'incoming';
-      const messageTime = new Date(message.created_at).toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
+      const messageTime = new Date(message.created_at).toLocaleTimeString('en-US', {
+        hour: '2-digit',
         minute: '2-digit',
         hour12: true
       });
-      
+
+      // Check if we need a date separator before this message
+      const currentDateLabel = getDateLabel(message.created_at);
+      const lastSeparator = messagesArea.querySelector('.date-separator:last-of-type');
+      const lastSeparatorLabel = lastSeparator ? lastSeparator.textContent.trim() : null;
+      let dateSeparatorHTML = '';
+      if (currentDateLabel !== lastSeparatorLabel) {
+        dateSeparatorHTML = `
+          <div class="flex items-center justify-center my-4">
+            <div class="date-separator bg-muted text-muted-foreground text-xs font-medium px-3 py-1 rounded-full">
+              ${currentDateLabel}
+            </div>
+          </div>
+        `;
+      }
+
       const statusIcon = !isIncoming && message.status === 'sending'
         ? `<i data-lucide="loader-2" class="inline h-3 w-3 ml-1 animate-spin"></i>`
         : !isIncoming ? `<i data-lucide="check" class="inline h-3 w-3 ml-1"></i>` : '';
       const tempIdAttr = message.tempId ? ` data-temp-id="${message.tempId}"` : '';
       const messageHTML = `
+        ${dateSeparatorHTML}
         <div class="flex ${isIncoming ? 'justify-start' : 'justify-end'}"${tempIdAttr}>
           <div class="max-w-[70%] ${isIncoming ? 'order-2' : 'order-1'}">
-            <div class="rounded-2xl px-4 py-3 ${isIncoming 
-              ? 'bg-muted text-foreground' 
+            <div class="rounded-2xl px-4 py-3 ${isIncoming
+              ? 'bg-muted text-foreground'
               : 'bg-primary text-primary-foreground'
             }">
               ${renderMessageContent(message)}
@@ -1438,7 +1488,7 @@
           </div>
         </div>
       `;
-      
+
       messagesArea.insertAdjacentHTML('beforeend', messageHTML);
       messagesArea.scrollTop = messagesArea.scrollHeight;
       lucide.createIcons();

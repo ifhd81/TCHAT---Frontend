@@ -2139,10 +2139,81 @@
       return div.innerHTML;
     }
 
+    const FAILURE_REASONS_INITIAL = 5;
+    const FAILURE_REASONS_PAGE = 10;
+    let failureReasonsState = null;
+
+    function failureReasonCardHtml(reason, total) {
+      const percentage = ((reason.count / total) * 100).toFixed(1);
+      const barColor = getFailureReasonColor(reason.reason);
+      const icon = getFailureReasonIcon(reason.reason);
+      const safeReason = escapeHtml(reason.reason);
+      return `
+        <div class="rounded-lg border border-border bg-card p-4">
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0">
+              <div class="flex h-10 w-10 items-center justify-center rounded-full ${barColor}/20">
+                <i data-lucide="${icon}" class="h-5 w-5 ${barColor}"></i>
+              </div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <h4 class="text-body-md font-medium text-foreground break-words">${safeReason}</h4>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  <span class="text-body-sm font-bold ${barColor}">${reason.count}</span>
+                  <span class="text-body-xs text-muted-foreground">(${percentage}%)</span>
+                </div>
+              </div>
+              <div class="w-full bg-muted rounded-full h-2">
+                <div class="${barColor} h-2 rounded-full transition-all" style="width: ${percentage}%"></div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function paintFailureReasonsContent(contentDiv) {
+      if (!contentDiv || !failureReasonsState) return;
+      const { sortedReasons, total, visible } = failureReasonsState;
+      const slice = sortedReasons.slice(0, visible);
+      const hasMore = visible < sortedReasons.length;
+      const tipsHtml = getFailureRecommendations(sortedReasons)
+        .map(tip => `<li class="flex items-start gap-2"><span>•</span><span>${escapeHtml(tip)}</span></li>`)
+        .join('');
+
+      contentDiv.innerHTML = `
+        <div class="space-y-3" id="failure-reasons-list">
+          ${slice.map(r => failureReasonCardHtml(r, total)).join('')}
+        </div>
+        ${hasMore ? `
+        <div class="mt-4 flex justify-center">
+          <button type="button" onclick="loadMoreFailureReasons()" class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary-hover">
+            <span>المزيد</span>
+            <i data-lucide="chevron-down" class="h-4 w-4"></i>
+          </button>
+        </div>` : ''}
+        <div class="mt-4 rounded-lg border border-border bg-muted/30 p-4">
+          <h4 class="text-body-sm font-semibold text-foreground mb-2">💡 نصائح لتقليل معدل الفشل:</h4>
+          <ul class="text-body-xs text-muted-foreground space-y-1">
+            ${tipsHtml}
+          </ul>
+        </div>`;
+      lucide.createIcons();
+    }
+
+    function loadMoreFailureReasons() {
+      if (!failureReasonsState) return;
+      const { sortedReasons, visible } = failureReasonsState;
+      failureReasonsState.visible = Math.min(visible + FAILURE_REASONS_PAGE, sortedReasons.length);
+      paintFailureReasonsContent(document.getElementById('failure-reasons-content'));
+    }
+
     // دالة تحميل أسباب الفشل
     async function loadFailureReasons(campaignId) {
       const contentDiv = document.getElementById('failure-reasons-content');
       if (!contentDiv) return;
+
+      failureReasonsState = null;
 
       contentDiv.innerHTML = `
         <div class="text-center text-body-sm text-muted-foreground">
@@ -2162,52 +2233,15 @@
         const result = await response.json();
 
         if (result.success && result.reasons && result.reasons.length > 0) {
-          // ترتيب الأسباب حسب العدد (تنازلياً)
           const sortedReasons = result.reasons.sort((a, b) => b.count - a.count);
-
-          // حساب النسب المئوية
           const total = result.total_failed;
-
-          contentDiv.innerHTML = `
-            <div class="space-y-3">
-              ${sortedReasons.map((reason, index) => {
-            const percentage = ((reason.count / total) * 100).toFixed(1);
-            const barColor = getFailureReasonColor(reason.reason);
-            const icon = getFailureReasonIcon(reason.reason);
-
-            return `
-                  <div class="rounded-lg border border-border bg-card p-4">
-                    <div class="flex items-start gap-3">
-                      <div class="flex-shrink-0">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-full ${barColor}/20">
-                          <i data-lucide="${icon}" class="h-5 w-5 ${barColor}"></i>
-                        </div>
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between gap-2 mb-2">
-                          <h4 class="text-body-md font-medium text-foreground">${reason.reason}</h4>
-                          <div class="flex items-center gap-2 flex-shrink-0">
-                            <span class="text-body-sm font-bold ${barColor}">${reason.count}</span>
-                            <span class="text-body-xs text-muted-foreground">(${percentage}%)</span>
-                          </div>
-                        </div>
-                        <div class="w-full bg-muted rounded-full h-2">
-                          <div class="${barColor} h-2 rounded-full transition-all" style="width: ${percentage}%"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                `;
-          }).join('')}
-            </div>
-            
-            <div class="mt-4 rounded-lg border border-border bg-muted/30 p-4">
-              <h4 class="text-body-sm font-semibold text-foreground mb-2">💡 نصائح لتقليل معدل الفشل:</h4>
-              <ul class="text-body-xs text-muted-foreground space-y-1">
-                ${getFailureRecommendations(sortedReasons).map(tip => `<li class="flex items-start gap-2"><span>•</span><span>${tip}</span></li>`).join('')}
-              </ul>
-            </div>
-          `;
+          failureReasonsState = {
+            campaignId,
+            sortedReasons,
+            total,
+            visible: Math.min(FAILURE_REASONS_INITIAL, sortedReasons.length)
+          };
+          paintFailureReasonsContent(contentDiv);
         } else {
           contentDiv.innerHTML = `
             <div class="text-center text-body-sm text-muted-foreground">
@@ -2215,9 +2249,8 @@
               <p>لا توجد تفاصيل متاحة عن أسباب الفشل</p>
             </div>
           `;
+          lucide.createIcons();
         }
-
-        lucide.createIcons();
       } catch (error) {
         console.error('خطأ في تحميل أسباب الفشل:', error);
         contentDiv.innerHTML = `
@@ -3113,7 +3146,7 @@
       let body = {};
 
       if (source === 'database') {
-        // فحص كل العملاء المسجلين على السيرفر (العدد الحقيقي 82415 أو حسب الدولة)
+        // فحص كل العملاء المسجلين على السيرفر (حسب الدولة إن وُجدت)
         const dialCodeEl = document.getElementById('target-country-dial-code');
         const dialCode = (dialCodeEl && dialCodeEl.value) ? dialCodeEl.value.trim() : '';
         body = { source: 'database', dial_code: dialCode };

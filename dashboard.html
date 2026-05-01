@@ -444,6 +444,46 @@
 
       let lastMetaAlerts = [];
 
+      const META_ALERTS_MAX_VISIBLE = 5;
+
+      /** عرض وقت نسبي بالعربية: منذ دقيقة / دقيقتين / أيام / أسابيع / أشهر / سنوات */
+      function formatRelativeTimeArabic(isoOrDate) {
+        if (!isoOrDate) return '—';
+        const t = new Date(isoOrDate).getTime();
+        if (Number.isNaN(t)) return '—';
+        let sec = Math.floor((Date.now() - t) / 1000);
+        if (sec < 0) sec = 0;
+        if (sec < 45) return 'الآن';
+
+        const pluralAr = (n, one, two, many) => {
+          if (n === 1) return `منذ ${one}`;
+          if (n === 2) return `منذ ${two}`;
+          return `منذ ${n} ${many}`;
+        };
+
+        const min = Math.floor(sec / 60);
+        if (min < 60) return pluralAr(min, 'دقيقة', 'دقيقتين', 'دقائق');
+
+        const hr = Math.floor(min / 60);
+        if (hr < 24) return pluralAr(hr, 'ساعة', 'ساعتين', 'ساعات');
+
+        const day = Math.floor(hr / 24);
+        if (day < 7) return pluralAr(day, 'يوم', 'يومين', 'أيام');
+
+        if (day < 30) {
+          const wk = Math.floor(day / 7);
+          return pluralAr(wk, 'أسبوع', 'أسبوعين', 'أسابيع');
+        }
+
+        if (day < 365) {
+          const mo = Math.floor(day / 30);
+          return pluralAr(mo, 'شهر', 'شهرين', 'أشهر');
+        }
+
+        const yr = Math.floor(day / 365);
+        return pluralAr(yr, 'سنة', 'سنتين', 'سنوات');
+      }
+
       function openMetaAlertDetail(index) {
         const alert = lastMetaAlerts[index];
         if (!alert) return;
@@ -481,20 +521,21 @@
       function renderMetaAlerts(alerts) {
         const container = document.getElementById('meta-alerts-container');
         if (!container) return;
-        lastMetaAlerts = alerts || [];
-        if (!alerts || alerts.length === 0) {
+        const list = Array.isArray(alerts) ? alerts.slice(0, META_ALERTS_MAX_VISIBLE) : [];
+        lastMetaAlerts = list;
+        if (list.length === 0) {
           container.innerHTML = '<p class="text-body-sm text-muted-foreground">لا توجد تنبيهات حديثة — تظهر هنا عند استقبال أي حدث من ميتا (تنبيهات، جودة، قوالب، تحديثات الحساب، إلخ).</p>';
           return;
         }
-        const rows = alerts.map((a, i) => {
-          const date = a.created_at ? new Date(a.created_at).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+        const rows = list.map((a, i) => {
+          const date = formatRelativeTimeArabic(a.created_at);
           const label = metaAlertEventLabel(a.event_type);
           const labelTitle = metaAlertEventTitle(a.event_type);
           const isPaymentIssue = a.event_type === 'meta_payment_issue';
           const rowClass = isPaymentIssue ? 'bg-red-50 hover:bg-red-100 border-red-200' : 'hover:bg-muted/60';
           return `<div class="flex items-center justify-between py-2 border-b border-border last:border-0 cursor-pointer rounded-md px-2 -mx-2 transition-colors ${rowClass}" data-meta-alert-index="${i}" role="button" tabindex="0" title="انقر لعرض ما وصل من ميتا"${labelTitle ? ` data-label-title="${labelTitle.replace(/"/g, '&quot;')}"` : ''}>
             <span class="text-body-sm font-medium ${isPaymentIssue ? 'text-red-700' : ''}">${label}</span>
-            <span class="text-body-xs ${isPaymentIssue ? 'text-red-600' : 'text-muted-foreground'}" dir="ltr">${date}</span>
+            <span class="text-body-xs shrink-0 ${isPaymentIssue ? 'text-red-600' : 'text-muted-foreground'}" dir="rtl">${date}</span>
           </div>`;
         }).join('');
         container.innerHTML = `<div class="space-y-0">${rows}</div>`;
@@ -719,7 +760,7 @@
 
           // تنبيهات ميتا (account_alerts، جودة الرقم، جودة/حالة القالب) + تنبيه مشكلة الدفع إن كان نشطاً
           try {
-            let metaAlerts = await loadMetaAlerts(15);
+            let metaAlerts = await loadMetaAlerts(META_ALERTS_MAX_VISIBLE);
             const paymentAlert = await (typeof getMetaPaymentAlert === 'function' ? getMetaPaymentAlert() : Promise.resolve({ active: false }));
             if (paymentAlert.active && Array.isArray(metaAlerts)) {
               metaAlerts = [{ id: -1, event_type: 'meta_payment_issue', created_at: paymentAlert.triggered_at || new Date().toISOString(), payload: null }].concat(metaAlerts);

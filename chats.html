@@ -1494,6 +1494,99 @@
       lucide.createIcons();
     }
 
+    function escapeHtmlChat(s) {
+      if (s == null || s === '') return '';
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function parseMessageWebhookData(message) {
+      const raw = message && message.webhook_data;
+      if (raw == null) return {};
+      if (typeof raw === 'string') {
+        try {
+          return JSON.parse(raw);
+        } catch {
+          return {};
+        }
+      }
+      if (typeof raw === 'object') return raw;
+      return {};
+    }
+
+    function findCachedTemplateByName(templateName, templateLanguage) {
+      if (!templateName || !availableTemplates || !availableTemplates.length) return null;
+      let t = availableTemplates.find(
+        x => x.name === templateName && (!templateLanguage || x.language === templateLanguage)
+      );
+      if (!t) t = availableTemplates.find(x => x.name === templateName);
+      return t || null;
+    }
+
+    /** روابط واضحة في نص القالب قبل تطبيق *غامق* */
+    function linkifyPlainUrlsForTemplate(text) {
+      if (!text) return '';
+      return text.replace(/(https?:\/\/[^\s<]+)/gi, (url) => {
+        const safeAttr = url.replace(/"/g, '&quot;');
+        return `<a href="${safeAttr}" target="_blank" rel="noopener noreferrer" class="underline font-medium break-all">${url}</a>`;
+      });
+    }
+
+    function formatChatPlainTextWithLinks(content) {
+      if (!content) return '';
+      const lines = String(content).split('\n');
+      return lines
+        .map((line) => linkifyPlainUrlsForTemplate(escapeHtmlChat(line)))
+        .join('<br>');
+    }
+
+    /**
+     * أزرار القالب (URL / هاتف / رد سريع) كما في تعريف Meta — للعرض في الفقاعة.
+     */
+    function renderWhatsAppTemplateButtonsFromTemplate(cachedTemplate, bubble) {
+      if (!cachedTemplate || !cachedTemplate.components) return '';
+      const btnComp = cachedTemplate.components.find((c) => c.type === 'BUTTONS');
+      if (!btnComp || !btnComp.buttons || !btnComp.buttons.length) return '';
+
+      const isOutgoing = bubble === 'outgoing';
+      const btnClass = isOutgoing
+        ? 'flex w-full items-center justify-center gap-2 rounded-lg border border-primary-foreground/35 bg-white/15 px-3 py-2.5 text-center text-body-sm font-medium text-primary-foreground'
+        : 'flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 py-2.5 text-center text-body-sm font-medium text-primary';
+
+      let html =
+        `<div class="mt-3 space-y-2 border-t pt-3 ${isOutgoing ? 'border-primary-foreground/25' : 'border-border'}">`;
+
+      btnComp.buttons.forEach((btn) => {
+        const label = escapeHtmlChat(btn.text || 'زر');
+        if (btn.type === 'URL') {
+          const u = (btn.url || '').trim();
+          const isDyn = !u || /\{\{\d+\}\}/.test(u);
+          if (!isDyn && /^https?:\/\//i.test(u)) {
+            html += `<a href="${escapeHtmlChat(u)}" target="_blank" rel="noopener noreferrer" class="${btnClass}"><i data-lucide="external-link" class="h-4 w-4 shrink-0"></i><span>${label}</span></a>`;
+          } else {
+            html += `<div class="${btnClass} cursor-default flex-col gap-0.5"><span>${label}</span><span class="text-[11px] font-normal opacity-80">رابط يُكمَّل عند الإرسال (متغير في القالب)</span></div>`;
+          }
+        } else if (btn.type === 'PHONE_NUMBER') {
+          const raw = (btn.phone_number || '').replace(/\s/g, '');
+          const tel = raw ? (raw.startsWith('+') ? raw : `+${raw}`) : '';
+          const href = tel ? `tel:${tel.replace(/[^\d+]/g, '')}` : '';
+          if (href) {
+            html += `<a href="${escapeHtmlChat(href)}" class="${btnClass}"><i data-lucide="phone" class="h-4 w-4 shrink-0"></i><span>${label}</span></a>`;
+          } else {
+            html += `<div class="${btnClass}">${label}</div>`;
+          }
+        } else {
+          html += `<div class="${btnClass} opacity-95"><i data-lucide="message-circle" class="h-4 w-4 shrink-0"></i><span>${label}</span></div>`;
+        }
+      });
+
+      html += '</div>';
+      return html;
+    }
+
     function renderMessageContent(message) {
       const content = message.content || '';
       const type = message.message_type || 'text';

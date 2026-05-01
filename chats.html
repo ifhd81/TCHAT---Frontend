@@ -849,13 +849,16 @@
           ${separator}
           <div class="flex ${isIncoming ? 'justify-start' : 'justify-end'}">
             <div class="max-w-[70%] ${isIncoming ? 'order-2' : 'order-1'}">
-              <div class="rounded-2xl px-4 py-3 ${isIncoming
-                ? 'bg-muted text-foreground'
-                : 'bg-primary text-primary-foreground'
-              } cursor-pointer hover:opacity-90 transition-opacity"
-              onclick="showMessageDetails(${message.id})">
-                ${renderMessageContent(message)}
-                ${sourceBadge ? `<div class="mt-2">${sourceBadge}</div>` : ''}
+              <div class="relative inline-block max-w-full">
+                <div class="rounded-2xl px-4 py-3 ${isIncoming
+                  ? 'bg-muted text-foreground'
+                  : 'bg-primary text-primary-foreground'
+                } cursor-pointer hover:opacity-90 transition-opacity"
+                onclick="showMessageDetails(${message.id})">
+                  ${renderMessageContent(message)}
+                  ${sourceBadge ? `<div class="mt-2">${sourceBadge}</div>` : ''}
+                </div>
+                ${renderMessageReactionBadge(message, isIncoming)}
               </div>
               <div class="mt-1 px-2 text-body-sm text-muted-foreground ${isIncoming ? 'text-right' : 'text-left'} flex items-center justify-between">
                 <div>
@@ -1504,6 +1507,14 @@
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+    }
+
+    /** تفاعل واتساب (ويب هوك type=reaction) — يُعرض كالشكل في توثيق ميتا */
+    function renderMessageReactionBadge(message, isIncoming) {
+      const re = (message.reaction_emoji || '').trim();
+      if (!re) return '';
+      const pos = isIncoming ? 'right-2' : 'left-2';
+      return `<span class="absolute -bottom-2 ${pos} inline-flex items-center justify-center rounded-full bg-background border border-border shadow-sm text-base leading-none px-1.5 py-0.5 z-10 select-none" title="تفاعل">${escapeHtmlChat(re)}</span>`;
     }
 
     function parseMessageWebhookData(message) {

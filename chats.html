@@ -924,7 +924,7 @@
         if (response && response.success && response.data) {
           availableTemplates = response.data.filter(t => t.status === 'APPROVED');
           console.log(`✅ تم تحميل ${availableTemplates.length} قالب في الخلفية`);
-          if (typeof currentConversationId === 'number' && currentConversationId > 0) {
+          if (currentConversationId != null && currentConversationId !== '') {
             loadAndRenderMessages(currentConversationId, false);
           }
         }

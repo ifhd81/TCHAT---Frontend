@@ -2139,6 +2139,19 @@
       return div.innerHTML;
     }
 
+    function toggleCampaignDetailCard(button, bodyId) {
+      const body = document.getElementById(bodyId);
+      if (!body || !button) return;
+      const expanded = button.getAttribute('aria-expanded') !== 'false';
+      const next = !expanded;
+      button.setAttribute('aria-expanded', next ? 'true' : 'false');
+      body.classList.toggle('hidden', !next);
+      const icon = button.querySelector('.detail-card-chevron');
+      if (icon) {
+        icon.classList.toggle('rotate-180', next);
+      }
+    }
+
     const FAILURE_REASONS_INITIAL = 5;
     const FAILURE_REASONS_PAGE = 10;
     let failureReasonsState = null;
@@ -2415,13 +2428,21 @@
         <div class="space-y-6">
           <!-- Campaign Info Section -->
           <div class="rounded-lg border bg-card">
-            <div class="border-b border-border px-6 py-4">
-              <h3 class="text-heading-md font-semibold flex items-center gap-2">
-                <i data-lucide="info" class="h-5 w-5 text-primary"></i>
+            <div class="border-b border-border px-6 py-4 flex items-center justify-between gap-3">
+              <h3 class="text-heading-md font-semibold flex items-center gap-2 min-w-0 flex-1">
+                <i data-lucide="info" class="h-5 w-5 text-primary shrink-0"></i>
                 <span>معلومات الحملة</span>
               </h3>
+              <button type="button"
+                onclick="toggleCampaignDetailCard(this, 'campaign-info-body')"
+                aria-expanded="true"
+                aria-label="طي أو توسيع القسم"
+                title="طي أو توسيع"
+                class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-accent-foreground">
+                <i data-lucide="chevron-down" class="detail-card-chevron h-5 w-5 transition-transform duration-200 rotate-180" aria-hidden="true"></i>
+              </button>
             </div>
-            <div class="p-6">
+            <div id="campaign-info-body" class="p-6">
               <div class="grid gap-6 md:grid-cols-2">
                 <!-- القسم الأيمن -->
                 <div class="space-y-4">
@@ -2524,12 +2545,25 @@
           <!-- نشاط الدفعات (مجدول، بدء، انتهى = من قاعدة البيانات) -->
           <div class="rounded-lg border bg-card">
             <div class="border-b border-border px-6 py-4">
-              <h3 class="text-heading-md font-semibold flex items-center justify-between gap-2">
-                <span class="flex items-center gap-2"><i data-lucide="layers" class="h-5 w-5 text-primary"></i><span>نشاط الدفعات</span></span>
-                <button type="button" id="batch-refresh-btn" class="inline-flex items-center gap-1 rounded-md border border-input bg-background px-2 py-1.5 text-body-xs font-medium hover:bg-accent hover:text-accent-foreground">تحديث</button>
-              </h3>
-              <p class="text-body-sm text-muted-foreground mt-1">حالة كل دفعة: معلّقة، جاري التشغيل، تمت أو فشلت. للدفعة «جاري التشغيل» يظهر التقدم (X / Y مرسل). البيانات أسفل من سجلات الدفعات.</p>
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="text-heading-md font-semibold flex items-center gap-2 min-w-0 flex-1 m-0">
+                  <span class="flex items-center gap-2"><i data-lucide="layers" class="h-5 w-5 text-primary shrink-0"></i><span>نشاط الدفعات</span></span>
+                </h3>
+                <div class="flex items-center gap-2 shrink-0">
+                  <button type="button" id="batch-refresh-btn" class="inline-flex items-center gap-1 rounded-md border border-input bg-background px-2 py-1.5 text-body-xs font-medium hover:bg-accent hover:text-accent-foreground">تحديث</button>
+                  <button type="button"
+                    onclick="toggleCampaignDetailCard(this, 'batch-activity-body')"
+                    aria-expanded="true"
+                    aria-label="طي أو توسيع القسم"
+                    title="طي أو توسيع"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-accent-foreground">
+                    <i data-lucide="chevron-down" class="detail-card-chevron h-5 w-5 transition-transform duration-200 rotate-180" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
             </div>
+            <div id="batch-activity-body">
+            <p class="px-6 pt-4 text-body-sm text-muted-foreground pb-2">حالة كل دفعة: معلّقة، جاري التشغيل، تمت أو فشلت. للدفعة «جاري التشغيل» يظهر التقدم (X / Y مرسل). البيانات أسفل من سجلات الدفعات.</p>
             <div class="overflow-x-auto">
               <table class="w-full min-w-[800px] caption-bottom text-sm table-fixed border-collapse" dir="rtl" style="table-layout: fixed;">
                 <thead class="bg-muted/50">
@@ -2560,11 +2594,23 @@
                 </tbody>
               </table>
             </div>
+            </div>
           </div>
 
           <!-- التقدم (مطابق لأرقام البطاقات: أُرسلت = عدد المحاولات الفعلي) -->
           <div class="rounded-lg border bg-card p-4">
-            <h3 class="text-body-md font-semibold text-muted-foreground mb-2">التقدم</h3>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <h3 class="text-body-md font-semibold text-muted-foreground m-0">التقدم</h3>
+              <button type="button"
+                onclick="toggleCampaignDetailCard(this, 'campaign-progress-body')"
+                aria-expanded="true"
+                aria-label="طي أو توسيع القسم"
+                title="طي أو توسيع"
+                class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-accent-foreground">
+                <i data-lucide="chevron-down" class="detail-card-chevron h-5 w-5 transition-transform duration-200 rotate-180" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div id="campaign-progress-body">
             <div id="campaign-progress-content" class="flex items-center gap-4">
               <div class="flex-1">
                 <div class="flex justify-between text-body-sm mb-1">
@@ -2575,6 +2621,7 @@
                   <div class="bg-primary h-2 rounded-full transition-all progress-bar-fill" style="width: ${progressSent}%"></div>
                 </div>
               </div>
+            </div>
             </div>
           </div>
 
@@ -2619,18 +2666,28 @@
           ${campaign.failed_count > 0 ? `
             <div class="rounded-lg border bg-card" id="meta-errors-section">
               <div class="border-b border-border px-6 py-4">
-                <div class="flex items-center justify-between">
-                  <div>
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0 flex-1">
                     <h3 class="text-heading-md font-semibold flex items-center gap-2">
-                      <i data-lucide="alert-triangle" class="h-5 w-5 text-destructive"></i>
+                      <i data-lucide="alert-triangle" class="h-5 w-5 text-destructive shrink-0"></i>
                       <span>أنواع الأخطاء من ميتا</span>
                     </h3>
                     <p class="text-body-sm text-muted-foreground mt-1">أسباب عدم التسليم كما وردت من واتساب (ميتا) لهذه الحملة</p>
                   </div>
-                  <button onclick="loadMetaErrors(${campaign.id})" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium transition hover:bg-accent">
-                    <i data-lucide="refresh-cw" class="h-4 w-4"></i>
-                    <span>تحديث</span>
-                  </button>
+                  <div class="flex items-center gap-2 shrink-0 self-center">
+                    <button onclick="loadMetaErrors(${campaign.id})" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium transition hover:bg-accent">
+                      <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+                      <span>تحديث</span>
+                    </button>
+                    <button type="button"
+                      onclick="toggleCampaignDetailCard(this, 'meta-errors-content')"
+                      aria-expanded="true"
+                      aria-label="طي أو توسيع القسم"
+                      title="طي أو توسيع"
+                      class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-accent-foreground">
+                      <i data-lucide="chevron-down" class="detail-card-chevron h-5 w-5 transition-transform duration-200 rotate-180" aria-hidden="true"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
               <div id="meta-errors-content" class="p-4">
@@ -2646,12 +2703,12 @@
           ${campaign.failed_count > 0 ? `
             <div class="rounded-lg border border-destructive/30 bg-destructive/5" id="failure-reasons-section">
               <div class="border-b border-destructive/20 p-4">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <i data-lucide="alert-circle" class="h-5 w-5 text-destructive"></i>
-                    <h3 class="text-heading-md font-semibold text-destructive">أسباب الفشل (${campaign.failed_count})</h3>
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-2 min-w-0 flex-1">
+                    <i data-lucide="alert-circle" class="h-5 w-5 text-destructive shrink-0"></i>
+                    <h3 class="text-heading-md font-semibold text-destructive m-0">أسباب الفشل (${campaign.failed_count})</h3>
                   </div>
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-2 shrink-0">
                     <button onclick="downloadFailedRecipientsCSV(${campaign.id})" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium transition hover:bg-accent">
                       <i data-lucide="download" class="h-4 w-4"></i>
                       <span>تنزيل CSV</span>
@@ -2659,6 +2716,14 @@
                     <button onclick="loadFailureReasons(${campaign.id})" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium transition hover:bg-accent">
                       <i data-lucide="refresh-cw" class="h-4 w-4"></i>
                       <span>تحديث</span>
+                    </button>
+                    <button type="button"
+                      onclick="toggleCampaignDetailCard(this, 'failure-reasons-content')"
+                      aria-expanded="true"
+                      aria-label="طي أو توسيع القسم"
+                      title="طي أو توسيع"
+                      class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-accent-foreground">
+                      <i data-lucide="chevron-down" class="detail-card-chevron h-5 w-5 transition-transform duration-200 rotate-180" aria-hidden="true"></i>
                     </button>
                   </div>
                 </div>
@@ -2675,15 +2740,25 @@
           <!-- Recipients Table -->
           <div class="rounded-lg border bg-card">
             <div class="border-b border-border p-4">
-              <div class="flex items-center justify-between">
-                <h3 class="text-heading-md font-semibold">تفاصيل المستقبلين</h3>
-                <button onclick="fixCampaignStats(${campaign.id})" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
-                  <i data-lucide="calculator" class="h-4 w-4"></i>
-                  <span>إعادة حساب دقيق</span>
-                </button>
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="text-heading-md font-semibold m-0 min-w-0 flex-1">تفاصيل المستقبلين</h3>
+                <div class="flex items-center gap-2 shrink-0">
+                  <button onclick="fixCampaignStats(${campaign.id})" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-body-sm font-medium transition hover:bg-accent hover:text-accent-foreground">
+                    <i data-lucide="calculator" class="h-4 w-4"></i>
+                    <span>إعادة حساب دقيق</span>
+                  </button>
+                  <button type="button"
+                    onclick="toggleCampaignDetailCard(this, 'recipients-table-body')"
+                    aria-expanded="true"
+                    aria-label="طي أو توسيع القسم"
+                    title="طي أو توسيع"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition hover:bg-accent hover:text-accent-foreground">
+                    <i data-lucide="chevron-down" class="detail-card-chevron h-5 w-5 transition-transform duration-200 rotate-180" aria-hidden="true"></i>
+                  </button>
+                </div>
               </div>
             </div>
-            <div class="overflow-x-auto max-h-96">
+            <div id="recipients-table-body" class="overflow-x-auto max-h-96">
               <table class="w-full caption-bottom text-sm">
                 <thead class="bg-muted/50 sticky top-0">
                   <tr class="border-b text-right text-body-sm font-semibold text-muted-foreground">

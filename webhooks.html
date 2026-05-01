@@ -769,24 +769,56 @@
       return badges[status] || badges['processed'];
     }
 
+    function calendarYearsApart(past, now) {
+      let y = now.getFullYear() - past.getFullYear();
+      if (now.getMonth() < past.getMonth() ||
+          (now.getMonth() === past.getMonth() && now.getDate() < past.getDate())) {
+        y--;
+      }
+      return Math.max(0, y);
+    }
+
+    function calendarMonthsApart(past, now) {
+      let m = (now.getFullYear() - past.getFullYear()) * 12 + (now.getMonth() - past.getMonth());
+      if (now.getDate() < past.getDate()) m--;
+      return Math.max(0, m);
+    }
+
+    function arWeeks(n) {
+      if (n === 1) return 'منذ أسبوع';
+      if (n === 2) return 'منذ أسبوعين';
+      if (n >= 3 && n <= 10) return `منذ ${n} أسابيع`;
+      return `منذ ${n} أسبوعًا`;
+    }
+
+    function arMonths(n) {
+      if (n === 1) return 'منذ شهر';
+      if (n === 2) return 'منذ شهرين';
+      if (n >= 3 && n <= 10) return `منذ ${n} أشهر`;
+      return `منذ ${n} شهرًا`;
+    }
+
+    function arYears(n) {
+      if (n === 1) return 'منذ سنة';
+      if (n === 2) return 'منذ سنتين';
+      if (n >= 3 && n <= 10) return `منذ ${n} سنوات`;
+      return `منذ ${n} سنة`;
+    }
+
     function formatDateTime(dateString) {
       if (!dateString) return '-';
-      
-      // تحليل التاريخ بشكل صحيح
-      let date = new Date(dateString);
-      
-      // التحقق من صحة التاريخ
+
+      const date = new Date(dateString);
       if (isNaN(date.getTime())) {
         return '-';
       }
-      
+
       const now = new Date();
       const diffMs = now - date;
       const diffMins = Math.floor(diffMs / 60000);
       const diffHours = Math.floor(diffMs / 3600000);
       const diffDays = Math.floor(diffMs / 86400000);
-      
-      // عرض نسبي للتواريخ الحديثة
+
       if (diffMins < 1) return 'الآن';
       if (diffMins === 1) return 'منذ دقيقة واحدة';
       if (diffMins < 60) return `منذ ${diffMins} دقيقة`;
@@ -794,15 +826,15 @@
       if (diffHours < 24) return `منذ ${diffHours} ساعة`;
       if (diffDays === 1) return 'منذ يوم واحد';
       if (diffDays < 7) return `منذ ${diffDays} يوم`;
-      
-      // تنسيق مخصص للتواريخ القديمة
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      
-      return `${year}/${month}/${day} - ${hours}:${minutes}`;
+
+      const years = calendarYearsApart(date, now);
+      if (years >= 1) return arYears(years);
+
+      const months = calendarMonthsApart(date, now);
+      if (months >= 1) return arMonths(months);
+
+      const weeks = Math.floor(diffDays / 7);
+      return arWeeks(Math.max(1, weeks));
     }
 
     // تصفية البيانات حسب نوع الحدث
@@ -864,28 +896,7 @@
     }
 
     function getTimeAgo(dateString) {
-      if (!dateString) return '-';
-      
-      let date = new Date(dateString);
-      
-      // التحقق من صحة التاريخ
-      if (isNaN(date.getTime())) {
-        return '-';
-      }
-      
-      const now = new Date();
-      const diffMs = now - date;
-      const diffMins = Math.floor(diffMs / 60000);
-      const diffHours = Math.floor(diffMs / 3600000);
-      const diffDays = Math.floor(diffMs / 86400000);
-      
-      if (diffMins < 1) return 'الآن';
-      if (diffMins === 1) return 'دقيقة واحدة';
-      if (diffMins < 60) return `${diffMins} دقيقة`;
-      if (diffHours === 1) return 'ساعة واحدة';
-      if (diffHours < 24) return `${diffHours} ساعة`;
-      if (diffDays === 1) return 'يوم واحد';
-      return `${diffDays} يوم`;
+      return formatDateTime(dateString);
     }
   </script>
 </body>

@@ -924,6 +924,9 @@
         if (response && response.success && response.data) {
           availableTemplates = response.data.filter(t => t.status === 'APPROVED');
           console.log(`✅ تم تحميل ${availableTemplates.length} قالب في الخلفية`);
+          if (typeof currentConversationId === 'number' && currentConversationId > 0) {
+            loadAndRenderMessages(currentConversationId, false);
+          }
         }
       } catch (error) {
         console.log('⚠️ لم يتم تحميل القوالب في الخلفية:', error);
@@ -1595,66 +1598,77 @@
       
       switch (type) {
         case 'template':
-          // عرض محتوى القالب بشكل منسق
+          // عرض محتوى القالب + أزرار/روابط من تعريف Meta (مع اسم القالب من webhook_data بعد الإرسال)
           let templateContent = content;
           let templateName = '';
-          let templateType = 'template'; // template, campaign, abandoned_cart
-          
-          // استخراج اسم القالب من مختلف التنسيقات
+          let templateLang = '';
+          let templateType = 'template';
+
+          const meta = parseMessageWebhookData(message);
+          if (meta.template_name) templateName = String(meta.template_name).trim();
+          if (meta.template_language) templateLang = String(meta.template_language).trim();
+
           if (content.startsWith('📄 قالب:')) {
-            templateName = content.replace('📄 قالب:', '').trim();
+            templateName = templateName || content.replace('📄 قالب:', '').trim();
             templateType = 'template';
           } else if (content.startsWith('🛒 تذكير بسلة متروكة:')) {
-            templateName = content.replace('🛒 تذكير بسلة متروكة:', '').trim();
+            templateName = templateName || content.replace('🛒 تذكير بسلة متروكة:', '').trim();
             templateType = 'abandoned_cart';
           } else if (content.startsWith('📢 حملة تسويقية:')) {
-            templateName = content.replace('📢 حملة تسويقية:', '').trim();
+            templateName = templateName || content.replace('📢 حملة تسويقية:', '').trim();
             templateType = 'campaign';
           } else if (content.startsWith('📨 قالب:')) {
-            templateName = content.replace('📨 قالب:', '').trim();
+            templateName = templateName || content.replace('📨 قالب:', '').trim();
             templateType = 'template';
           }
-          
-          // محاولة جلب المحتوى الفعلي من القوالب المحملة
-          if (templateName && availableTemplates && availableTemplates.length > 0) {
-            const cachedTemplate = availableTemplates.find(t => t.name === templateName);
-            if (cachedTemplate && cachedTemplate.components) {
-              let bodyContent = '';
-              for (const comp of cachedTemplate.components) {
-                if (comp.type === 'HEADER' && comp.format === 'TEXT' && comp.text) {
-                  bodyContent += comp.text + '\n\n';
-                }
-                if (comp.type === 'BODY' && comp.text) {
-                  bodyContent += comp.text;
-                }
-                if (comp.type === 'FOOTER' && comp.text) {
-                  bodyContent += '\n\n' + comp.text;
-                }
+
+          const isEmojiPlaceholder =
+            content.startsWith('📄 قالب:') ||
+            content.startsWith('🛒 تذكير بسلة متروكة:') ||
+            content.startsWith('📢 حملة تسويقية:') ||
+            content.startsWith('📨 قالب:');
+
+          const cachedTemplate = findCachedTemplateByName(templateName, templateLang);
+
+          if (cachedTemplate && cachedTemplate.components && (isEmojiPlaceholder || !String(content || '').trim())) {
+            let bodyContent = '';
+            for (const comp of cachedTemplate.components) {
+              if (comp.type === 'HEADER' && comp.format === 'TEXT' && comp.text) {
+                bodyContent += comp.text + '\n\n';
               }
-              if (bodyContent) {
-                templateContent = bodyContent;
+              if (comp.type === 'BODY' && comp.text) {
+                bodyContent += comp.text;
+              }
+              if (comp.type === 'FOOTER' && comp.text) {
+                bodyContent += '\n\n' + comp.text;
               }
             }
+            if (bodyContent) {
+              templateContent = bodyContent;
+            }
           }
-          
-          // تنسيق النص (دعم التنسيق البسيط)
-          let formattedContent = templateContent
-            .replace(/\*([^*]+)\*/g, '<strong>$1</strong>')  // Bold
-            .replace(/_([^_]+)_/g, '<em>$1</em>')            // Italic
-            .replace(/\n/g, '<br>');                         // Line breaks
-          
-          // إذا كان المحتوى لا يزال بالتنسيق القديم، اعرضه بشكل خاص
-          const isOldFormat = formattedContent.startsWith('📄 قالب:') || 
-                              formattedContent.startsWith('🛒 تذكير بسلة متروكة:') ||
-                              formattedContent.startsWith('📢 حملة تسويقية:') ||
-                              formattedContent.startsWith('📨 قالب:') ||
-                              !formattedContent;
-          
+
+          const bubble = message.direction === 'outgoing' ? 'outgoing' : 'incoming';
+          const buttonsHtml = renderWhatsAppTemplateButtonsFromTemplate(cachedTemplate, bubble);
+
+          const linkedBody = linkifyPlainUrlsForTemplate(templateContent);
+          let formattedContent = linkedBody
+            .replace(/\*([^*]+)\*/g, '<strong>$1</strong>')
+            .replace(/_([^_]+)_/g, '<em>$1</em>')
+            .replace(/\n/g, '<br>');
+
+          const isOldFormat =
+            formattedContent.startsWith('📄 قالب:') ||
+            formattedContent.startsWith('🛒 تذكير بسلة متروكة:') ||
+            formattedContent.startsWith('📢 حملة تسويقية:') ||
+            formattedContent.startsWith('📨 قالب:') ||
+            !formattedContent;
+
           if (isOldFormat) {
             const displayName = templateName || 'قالب';
             let typeIcon = 'file-text';
             let typeLabel = 'رسالة قالب';
-            
+
             if (templateType === 'abandoned_cart') {
               typeIcon = 'shopping-cart';
               typeLabel = 'تذكير سلة متروكة';
@@ -1662,26 +1676,28 @@
               typeIcon = 'megaphone';
               typeLabel = 'حملة تسويقية';
             }
-            
+
             return `
               <div class="space-y-2">
                 <div class="flex items-center gap-2 text-body-sm opacity-75">
                   <i data-lucide="${typeIcon}" class="h-4 w-4"></i>
                   <span>${typeLabel}</span>
                 </div>
-                <p class="text-body-md font-medium">${displayName}</p>
+                <p class="text-body-md font-medium">${escapeHtmlChat(displayName)}</p>
+                ${buttonsHtml}
               </div>
             `;
           }
-          
+
           return `
             <div class="space-y-2">
-              <p class="text-body-md whitespace-pre-wrap">${formattedContent}</p>
+              <div class="text-body-md whitespace-pre-wrap">${formattedContent}</div>
+              ${buttonsHtml}
             </div>
           `;
-          
+
         case 'text':
-          return `<p class="text-body-md">${content}</p>`;
+          return `<p class="text-body-md whitespace-pre-wrap">${formatChatPlainTextWithLinks(content)}</p>`;
           
         case 'image':
           return `

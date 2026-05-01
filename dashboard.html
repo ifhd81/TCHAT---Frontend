@@ -313,6 +313,17 @@
                 <span class="font-mono text-body-xs text-muted-foreground" id="modal-whatsapp-id">-</span>
               </div>
             </div>
+
+            <!-- رابط إكمال الطلب كما يُرسل مع تتبع UTM -->
+            <div id="modal-cart-link-wrap" class="hidden mt-3 pt-3 border-t">
+              <div class="text-body-sm text-muted-foreground mb-1.5">رابط السلة</div>
+              <a id="modal-cart-url"
+                 href="#"
+                 class="inline-block w-full rounded-md border border-border bg-muted/30 px-3 py-2 text-body-xs font-mono text-primary hover:bg-muted/60 hover:underline break-all"
+                 dir="ltr"
+                 target="_blank"
+                 rel="noopener noreferrer"></a>
+            </div>
           </div>
 
           <!-- Cart ID -->
@@ -1020,6 +1031,19 @@
           document.getElementById('modal-whatsapp-id').textContent = cart.whatsapp_message_id;
         } else {
           whatsappSection.classList.add('hidden');
+        }
+
+        const cartLinkWrap = document.getElementById('modal-cart-link-wrap');
+        const cartUrlEl = document.getElementById('modal-cart-url');
+        const cartHref = ((cart.sent_cart_url || cart.checkout_url || '') + '').trim();
+        if (cartHref) {
+          cartLinkWrap.classList.remove('hidden');
+          cartUrlEl.href = cartHref;
+          cartUrlEl.textContent = cartHref;
+        } else {
+          cartLinkWrap.classList.add('hidden');
+          cartUrlEl.removeAttribute('href');
+          cartUrlEl.textContent = '';
         }
 
         // عرض الـ modal

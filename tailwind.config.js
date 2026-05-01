@@ -13,7 +13,13 @@ export default {
         "2xl": "0.5rem",
       },
       fontFamily: {
-        sans: ["LamaSans", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: [
+          "SuisseIntl",
+          "Cairo",
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif",
+        ],
         lama: ["LamaSans", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       fontWeight: {

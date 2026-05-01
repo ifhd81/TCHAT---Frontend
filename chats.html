@@ -1556,7 +1556,7 @@
       if (!body) return '';
       const maxLen = 3900;
       if (body.length > maxLen) body = `${body.slice(0, maxLen)}…`;
-      return `إعادة توجيه:\n\n${body}`;
+      return body;
     }
 
     function openForwardMessageModal() {

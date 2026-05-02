@@ -239,7 +239,8 @@
         </button>
       </div>
       <div class="p-4 border-b border-border shrink-0">
-        <p class="text-body-sm text-muted-foreground mb-2">معاينة النص الذي سيتم إرساله:</p>
+        <p class="text-body-sm text-muted-foreground mb-1">محتوى سيتم إعادة توجيهه لهذه المحادثات:</p>
+        <p class="text-body-xs text-muted-foreground mb-2">اختر محادثة أو أكثر، ثم اضغط «إرسال إعادة التوجيه»</p>
         <div id="forward-preview" class="p-3 bg-muted rounded-lg text-body-sm max-h-28 overflow-y-auto whitespace-pre-wrap break-words" dir="auto"></div>
         <input
           type="text"
@@ -250,7 +251,22 @@
         />
       </div>
       <div id="forward-conversations-list" class="flex-1 overflow-y-auto min-h-[180px] max-h-[42vh] px-2 py-1"></div>
-      <div class="p-3 border-t border-border shrink-0">
+      <div class="p-3 border-t border-border shrink-0 flex flex-col gap-2">
+        <div class="flex flex-wrap gap-2 justify-between items-center">
+          <div class="flex gap-2">
+            <button type="button" onclick="forwardSelectAllVisible()" class="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-body-xs font-medium hover:bg-accent transition-colors">
+              تحديد الكل الظاهر
+            </button>
+            <button type="button" onclick="forwardClearSelection()" class="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-body-xs font-medium hover:bg-accent transition-colors">
+              إلغاء التحديد
+            </button>
+          </div>
+          <span id="forward-selection-count" class="text-body-xs text-muted-foreground">0 محادثة محدَّدة</span>
+        </div>
+        <button type="button" id="forward-send-selected-btn" disabled onclick="sendForwardToSelectedBatch()"
+          class="w-full inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-4 py-2.5 text-body-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:pointer-events-none">
+          إرسال إعادة التوجيه
+        </button>
         <button type="button" onclick="closeForwardMessageModal()" class="w-full inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-body-sm font-medium hover:bg-accent transition-colors">
           إلغاء
         </button>
@@ -297,6 +313,8 @@
     let forwardMessageDraftText = '';
     /** إن وُجد، يتم استدعاء POST /whatsapp/forward-media بدل النص الخام */
     let forwardMessageStored = null;
+    /** محادثات محدَّدة للإرسال المتعدّد في نافذة إعادة التوجيه */
+    let forwardSelectedIds = new Set();
 
     function isForwardableMediaMessage(message) {
       if (!message) return false;
@@ -1634,6 +1652,7 @@
       }
       forwardMessageStored = null;
       forwardMessageDraftText = '';
+      forwardSelectedIds = new Set();
 
       if (isForwardableMediaMessage(message)) {
         forwardMessageStored = buildForwardMediaPayloadFromMessage(message);
@@ -1655,6 +1674,7 @@
       const filterInput = document.getElementById('forward-conv-filter');
       if (filterInput) filterInput.value = '';
       renderForwardConversationList('');
+      updateForwardSelectionCountUI();
       document.getElementById('forward-message-modal').classList.remove('hidden');
       closeMessageDetails();
       setTimeout(() => {
@@ -1667,18 +1687,27 @@
       if (el) el.classList.add('hidden');
       forwardMessageDraftText = '';
       forwardMessageStored = null;
+      forwardSelectedIds = new Set();
     }
 
-    function filterForwardConversations() {
-      const q = document.getElementById('forward-conv-filter');
-      renderForwardConversationList(q ? q.value : '');
+    function updateForwardSelectionCountUI() {
+      const span = document.getElementById('forward-selection-count');
+      const btn = document.getElementById('forward-send-selected-btn');
+      const n = forwardSelectedIds.size;
+      const hasPayload = !!(forwardMessageDraftText || forwardMessageStored);
+      if (span) span.textContent = n === 0 ? '0 محادثة محدَّدة' : `${n} محادثة محدَّدة`;
+      if (btn) {
+        btn.disabled = n === 0 || !hasPayload;
+        btn.textContent =
+          n > 0 ? `إرسال إعادة التوجيه (${n})` : 'إرسال إعادة التوجيه';
+      }
     }
 
-    function renderForwardConversationList(filterRaw) {
-      const listEl = document.getElementById('forward-conversations-list');
-      if (!listEl) return;
+    /** محادثات صالحة للإعادة؛ تُستبعد المحادثة المفتوحة حاليًا لتفادي الإرسال إلى نفس الدردشة */
+    function getFilteredConversationsForForward(filterRaw) {
       const q = (filterRaw || '').trim().toLowerCase();
-      const items = conversations.filter(c => {
+      return conversations.filter(c => {
+        if (currentConversationId != null && c.id === currentConversationId) return false;
         const name = (c.customer_name || '').toLowerCase();
         const phone = String(c.phone_number || '').toLowerCase();
         let disp = '';
@@ -1689,84 +1718,163 @@
         }
         return !q || name.includes(q) || phone.includes(q) || disp.includes(q);
       });
-      if (!items.length) {
-        listEl.innerHTML = '<div class="p-6 text-center text-body-sm text-muted-foreground">لا توجد محادثات مطابقة</div>';
-        return;
-      }
-      listEl.innerHTML = items.map(conv => {
-        const phoneFormatted = getDisplayIdentifier(conv);
-        const title = conv.customer_name && conv.customer_name !== '.'
-          ? conv.customer_name
-          : `عميل ${phoneFormatted}`;
-        return `
-          <button type="button"
-            class="w-full text-right p-3 rounded-lg border border-border hover:bg-muted/60 transition-colors mb-1 flex flex-col gap-0.5"
-            onclick="sendForwardToConversationId(${conv.id})">
-            <span class="text-body-md font-medium">${escapeHtmlChat(title)}</span>
-            <span class="text-body-sm text-muted-foreground number">${escapeHtmlChat(phoneFormatted)}</span>
-          </button>
-        `;
-      }).join('');
     }
 
-    async function sendForwardToConversationId(conversationId) {
+    function toggleForwardConversationSelection(convId, checked) {
+      if (checked) forwardSelectedIds.add(convId);
+      else forwardSelectedIds.delete(convId);
+      updateForwardSelectionCountUI();
+    }
+
+    function forwardSelectAllVisible() {
+      const q = document.getElementById('forward-conv-filter');
+      const raw = q ? q.value : '';
+      getFilteredConversationsForForward(raw).forEach(c => forwardSelectedIds.add(c.id));
+      renderForwardConversationList(raw);
+      updateForwardSelectionCountUI();
+    }
+
+    function forwardClearSelection() {
+      forwardSelectedIds.clear();
+      const q = document.getElementById('forward-conv-filter');
+      renderForwardConversationList(q ? q.value : '');
+      updateForwardSelectionCountUI();
+    }
+
+    function filterForwardConversations() {
+      const q = document.getElementById('forward-conv-filter');
+      renderForwardConversationList(q ? q.value : '');
+      updateForwardSelectionCountUI();
+    }
+
+    function renderForwardConversationList(filterRaw) {
+      const listEl = document.getElementById('forward-conversations-list');
+      if (!listEl) return;
+      const items = getFilteredConversationsForForward(filterRaw);
+      if (!items.length) {
+        listEl.innerHTML =
+          '<div class="p-6 text-center text-body-sm text-muted-foreground">' +
+          (currentConversationId != null
+            ? 'لا توجد محادثات أخرى أو لا توجد نتيجة بحث مطابقة'
+            : 'لا توجد محادثات مطابقة') +
+          '</div>';
+        return;
+      }
+      listEl.innerHTML = items
+        .map(conv => {
+          const phoneFormatted = getDisplayIdentifier(conv);
+          const title =
+            conv.customer_name && conv.customer_name !== '.'
+              ? conv.customer_name
+              : `عميل ${phoneFormatted}`;
+          const cid = conv.id;
+          const chk = forwardSelectedIds.has(cid) ? 'checked' : '';
+          return `
+          <label class="w-full flex items-start gap-3 p-3 rounded-lg border border-border hover:bg-muted/60 transition-colors mb-1 cursor-pointer text-right">
+            <input type="checkbox" class="mt-1 h-4 w-4 shrink-0 rounded border-input accent-primary"
+              data-forward-cb="${cid}" ${chk}
+              onchange="toggleForwardConversationSelection(${cid}, this.checked)">
+            <div class="flex flex-col gap-0.5 min-w-0 flex-1">
+              <span class="text-body-md font-medium">${escapeHtmlChat(title)}</span>
+              <span class="text-body-sm text-muted-foreground number">${escapeHtmlChat(phoneFormatted)}</span>
+            </div>
+          </label>`;
+        })
+        .join('');
+    }
+
+    async function sendForwardToSelectedBatch() {
       if (!forwardMessageDraftText && !forwardMessageStored) {
         showToast('لا يوجد محتوى لإعادة التوجيه', 'error');
         return;
       }
-      const conv = conversations.find(c => c.id === conversationId);
-      if (!conv) {
-        showToast('المحادثة غير متوفرة', 'error');
+      const ids = Array.from(forwardSelectedIds);
+      if (!ids.length) {
+        showToast('اختر محادثة واحدة على الأقل', 'error');
         return;
       }
       const listEl = document.getElementById('forward-conversations-list');
+      const sendBtn = document.getElementById('forward-send-selected-btn');
       if (listEl) {
-        listEl.querySelectorAll('button').forEach(b => {
-          b.disabled = true;
+        listEl.querySelectorAll('input[type="checkbox"]').forEach(el => {
+          el.disabled = true;
         });
       }
+      if (sendBtn) sendBtn.disabled = true;
+
+      let ok = 0;
+      let fail = 0;
+      let firstErr = '';
       try {
-        let result;
-        if (forwardMessageStored) {
-          result = await apiRequest('/whatsapp/forward-media', {
-            method: 'POST',
-            body: JSON.stringify({
-              to: getSendToIdentifier(conv),
-              ...forwardMessageStored,
-            }),
-          });
-        } else {
-          result = await apiRequest('/whatsapp/send', {
-            method: 'POST',
-            body: JSON.stringify({
-              to: getSendToIdentifier(conv),
-              message: forwardMessageDraftText,
-              type: 'text',
-            }),
-          });
-        }
-        if (result.error === 'Session expired') return;
-        if (result.success) {
-          lastOutgoingConversationId = conversationId;
-          lastOutgoingAt = Date.now();
-          closeForwardMessageModal();
-          showToast('تم إعادة توجيه الرسالة', 'success');
-          setTimeout(() => refreshConversations(), 2000);
-          if (currentConversationId === conversationId) {
-            loadAndRenderMessages(conversationId, false);
+        for (const cid of ids) {
+          const conv = conversations.find(c => c.id === cid);
+          if (!conv) {
+            fail++;
+            continue;
           }
+          try {
+            let result;
+            if (forwardMessageStored) {
+              result = await apiRequest('/whatsapp/forward-media', {
+                method: 'POST',
+                body: JSON.stringify({
+                  to: getSendToIdentifier(conv),
+                  ...forwardMessageStored,
+                }),
+              });
+            } else {
+              result = await apiRequest('/whatsapp/send', {
+                method: 'POST',
+                body: JSON.stringify({
+                  to: getSendToIdentifier(conv),
+                  message: forwardMessageDraftText,
+                  type: 'text',
+                }),
+              });
+            }
+            if (result.error === 'Session expired') return;
+            if (result.success) {
+              ok++;
+              lastOutgoingConversationId = cid;
+              lastOutgoingAt = Date.now();
+            } else {
+              fail++;
+              if (!firstErr) firstErr = result.message || '';
+            }
+          } catch (_) {
+            fail++;
+          }
+        }
+        closeForwardMessageModal();
+        if (fail === 0) {
+          showToast(
+            ok === 1
+              ? 'تم إعادة توجيه الرسالة'
+              : `تم إعادة التوجيه إلى ${ok} محادثات`,
+            'success'
+          );
+        } else if (ok === 0) {
+          showToast('فشل الإرسال' + (firstErr ? `: ${firstErr}` : ''), 'error');
         } else {
-          showToast('فشل الإرسال: ' + (result.message || 'خطأ غير معروف'), 'error');
+          showToast(`أُرسل إلى ${ok} محادثات، فشل ${fail}`, 'error');
+        }
+        setTimeout(() => refreshConversations(), 1500);
+        const refreshCurrent =
+          currentConversationId != null &&
+          ids.some(id => id === currentConversationId);
+        if (refreshCurrent) {
+          loadAndRenderMessages(currentConversationId, false);
         }
       } catch (error) {
         console.error('خطأ في إعادة التوجيه:', error);
         showToast('تعذر إرسال إعادة التوجيه. تحقق من الاتصال.', 'error');
       } finally {
         if (listEl) {
-          listEl.querySelectorAll('button').forEach(b => {
-            b.disabled = false;
+          listEl.querySelectorAll('input[type="checkbox"]').forEach(el => {
+            el.disabled = false;
           });
         }
+        if (sendBtn) sendBtn.disabled = false;
       }
     }
 

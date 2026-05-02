@@ -927,6 +927,37 @@
       `;
     }
 
+    /** التمرير لأسفل منطقة الرسائل بعد الرسم وبعد أي تخطيط لاحق (أيقونات، صور، فيديو) */
+    function scrollMessagesAreaToBottom() {
+      const messagesArea = document.getElementById('messages-area');
+      if (!messagesArea) return;
+      const go = () => {
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+      };
+      go();
+      requestAnimationFrame(() => {
+        go();
+        requestAnimationFrame(go);
+      });
+    }
+
+    /** إعادة التمرير لأسفل عند اكتمال تحميل الوسائط داخل المحادثة */
+    function bindMessagesMediaLoadScroll(messagesArea) {
+      if (!messagesArea) return;
+      const bump = () => scrollMessagesAreaToBottom();
+      messagesArea.querySelectorAll('img').forEach((img) => {
+        if (img.complete) return;
+        img.addEventListener('load', bump, { once: true });
+        img.addEventListener('error', bump, { once: true });
+      });
+      messagesArea.querySelectorAll('video').forEach((video) => {
+        if (video.readyState >= 1) return;
+        video.addEventListener('loadedmetadata', bump, { once: true });
+        video.addEventListener('loadeddata', bump, { once: true });
+        video.addEventListener('error', bump, { once: true });
+      });
+    }
+
     function renderMessages(messages) {
       const messagesArea = document.getElementById('messages-area');
 
@@ -1001,9 +1032,10 @@
         `;
       }).join('');
 
-      // التمرير إلى آخر رسالة
-      messagesArea.scrollTop = messagesArea.scrollHeight;
+      scrollMessagesAreaToBottom();
+      bindMessagesMediaLoadScroll(messagesArea);
       lucide.createIcons();
+      scrollMessagesAreaToBottom();
     }
 
     async function refreshConversations() {
@@ -1614,8 +1646,10 @@
       `;
 
       messagesArea.insertAdjacentHTML('beforeend', messageHTML);
-      messagesArea.scrollTop = messagesArea.scrollHeight;
+      scrollMessagesAreaToBottom();
+      bindMessagesMediaLoadScroll(messagesArea);
       lucide.createIcons();
+      scrollMessagesAreaToBottom();
     }
 
     function escapeHtmlChat(s) {
@@ -2080,7 +2114,7 @@
           const imgRaw = (mediaUrl || '').trim();
           const hasImg = /^https?:\/\//i.test(imgRaw);
           const imgBlock = hasImg
-            ? `<div class="mb-2 rounded-lg overflow-hidden border border-border max-h-52"><img src="${escapeHtmlChat(imgRaw)}" alt="" class="w-full max-h-52 object-cover" loading="lazy" referrerpolicy="no-referrer" /></div>`
+            ? `<div class="mb-2 rounded-lg overflow-hidden border border-border max-h-52"><img src="${escapeHtmlChat(imgRaw)}" alt="" class="w-full max-h-52 object-cover" loading="eager" referrerpolicy="no-referrer" /></div>`
             : '';
           return `${imgBlock}<p class="text-body-md whitespace-pre-wrap">${formatChatPlainTextWithLinks(content)}</p>`;
           

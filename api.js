@@ -429,6 +429,23 @@ async function loadCustomerById(customerId) {
   }
 }
 
+// حفظ ملاحظات العميل — PUT /customers/:id/notes
+async function saveCustomerNotes(customerId, notes) {
+  if (!customerId || customerId === 0) {
+    return { success: false, error: 'معرف العميل غير صحيح' };
+  }
+  try {
+    const res = await apiRequest(`/customers/${customerId}/notes`, {
+      method: 'PUT',
+      body: JSON.stringify({ notes: notes ?? '' }),
+    });
+    return res;
+  } catch (error) {
+    console.error('خطأ في حفظ ملاحظات العميل:', error);
+    return { success: false, error: error.message || 'تعذّر حفظ الملاحظات' };
+  }
+}
+
 // تحميل قائمة المحادثات مع دعم الـ pagination (كل صفحة ١٠٠)
 // limit: عدد المحادثات في الصفحة (افتراضي ١٠٠)، offset: التخطي للصفحة التالية
 // يُرجع: { data: [...], pagination: { limit, offset, has_more } }

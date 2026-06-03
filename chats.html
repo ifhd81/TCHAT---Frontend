@@ -129,7 +129,7 @@
             class="w-full h-24 rounded-md border border-input bg-background px-3 py-2 text-body-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             id="customer-notes"
           ></textarea>
-          <button class="mt-2 inline-flex items-center justify-center gap-2 rounded-md bg-muted px-4 py-2 text-body-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground">
+          <button onclick="saveCustomerNotesFromTab()" class="mt-2 inline-flex items-center justify-center gap-2 rounded-md bg-muted px-4 py-2 text-body-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground">
             <i data-lucide="save" class="h-4 w-4"></i>
             حفظ الملاحظة
           </button>
@@ -305,6 +305,7 @@
 
     const CONVERSATIONS_PAGE_SIZE = 100; // عدد المحادثات في كل صفحة
     let currentConversationId = null;
+    let currentCustomerDetails = null;
     let conversations = [];
     let conversationsHasMore = false; // هل توجد صفحات إضافية للمحادثات؟
     let conversationsLoadingMore = false; // جاري تحميل المزيد (لإظهار السبينر)
@@ -2668,6 +2669,28 @@ const staticMapUrl = lat && lng ? `https://maps.googleapis.com/maps/api/staticma
             </div>
           </div>
 
+          <!-- Customer Notes -->
+          <div class="rounded-lg border bg-card p-4">
+            <h4 class="text-body-md font-semibold mb-3 flex items-center gap-2">
+              <i data-lucide="sticky-note" class="h-4 w-4"></i>
+              ملاحظات
+            </h4>
+            <textarea
+              id="customer-notes-panel"
+              placeholder="أضف ملاحظة خاصة بهذا العميل..."
+              class="w-full h-24 rounded-md border border-input bg-background px-3 py-2 text-body-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >${escapeHtml(customer.notes || '')}</textarea>
+            <button
+              onclick="saveCustomerNotesFromPanel(${customer.id})"
+              id="save-customer-notes-btn"
+              class="mt-2 w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-body-sm font-medium text-primary-foreground transition hover:bg-primary-hover"
+            >
+              <i data-lucide="save" class="h-4 w-4"></i>
+              حفظ الملاحظة
+            </button>
+            <p id="customer-notes-status" class="mt-2 text-body-xs text-muted-foreground hidden"></p>
+          </div>
+
           <!-- Quick Actions -->
           <div class="rounded-lg border bg-card p-4">
             <h4 class="text-body-md font-semibold mb-3 flex items-center gap-2">
@@ -2692,7 +2715,76 @@ const staticMapUrl = lat && lng ? `https://maps.googleapis.com/maps/api/staticma
         </div>
       `;
       
+      currentCustomerDetails = customer;
+      syncCustomerNotesFields(customer.notes || '');
       lucide.createIcons();
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function syncCustomerNotesFields(notes) {
+      const panel = document.getElementById('customer-notes-panel');
+      const tab = document.getElementById('customer-notes');
+      if (panel) panel.value = notes;
+      if (tab) tab.value = notes;
+    }
+
+    function setCustomerNotesStatus(message, isError) {
+      const el = document.getElementById('customer-notes-status');
+      if (!el) return;
+      el.textContent = message;
+      el.classList.remove('hidden', 'text-destructive', 'text-muted-foreground');
+      el.classList.add(isError ? 'text-destructive' : 'text-muted-foreground');
+    }
+
+    async function saveCustomerNotesFromPanel(customerId) {
+      const textarea = document.getElementById('customer-notes-panel');
+      const btn = document.getElementById('save-customer-notes-btn');
+      if (!textarea || !customerId) return;
+      const notes = textarea.value;
+      if (btn) {
+        btn.disabled = true;
+        btn.classList.add('opacity-70');
+      }
+      setCustomerNotesStatus('جاري الحفظ...', false);
+      const res = await saveCustomerNotes(customerId, notes);
+      if (btn) {
+        btn.disabled = false;
+        btn.classList.remove('opacity-70');
+      }
+      if (res.success && res.data) {
+        currentCustomerDetails = res.data;
+        syncCustomerNotesFields(res.data.notes || '');
+        setCustomerNotesStatus('تم حفظ الملاحظة', false);
+      } else {
+        setCustomerNotesStatus(res.error || 'تعذّر حفظ الملاحظة', true);
+      }
+    }
+
+    async function saveCustomerNotesFromTab() {
+      const conversation = conversations.find(c => c.id === currentConversationId);
+      const customerId = conversation?.customer_id || currentCustomerDetails?.id;
+      if (!customerId) {
+        alert('اختر محادثة لعميل مسجّل أولاً');
+        return;
+      }
+      const tab = document.getElementById('customer-notes');
+      const notes = tab ? tab.value : '';
+      const res = await saveCustomerNotes(customerId, notes);
+      if (res.success && res.data) {
+        currentCustomerDetails = res.data;
+        syncCustomerNotesFields(res.data.notes || '');
+        alert('تم حفظ الملاحظة');
+      } else {
+        alert(res.error || 'تعذّر حفظ الملاحظة');
+      }
     }
 
     function openCustomerProfile(customerId) {

@@ -259,9 +259,9 @@
               المستقبلين
             </h3>
 
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid gap-4 md:grid-cols-2 items-start">
               <div class="space-y-2">
-                <label class="text-body-sm font-medium">مصدر البيانات</label>
+                <label class="text-body-sm font-medium flex items-center min-h-5">مصدر البيانات</label>
                 <select id="recipients-source" onchange="handleRecipientsSourceChange()"
                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <option value="database" data-count="0">العملاء المسجلين (جاري التحميل...)</option>
@@ -270,8 +270,8 @@
                 </select>
               </div>
               <div class="space-y-2" id="target-country-wrap" style="display: none;">
-                <label class="text-body-sm font-medium flex items-center gap-2">
-                  <i data-lucide="globe" class="h-4 w-4"></i>
+                <label class="text-body-sm font-medium flex items-center gap-2 min-h-5">
+                  <i data-lucide="globe" class="h-4 w-4 shrink-0"></i>
                   <span>الدولة المستهدفة</span>
                 </label>
                 <select id="target-country-dial-code" onchange="onTargetCountryChange()"

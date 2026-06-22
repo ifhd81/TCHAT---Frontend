@@ -288,6 +288,26 @@
               </div>
             </div>
 
+            <!-- إرسال لمرة واحدة فقط -->
+            <div class="rounded-lg border border-border bg-card p-4">
+              <label class="flex items-start gap-3 cursor-pointer">
+                <input type="checkbox" id="exclude-previously-sent" onchange="onExcludePreviouslySentChange()"
+                  class="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary focus:ring-offset-2" />
+                <div class="flex-1">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="user-x" class="h-4 w-4 text-primary"></i>
+                    <span class="text-body-md font-semibold">إرسال لمرة واحدة فقط</span>
+                  </div>
+                  <p class="text-body-sm text-muted-foreground mt-1">
+                    استبعاد العملاء الذين سبق إرسال حملة تسويقية لهم، بغض النظر عن وقت الإرسال السابق
+                  </p>
+                  <p class="text-body-xs text-muted-foreground mt-1">
+                    يمكن تفعيله مع الإرسال الذكي لتطبيق كلا الفلترين معاً
+                  </p>
+                </div>
+              </label>
+            </div>
+
             <!-- Manual Input Section -->
             <div id="manual-input-section" class="space-y-4" style="display: none;">
               <div class="space-y-2">
@@ -1045,6 +1065,8 @@
       if (targetCountrySelect) targetCountrySelect.value = '';
       document.getElementById('csv-file').value = '';
       document.getElementById('manual-recipients').value = '';
+      const excludeOnceEl = document.getElementById('exclude-previously-sent');
+      if (excludeOnceEl) excludeOnceEl.checked = false;
       selectedRecipients = [];
       // إخفاء صورة الرأس ومسح قيمها
       const headerBox = document.getElementById('create-campaign-header-image-box');
@@ -1281,6 +1303,32 @@
       updateBatchPreview();
     }
 
+    // هل خيار «إرسال لمرة واحدة» مفعّل؟
+    function isExcludePreviouslySent() {
+      const el = document.getElementById('exclude-previously-sent');
+      return el ? el.checked : false;
+    }
+
+    function buildCustomerCountUrl(dialCode) {
+      const base = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1').replace(/\/$/, '');
+      const params = new URLSearchParams();
+      if (dialCode) params.set('dial_code', dialCode);
+      if (isExcludePreviouslySent()) params.set('exclude_previously_sent', 'true');
+      const qs = params.toString();
+      return `${base}/campaigns/customer-count${qs ? '?' + qs : ''}`;
+    }
+
+    // عند تغيير خيار «إرسال لمرة واحدة»
+    function onExcludePreviouslySentChange() {
+      const source = document.getElementById('recipients-source').value;
+      if (source === 'database') {
+        const dialCode = (document.getElementById('target-country-dial-code') || {}).value || '';
+        updateDatabaseCountByDialCode(dialCode);
+      } else {
+        updateBatchPreview();
+      }
+    }
+
     // تحميل خيارات الدول للحملة (أرقام تبدأ بمفتاح الدولة)
     async function loadCampaignCountryOptions() {
       const select = document.getElementById('target-country-dial-code');
@@ -1320,9 +1368,7 @@
       const base = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1').replace(/\/$/, '');
       const token = localStorage.getItem('access_token') || localStorage.getItem('tchat_token');
       try {
-        const url = dialCode
-          ? `${base}/campaigns/customer-count?dial_code=${encodeURIComponent(dialCode)}`
-          : `${base}/campaigns/customer-count`;
+        const url = buildCustomerCountUrl(dialCode);
         const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
         const json = await res.json();
         const count = (json.count != null) ? json.count : (json.data && json.data.count != null ? json.data.count : 0);
@@ -1617,12 +1663,19 @@
           if (dialCode) {
             const base = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1').replace(/\/$/, '');
             const token = localStorage.getItem('access_token') || localStorage.getItem('tchat_token');
-            const res = await fetch(`${base}/campaigns/customer-count?dial_code=${encodeURIComponent(dialCode)}`, { headers: { 'Authorization': 'Bearer ' + token } });
+            const res = await fetch(buildCustomerCountUrl(dialCode), { headers: { 'Authorization': 'Bearer ' + token } });
             const json = await res.json();
             totalCount = (json.count != null) ? json.count : (json.data && json.data.count != null ? json.data.count : 0);
           } else {
-            const stats = await loadSystemStats();
-            totalCount = (stats && stats.total_customers) ? stats.total_customers : 0;
+            const base = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api/v1').replace(/\/$/, '');
+            const token = localStorage.getItem('access_token') || localStorage.getItem('tchat_token');
+            const res = await fetch(buildCustomerCountUrl(''), { headers: { 'Authorization': 'Bearer ' + token } });
+            const json = await res.json();
+            totalCount = (json.count != null) ? json.count : (json.data && json.data.count != null ? json.data.count : 0);
+            if (!totalCount) {
+              const stats = await loadSystemStats();
+              totalCount = (stats && stats.total_customers) ? stats.total_customers : 0;
+            }
           }
           databaseCustomersCount = totalCount;
           updateSourceCount('database', totalCount);
@@ -1727,6 +1780,7 @@
       const batchInterval = parseInt(document.getElementById('batch-interval').value);
       const sendType = document.getElementById('send-type').value;
       const isSmartSend = document.getElementById('enable-smart-send').checked;
+      const excludePreviouslySent = isExcludePreviouslySent();
 
       // التحقق من البيانات
       if (!name) {
@@ -1745,8 +1799,11 @@
       }
 
       // عدد المستقبلين الفعلي (بعد الإرسال الذكي إن وُجدت نتيجة فحص)
-      let previewRecipientCount = selectedRecipients.length;
-      if (isSmartSend && smartSendFilteredRecipients && smartSendFilteredRecipients.length > 0) {
+      const recipientsSource = document.getElementById('recipients-source').value;
+      let previewRecipientCount = (recipientsSource === 'database' && databaseCustomersCount > 0)
+        ? databaseCustomersCount
+        : selectedRecipients.length;
+      if (recipientsSource !== 'database' && isSmartSend && smartSendFilteredRecipients && smartSendFilteredRecipients.length > 0) {
         const allowedSet = new Set(smartSendFilteredRecipients);
         previewRecipientCount = selectedRecipients.filter(r => allowedSet.has(r.phone_number)).length;
       }
@@ -1811,6 +1868,10 @@
                   <span class="font-semibold number">${totalDurationLabel}</span>
                 </div>
                 ` : ''}
+                <div class="flex justify-between items-center py-2 border-b border-border">
+                  <span class="text-muted-foreground">إرسال لمرة واحدة</span>
+                  <span class="font-semibold ${excludePreviouslySent ? 'text-primary' : 'text-muted-foreground'}">${excludePreviouslySent ? 'مفعّل ✓' : 'غير مفعّل'}</span>
+                </div>
                 <div class="flex justify-between items-center py-2">
                   <span class="text-muted-foreground">الإرسال الذكي</span>
                   <span class="font-semibold ${isSmartSend ? 'text-primary' : 'text-muted-foreground'}">${isSmartSend ? 'مفعّل ✓' : 'غير مفعّل'}</span>
@@ -1883,6 +1944,7 @@
 
       try {
         const isSmartSend = document.getElementById('enable-smart-send').checked;
+        const excludePreviouslySent = isExcludePreviouslySent();
         // is_smart_send يُرسل للباك اند الذي يطبّق الفلتر ويضيف للم campaign فقط الأرقام المسموح بها (لا يُرسل للكامل)
 
         // عند تفعيل الإرسال الذكي ووجود نتيجة "فحص الأرقام الآن" (مصدر يدوي/CSV)، نرسل القائمة المصفاة فقط
@@ -1914,6 +1976,7 @@
           batch_interval_hours: sendType === 'all' ? 0 : (batchInterval >= 60 ? batchInterval / 60 : 0),
           batch_interval_minutes: sendType === 'all' ? 0 : batchInterval,
           is_smart_send: isSmartSend,
+          exclude_previously_sent: excludePreviouslySent,
           use_all_database: useAllDatabase,
           target_country_dial_code: targetCountryDialCode,
           recipients: useAllDatabase ? [] : recipientsToSend
@@ -1931,13 +1994,7 @@
         const result = await response.json();
 
         if (result.success) {
-          let message = result.message || 'تم إنشاء الحملة بنجاح!';
-
-          // إذا كانت هناك أرقام مستبعدة، أضف تفاصيل
-          if (result.excluded_count && result.excluded_count > 0) {
-            message += ` (${result.final_count} مستقبل، ${result.excluded_count} مستبعد)`;
-          }
-
+          const message = result.message || 'تم إنشاء الحملة بنجاح!';
           showToast(message, 'success');
           hideCreateCampaignModal();
           refreshCampaigns();

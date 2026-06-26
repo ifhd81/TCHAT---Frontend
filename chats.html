@@ -1005,6 +1005,7 @@
                   : 'bg-primary text-primary-foreground'
                 } cursor-pointer hover:opacity-90 transition-opacity"
                 onclick="showMessageDetails(${message.id})">
+                  ${renderQuotedPreview(message, isIncoming)}
                   ${renderMessageContent(message)}
                   ${sourceBadge ? `<div class="mt-2">${sourceBadge}</div>` : ''}
                 </div>
@@ -1636,6 +1637,7 @@
               ? 'bg-muted text-foreground'
               : 'bg-primary text-primary-foreground'
             }">
+              ${renderQuotedPreview(message, isIncoming)}
               ${renderMessageContent(message)}
             </div>
             <div class="mt-1 px-2 text-body-sm text-muted-foreground ${isIncoming ? 'text-right' : 'text-left'} message-status-row" data-time="${messageTime}">
@@ -1919,6 +1921,67 @@
       if (!re) return '';
       const pos = isIncoming ? 'right-2' : 'left-2';
       return `<span class="absolute -bottom-2 ${pos} inline-flex items-center justify-center rounded-full bg-background border border-border shadow-sm text-base leading-none px-1.5 py-0.5 z-10 select-none" title="تفاعل">${escapeHtmlChat(re)}</span>`;
+    }
+
+    // فقاعة اقتباس صغيرة تُعرض فوق الرسالة عندما يرد العميل على رسالة سابقة من واتساب
+    function renderQuotedPreview(message, isIncoming) {
+      const quotedId = String(message.context_message_id || '').trim();
+      if (!quotedId) return '';
+
+      const quotedContent = String(message.quoted_content || '').trim();
+      const quotedType = String(message.quoted_type || '').toLowerCase().trim();
+      const quotedDir = String(message.quoted_direction || '').trim();
+      const unavailable = !quotedContent && !quotedType;
+
+      // اسم صاحب الرسالة الأصلية: نحن (المتجر) أو العميل
+      let title = 'العميل';
+      if (quotedDir === 'outgoing') {
+        title = 'أنت';
+      } else {
+        const conv = conversations.find(c => c.id === currentConversationId);
+        if (conv && conv.customer_name && conv.customer_name !== '.') title = conv.customer_name;
+      }
+
+      // أيقونة + نص حسب نوع الرسالة الأصلية
+      let icon = '';
+      let label;
+      if (unavailable) {
+        label = 'رسالة غير متاحة';
+      } else {
+        switch (quotedType) {
+          case 'image': icon = 'image'; label = quotedContent || 'صورة'; break;
+          case 'video': icon = 'video'; label = quotedContent || 'فيديو'; break;
+          case 'audio':
+          case 'voice': icon = 'mic'; label = 'رسالة صوتية'; break;
+          case 'document': icon = 'file-text'; label = quotedContent || 'مستند'; break;
+          case 'sticker': icon = 'smile'; label = 'ملصق'; break;
+          case 'location': icon = 'map-pin'; label = 'موقع'; break;
+          default: label = quotedContent || 'رسالة';
+        }
+      }
+
+      // ألوان متوافقة مع لون الفقاعة (واردة = bg-muted، صادرة = bg-primary)
+      const wrapBg = isIncoming ? 'background:rgba(0,0,0,0.05)' : 'background:rgba(255,255,255,0.15)';
+      const accent = isIncoming ? 'var(--primary, #2563eb)' : 'rgba(255,255,255,0.9)';
+      const titleColor = isIncoming ? 'color:var(--primary, #2563eb)' : 'color:rgba(255,255,255,0.9)';
+      const bodyOpacity = isIncoming ? 'opacity:0.75' : 'opacity:0.85';
+      const iconHtml = icon
+        ? `<i data-lucide="${icon}" class="h-3 w-3 shrink-0" style="${bodyOpacity}"></i>`
+        : '';
+      const titleHtml = unavailable
+        ? ''
+        : `<div class="text-xs font-bold truncate" style="${titleColor}">${escapeHtmlChat(title)}</div>`;
+      const fontStyle = unavailable ? 'font-style:italic;' : '';
+
+      return `
+        <div class="mb-1.5 rounded-lg px-2.5 py-1.5" style="${wrapBg};border-right:3px solid ${accent}">
+          ${titleHtml}
+          <div class="flex items-center gap-1 text-body-sm" style="${bodyOpacity};${fontStyle}line-height:1.3;max-height:2.6em;overflow:hidden">
+            ${iconHtml}
+            <span style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escapeHtmlChat(label)}</span>
+          </div>
+        </div>
+      `;
     }
 
     function parseMessageWebhookData(message) {

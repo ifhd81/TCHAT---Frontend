@@ -154,16 +154,16 @@
         document.getElementById('avg-response').textContent = formatDuration(data.avg_response_seconds);
         document.getElementById('median-response').textContent = `الوسيط: ${formatDuration(data.median_response_seconds)}`;
 
-        document.getElementById('answered-count').textContent = answered.toLocaleString('ar-SA');
+        document.getElementById('answered-count').textContent = answered.toLocaleString('en-US');
         document.getElementById('answered-pct').textContent = `${answeredPct}% من المحادثات`;
-        document.getElementById('unanswered-count').textContent = unanswered.toLocaleString('ar-SA');
+        document.getElementById('unanswered-count').textContent = unanswered.toLocaleString('en-US');
         document.getElementById('unanswered-pct').textContent = `${unansweredPct}% من المحادثات`;
 
-        document.getElementById('total-conversations').textContent = `إجمالي ${total.toLocaleString('ar-SA')} محادثة فيها رسائل واردة`;
+        document.getElementById('total-conversations').textContent = `إجمالي ${total.toLocaleString('en-US')} محادثة فيها رسائل واردة`;
         document.getElementById('answered-bar').style.width = `${answeredPct}%`;
         document.getElementById('unanswered-bar').style.width = `${unansweredPct}%`;
-        document.getElementById('legend-answered').textContent = answered.toLocaleString('ar-SA');
-        document.getElementById('legend-unanswered').textContent = unanswered.toLocaleString('ar-SA');
+        document.getElementById('legend-answered').textContent = answered.toLocaleString('en-US');
+        document.getElementById('legend-unanswered').textContent = unanswered.toLocaleString('en-US');
       }
 
       async function loadAnalytics() {

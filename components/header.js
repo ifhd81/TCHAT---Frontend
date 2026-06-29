@@ -113,6 +113,15 @@ function createHeader(options = {}) {
             <span>الدردشات</span>
           </a>
 
+          <!-- التحليلات -->
+          <a
+            href="./analytics.html"
+            class="${getLinkClasses('analytics')}"
+          >
+            <i data-lucide="bar-chart-3" class="h-4 w-4"></i>
+            <span>التحليلات</span>
+          </a>
+
           <!-- المؤتمتة -->
           <a
             href="./automations.html"
@@ -214,6 +223,15 @@ function createHeader(options = {}) {
               <div id="unread-indicator-mobile" class="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive hidden"></div>
             </div>
             <span>الدردشات</span>
+          </a>
+
+          <!-- التحليلات -->
+          <a
+            href="./analytics.html"
+            class="${getMobileLinkClasses('analytics')}"
+          >
+            <i data-lucide="bar-chart-3" class="h-5 w-5"></i>
+            <span>التحليلات</span>
           </a>
 
           <!-- المؤتمتة -->
@@ -554,6 +572,7 @@ function getActivePageFromURL() {
     'customers': 'customers',
     'templates': 'templates',
     'campaigns': 'campaigns',
+    'analytics': 'analytics',
     'chats': 'chats',
     'automations': 'automations',
     'webhooks': 'webhooks',

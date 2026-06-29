@@ -39,6 +39,7 @@ export default defineConfig(({ mode }) => {
         chats: resolve(__dirname, 'chats.html'),
         customers: resolve(__dirname, 'customers.html'),
         campaigns: resolve(__dirname, 'campaigns.html'),
+        analytics: resolve(__dirname, 'analytics.html'),
         templates: resolve(__dirname, 'templates.html'),
         webhooks: resolve(__dirname, 'webhooks.html'),
         automations: resolve(__dirname, 'automations.html'),

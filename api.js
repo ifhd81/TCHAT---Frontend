@@ -298,6 +298,17 @@ async function loadRevenueData() {
   }
 }
 
+// تحميل تحليلات المحادثات (متوسط مدة الرد + المردود عليها مقابل غير المردود)
+async function loadConversationAnalytics(days = 30) {
+  try {
+    const data = await apiRequest(`/stats/analytics?days=${days}`);
+    return (data.success && data.data) ? data.data : null;
+  } catch (error) {
+    console.error('خطأ في تحميل تحليلات المحادثات:', error);
+    return null;
+  }
+}
+
 // تحميل تنبيهات ميتا (account_alerts، جودة الرقم، جودة/حالة القالب)
 async function loadMetaAlerts(limit = 20) {
   try {

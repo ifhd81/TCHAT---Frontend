@@ -299,9 +299,18 @@ async function loadRevenueData() {
 }
 
 // تحميل تحليلات المحادثات (متوسط مدة الرد + المردود عليها مقابل غير المردود)
-async function loadConversationAnalytics(days = 30) {
+// opts: رقم (عدد الأيام) للتوافق القديم، أو كائن { days } أو { from, to } لنطاق مخصص (ثوانٍ Unix أو ISO)
+async function loadConversationAnalytics(opts = 30) {
   try {
-    const data = await apiRequest(`/stats/analytics?days=${days}`);
+    const params = new URLSearchParams();
+    if (typeof opts === 'number') {
+      params.set('days', opts);
+    } else if (opts && typeof opts === 'object') {
+      if (opts.from != null) params.set('from', opts.from);
+      if (opts.to != null) params.set('to', opts.to);
+      if (opts.from == null && opts.days != null) params.set('days', opts.days);
+    }
+    const data = await apiRequest(`/stats/analytics?${params.toString()}`);
     return (data.success && data.data) ? data.data : null;
   } catch (error) {
     console.error('خطأ في تحميل تحليلات المحادثات:', error);

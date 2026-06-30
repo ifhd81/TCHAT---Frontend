@@ -30,14 +30,32 @@
           <div class="flex items-center gap-2">
             <label for="period-select" class="text-body-sm text-muted-foreground">الفترة:</label>
             <select id="period-select" class="rounded-md border bg-card text-card-foreground text-body-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring">
+              <option value="today">اليوم</option>
               <option value="7">آخر 7 أيام</option>
               <option value="30" selected>آخر 30 يوم</option>
               <option value="90">آخر 90 يوم</option>
+              <option value="custom">مخصص</option>
             </select>
             <button type="button" id="refresh-btn" class="inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent transition-colors" title="تحديث" aria-label="تحديث">
               <i data-lucide="refresh-cw" id="refresh-icon" class="h-4 w-4"></i>
             </button>
           </div>
+        </div>
+
+        <!-- نطاق مخصص (يظهر عند اختيار «مخصص») -->
+        <div id="custom-range" class="hidden flex flex-col sm:flex-row sm:items-end gap-3 mb-6 p-4 rounded-lg border bg-card">
+          <div class="flex flex-col gap-1">
+            <label for="custom-from" class="text-body-sm text-muted-foreground">من تاريخ</label>
+            <input type="date" id="custom-from" class="rounded-md border bg-background text-card-foreground text-body-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring">
+          </div>
+          <div class="flex flex-col gap-1">
+            <label for="custom-to" class="text-body-sm text-muted-foreground">إلى تاريخ</label>
+            <input type="date" id="custom-to" class="rounded-md border bg-background text-card-foreground text-body-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring">
+          </div>
+          <button type="button" id="apply-custom-btn" class="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground text-body-sm font-medium px-4 py-2 h-10 hover:opacity-90 transition-opacity">
+            تطبيق
+          </button>
+          <p id="custom-error" class="hidden text-body-sm text-destructive self-center">يرجى تحديد تاريخ البداية والنهاية بشكل صحيح.</p>
         </div>
 
         <!-- حالة التحميل -->
@@ -166,8 +184,36 @@
         document.getElementById('legend-unanswered').textContent = unanswered.toLocaleString('en-US');
       }
 
+      // يبني خيارات الطلب حسب الفترة المختارة. يُرجع null إذا كان «مخصص» بنطاق غير صالح.
+      function buildAnalyticsOptions() {
+        const sel = document.getElementById('period-select').value;
+        if (sel === 'today') {
+          const start = new Date();
+          start.setHours(0, 0, 0, 0);
+          return { from: Math.floor(start.getTime() / 1000), to: Math.floor(Date.now() / 1000) };
+        }
+        if (sel === 'custom') {
+          const fromVal = document.getElementById('custom-from').value;
+          const toVal = document.getElementById('custom-to').value;
+          if (!fromVal || !toVal) return null;
+          const from = new Date(fromVal); from.setHours(0, 0, 0, 0);
+          const to = new Date(toVal); to.setHours(23, 59, 59, 999);
+          if (isNaN(from.getTime()) || isNaN(to.getTime()) || from > to) return null;
+          return { from: Math.floor(from.getTime() / 1000), to: Math.floor(to.getTime() / 1000) };
+        }
+        return { days: parseInt(sel, 10) || 30 };
+      }
+
       async function loadAnalytics() {
-        const days = parseInt(document.getElementById('period-select').value, 10) || 30;
+        const opts = buildAnalyticsOptions();
+        const customError = document.getElementById('custom-error');
+        if (opts === null) {
+          // «مخصص» بنطاق ناقص/خاطئ — أظهر تنبيهاً ولا ترسل الطلب
+          if (customError) customError.classList.remove('hidden');
+          return;
+        }
+        if (customError) customError.classList.add('hidden');
+
         const icon = document.getElementById('refresh-icon');
         if (icon) icon.classList.add('animate-spin');
         // أظهر التحميل فقط عند عدم وجود محتوى سابق لتفادي الوميض عند التحديث
@@ -175,7 +221,7 @@
           showState('loading');
         }
         try {
-          const data = await loadConversationAnalytics(days);
+          const data = await loadConversationAnalytics(opts);
           if (!data) { showState('error'); return; }
           renderAnalytics(data);
           showState('content');
@@ -188,13 +234,23 @@
         }
       }
 
+      function onPeriodChange() {
+        const sel = document.getElementById('period-select').value;
+        const customRange = document.getElementById('custom-range');
+        const isCustom = sel === 'custom';
+        customRange.classList.toggle('hidden', !isCustom);
+        // عند «مخصص» ننتظر ضغط «تطبيق»؛ غير ذلك نحمّل مباشرة
+        if (!isCustom) loadAnalytics();
+      }
+
       document.addEventListener('DOMContentLoaded', function () {
         renderHeader('header-container', { activePage: 'analytics' });
         lucide.createIcons();
         loadAnalytics();
 
-        document.getElementById('period-select').addEventListener('change', loadAnalytics);
+        document.getElementById('period-select').addEventListener('change', onPeriodChange);
         document.getElementById('refresh-btn').addEventListener('click', loadAnalytics);
+        document.getElementById('apply-custom-btn').addEventListener('click', loadAnalytics);
 
         if (typeof checkUnreadConversations === 'function') {
           setInterval(checkUnreadConversations, 60000);
